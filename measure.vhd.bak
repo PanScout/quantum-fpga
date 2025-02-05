@@ -1,0 +1,21 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use IEEE.fixed_pkg.ALL;
+
+library work;
+use work.qTypes.ALL;
+
+entity measure is
+    Port (
+        A       : in  cfixed;
+        Result  : out fixed
+    );
+end measure;
+
+architecture rtl of measure is
+begin
+
+Result <= (A.re * A.re) + (A.im + A.im);
+
+end measure;

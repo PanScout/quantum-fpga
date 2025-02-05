@@ -1,0 +1,99 @@
+D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/cMatrixVector.vhd {0 {vcom -work work -2002 -explicit -stats=none D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/cMatrixVector.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package instance fixed_pkg
+-- Loading package fixed_float_types
+-- Loading package fixed_generic_pkg
+-- Loading package MATH_REAL
+-- Loading package body fixed_generic_pkg
+-- Loading package qTypes
+-- Compiling entity cMatrixVector
+-- Compiling architecture Behavioral of cMatrixVector
+** Error: D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/cMatrixVector.vhd(21): near "buffer": (vcom-1576) expecting STRING or IDENTIFIER or << or '('.
+** Note: D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/cMatrixVector.vhd(49): VHDL Compiler exiting
+
+} {15.0 16.0} {}} D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/columnMultiplication.vhd {1 {vcom -work work -2002 -explicit -stats=none D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/columnMultiplication.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package instance fixed_pkg
+-- Loading package fixed_float_types
+-- Loading package fixed_generic_pkg
+-- Loading package MATH_REAL
+-- Loading package body fixed_generic_pkg
+-- Loading package qTypes
+-- Compiling entity columnMultiplication
+-- Compiling architecture Behavioral of columnMultiplication
+
+} {} {}} D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/C_ALU.vhd {1 {vcom -work work -2002 -explicit -check_synthesis -stats=none D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/C_ALU.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package instance fixed_pkg
+-- Loading package fixed_float_types
+-- Loading package fixed_generic_pkg
+-- Loading package MATH_REAL
+-- Loading package body fixed_generic_pkg
+-- Loading package qTypes
+-- Compiling entity C_ALU
+-- Compiling architecture Behavioral of C_ALU
+
+} {} {}} {{D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/Kelan's Files/ECE482/columnMultiplication.vhd}} {0 {vcom -work work -2002 -explicit {D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/Kelan's Files/ECE482/columnMultiplication.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
+Start time: 14:57:28 on Jan 25,2025
+vcom -reportprogress 300 -work work -2002 -explicit D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/Kelan's Files/ECE482/columnMultiplication.vhd 
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package instance fixed_pkg
+-- Loading package fixed_float_types
+-- Loading package fixed_generic_pkg
+-- Loading package MATH_REAL
+-- Loading package body fixed_generic_pkg
+-- Loading package qTypes
+-- Compiling entity columnMultiplication
+-- Compiling architecture Behavioral of columnMultiplication
+** Error: D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/Kelan's Files/ECE482/columnMultiplication.vhd(31): (vcom-1136) Unknown identifier "qTypes".
+** Error: D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/Kelan's Files/ECE482/columnMultiplication.vhd(31): (vcom-1591) Bad expression in right bound of range expression.
+** Error: D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/Kelan's Files/ECE482/columnMultiplication.vhd(31): Cannot resolve expression type.
+** Warning: D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/Kelan's Files/ECE482/columnMultiplication.vhd(31): (vcom-1147) Range in parameter specification of FOR GENERATE must be static.
+** Note: D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/Kelan's Files/ECE482/columnMultiplication.vhd(41): VHDL Compiler exiting
+End time: 14:57:28 on Jan 25,2025, Elapsed time: 0:00:00
+
+} {17.0 20.0} {}} D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/measure.vhd {1 {vcom -work work -2002 -explicit -stats=none D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/measure.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package instance fixed_pkg
+-- Loading package fixed_float_types
+-- Loading package fixed_generic_pkg
+-- Loading package MATH_REAL
+-- Loading package body fixed_generic_pkg
+-- Loading package qTypes
+-- Compiling entity measure
+-- Compiling architecture rtl of measure
+
+} {} {}} D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/qTypes.vhd {1 {vcom -work work -2002 -explicit -stats=none D:/.shortcut-targets-by-id/1X3obQH6BIOZVAFquYit6OVjQ7cqDsejJ/VHDL/qTypes.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package instance fixed_pkg
+-- Loading package fixed_float_types
+-- Loading package fixed_generic_pkg
+-- Loading package MATH_REAL
+-- Loading package body fixed_generic_pkg
+-- Compiling package qTypes
+
+} {} {}}

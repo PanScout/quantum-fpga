@@ -1,0 +1,61 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use IEEE.fixed_pkg.ALL;
+library work;
+use work.qTypes.ALL;  -- Import the qTypes package
+entity cVectorAdd is 
+    Port (
+        A : in  cvector;        -- Input vector of complex numbers
+        y : out cfixed          -- Sum of all vector components
+    );
+end cVectorAdd;
+
+architecture Behavioral of cVectorAdd is
+
+    -- Array to hold intermediate sums
+    type sum_array is array (0 to numBasisStates-2) of cfixed;
+    signal sum : sum_array;
+    -- Explicit component declaration
+    component C_ALU
+        Port (
+            A      : in  cfixed;
+            B      : in  cfixed;
+            Op     : in  std_logic_vector(1 downto 0);
+            Result : out cfixed
+        );
+    end component;
+
+
+begin
+    -- Generate adder chain using C_ALU components
+    gen_adder_chain: for i in 0 to numBasisStates-2 generate
+    
+        -- First stage: Add first two elements
+        first_stage: if i = 0 generate
+            alu_first: entity C_ALU
+                port map (
+                    A => A(0),
+                    B => A(1),
+                    Op => "00",       -- Addition operation
+                    Result => sum(0)
+                );
+        end generate first_stage;
+        
+        -- Subsequent stages: Add accumulated sum with next element
+        other_stages: if i > 0 generate
+            alu_others: entity C_ALU
+                port map (
+                    A => sum(i-1),    -- Previous accumulated sum
+                    B => A(i+1),      -- Next element in vector
+                    Op => "00",       -- Addition operation
+                    Result => sum(i)
+                );
+        end generate other_stages;
+        
+    end generate gen_adder_chain;
+
+    -- Connect final sum to output
+    y <= sum(numBasisStates-2);
+
+end Behavioral;
