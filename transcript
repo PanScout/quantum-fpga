@@ -1,0 +1,265 @@
+# Compile of qTypes.vhd was successful with warnings.
+# Compile of qTypes.vhd was successful with warnings.
+# Compile of qTypes.vhd was successful.
+# Compile of qTypes.vhd was successful.
+# Compile of C_ALU.vhd was successful.
+# Compile of multiplyColumnByScalar.vhd was successful.
+# Compile of addTwoVectors.vhd was successful.
+# Compile of multiplyThenAddVectors.vhd was successful.
+# Compile of matrixByVectorMultiplication.vhd was successful.
+# Compile of matrixByMatrixMultiplication.vhd was successful.
+# Compile of matrixAddition.vhd failed with 1 errors.
+# 8 compiles, 1 failed with 1 error.
+# Compile of matrixAddition.vhd was successful.
+# Compile of matrixByScalarMultiplication.vhd failed with 4 errors.
+# Compile of matrixByScalarMultiplication.vhd failed with 2 errors.
+# Compile of matrixAddition.vhd failed with 2 errors.
+# Compile of matrixAddition.vhd was successful.
+# Compile of matrixByScalarMultiplication.vhd was successful.
+# Compile of matrixByScalarMultiplication.vhd was successful.
+vsim -gui work.matrixaddition
+# vsim -gui work.matrixaddition 
+# Start time: 01:26:59 on Feb 05,2025
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading ieee.numeric_std(body)
+# Loading ieee.fixed_float_types
+# Loading ieee.math_real(body)
+# Loading ieee.fixed_generic_pkg(body)
+# Loading ieee.fixed_pkg
+# Loading work.qtypes
+# Loading work.matrixaddition(concurrent)
+quit -sim
+# End time: 01:27:52 on Feb 05,2025, Elapsed time: 0:00:53
+# Errors: 0, Warnings: 14
+# Compile of tb_matrixAddition_simple.vhd was successful.
+vsim -gui work.tb_matrixaddition_simple
+# vsim -gui work.tb_matrixaddition_simple 
+# Start time: 01:30:40 on Feb 05,2025
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading ieee.numeric_std(body)
+# Loading ieee.fixed_float_types
+# Loading ieee.math_real(body)
+# Loading ieee.fixed_generic_pkg(body)
+# Loading ieee.fixed_pkg
+# Loading work.qtypes
+# Loading work.tb_matrixaddition_simple(behavioral)
+# Loading work.matrixaddition(concurrent)
+add wave -position insertpoint  \
+sim:/tb_matrixaddition_simple/A \
+sim:/tb_matrixaddition_simple/B \
+sim:/tb_matrixaddition_simple/C \
+sim:/tb_matrixaddition_simple/test_pass \
+sim:/tb_matrixaddition_simple/epsilon
+# ** Warning: (vsim-WLF-5000) WLF file currently in use: vsim.wlf
+#           File in use by: mwd  Hostname: WIN-5F3DJOGAKN0  ProcessID: 9568
+#           Attempting to use alternate WLF file "./wlftegb41a".
+# ** Warning: (vsim-WLF-5001) Could not open WLF file: vsim.wlf
+#           Using alternate file: ./wlftegb41a
+run
+quit -sim
+# End time: 01:32:32 on Feb 05,2025, Elapsed time: 0:01:52
+# Errors: 0, Warnings: 5
+# Compile of tb_matrixAddition_simple.vhd was successful.
+vsim -gui work.tb_matrixaddition_simple
+# vsim -gui work.tb_matrixaddition_simple 
+# Start time: 01:32:56 on Feb 05,2025
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading ieee.numeric_std(body)
+# Loading ieee.fixed_float_types
+# Loading ieee.math_real(body)
+# Loading ieee.fixed_generic_pkg(body)
+# Loading ieee.fixed_pkg
+# Loading work.qtypes
+# Loading work.tb_matrixaddition_simple(behavioral)
+# Loading work.matrixaddition(concurrent)
+add wave -position insertpoint  \
+sim:/tb_matrixaddition_simple/A \
+sim:/tb_matrixaddition_simple/B \
+sim:/tb_matrixaddition_simple/C \
+sim:/tb_matrixaddition_simple/test_pass \
+sim:/tb_matrixaddition_simple/epsilon
+# ** Warning: (vsim-WLF-5000) WLF file currently in use: vsim.wlf
+#           File in use by: mwd  Hostname: WIN-5F3DJOGAKN0  ProcessID: 9568
+#           Attempting to use alternate WLF file "./wlftzf0nxi".
+# ** Warning: (vsim-WLF-5001) Could not open WLF file: vsim.wlf
+#           Using alternate file: ./wlftzf0nxi
+run
+quit -sim
+# End time: 01:33:57 on Feb 05,2025, Elapsed time: 0:01:01
+# Errors: 0, Warnings: 4
+# Compile of tb_matrixScalarMultiplication.vhd was successful.
+# Compile of tb_matrixScalarMultiplication.vhd was successful.
+vsim -gui work.tb_matrixscalarmultiplication
+# vsim -gui work.tb_matrixscalarmultiplication 
+# Start time: 01:35:58 on Feb 05,2025
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading ieee.numeric_std(body)
+# Loading ieee.fixed_float_types
+# Loading ieee.math_real(body)
+# Loading ieee.fixed_generic_pkg(body)
+# Loading ieee.fixed_pkg
+# Loading work.qtypes
+# Loading work.tb_matrixscalarmultiplication(behavioral)
+# Loading work.matrixscalarmultiplication(concurrent)
+add wave -position insertpoint  \
+sim:/tb_matrixscalarmultiplication/A \
+sim:/tb_matrixscalarmultiplication/C \
+sim:/tb_matrixscalarmultiplication/scalar \
+sim:/tb_matrixscalarmultiplication/epsilon
+# ** Warning: (vsim-WLF-5000) WLF file currently in use: vsim.wlf
+#           File in use by: mwd  Hostname: WIN-5F3DJOGAKN0  ProcessID: 9568
+#           Attempting to use alternate WLF file "./wlftnh37a1".
+# ** Warning: (vsim-WLF-5001) Could not open WLF file: vsim.wlf
+#           Using alternate file: ./wlftnh37a1
+run
+quit -sim
+# End time: 01:40:44 on Feb 05,2025, Elapsed time: 0:04:46
+# Errors: 0, Warnings: 6
+# Compile of timePiGate.vhd was successful.
+# Compile of itMultiplication.vhd was successful.
+# Compile of itMultiplication.vhd failed with 5 errors.
+# Compile of qTypes.vhd was successful.
+# Compile of itMultiplication.vhd was successful.
+# Compile of qTypes.vhd was successful.
+# Compile of C_ALU.vhd was successful.
+# Compile of multiplyColumnByScalar.vhd was successful.
+# Compile of addTwoVectors.vhd was successful.
+# Compile of multiplyThenAddVectors.vhd was successful.
+# Compile of matrixByVectorMultiplication.vhd was successful.
+# Compile of matrixByMatrixMultiplication.vhd was successful.
+# Compile of matrixAddition.vhd was successful.
+# Compile of matrixByScalarMultiplication.vhd was successful.
+# Compile of tb_matrixAddition_simple.vhd was successful.
+# Compile of tb_matrixScalarMultiplication.vhd was successful.
+# Compile of timePiGate.vhd was successful.
+# Compile of itMultiplication.vhd was successful.
+# Compile of qTypesBody.vhd was successful with warnings.
+# Compile of qTypesBody.vhd was successful with warnings.
+# 14 compiles, 0 failed with no errors.
+# Compile of qTypes.vhd was successful.
+# Compile of qTypesBody.vhd was successful.
+# Compile of itMultiplication.vhd failed with 1 errors.
+# Compile of itMultiplication.vhd failed with 1 errors.
+# Compile of qTypesBody.vhd was successful.
+# Compile of qTypesBody.vhd failed with 1 errors.
+# Compile of qTypesBody.vhd failed with 1 errors.
+# Compile of qTypesBody.vhd was successful.
+# Compile of itMultiplication.vhd failed with 1 errors.
+# Compile of itMultiplication.vhd failed with 3 errors.
+# Compile of qTypes.vhd was successful.
+# Compile of itMultiplication.vhd failed with 1 errors.
+# Compile of qTypes.vhd was successful.
+# Compile of qTypesBody.vhd was successful.
+# Compile of C_ALU.vhd was successful.
+# Compile of multiplyColumnByScalar.vhd was successful.
+# Compile of addTwoVectors.vhd was successful.
+# Compile of multiplyThenAddVectors.vhd was successful.
+# Compile of matrixByVectorMultiplication.vhd was successful.
+# Compile of matrixByMatrixMultiplication.vhd was successful.
+# Compile of matrixAddition.vhd was successful.
+# Compile of matrixByScalarMultiplication.vhd was successful.
+# Compile of timePiGate.vhd was successful.
+# Compile of itMultiplication.vhd failed with 1 errors.
+# Compile of tb_matrixAddition_simple.vhd was successful.
+# Compile of tb_matrixScalarMultiplication.vhd was successful.
+# 14 compiles, 1 failed with 1 error.
+# Compile of itMultiplication.vhd failed with 1 errors.
+# Compile of itMultiplication.vhd was successful.
+# Compile of itMultiplication.vhd failed with 1 errors.
+# Compile of itMultiplication.vhd failed with 3 errors.
+# Compile of qTypes.vhd was successful.
+# Compile of qTypes.vhd was successful.
+# Compile of qTypesBody.vhd was successful.
+# Compile of C_ALU.vhd was successful.
+# Compile of multiplyColumnByScalar.vhd was successful.
+# Compile of addTwoVectors.vhd was successful.
+# Compile of multiplyThenAddVectors.vhd was successful.
+# Compile of matrixByVectorMultiplication.vhd was successful.
+# Compile of matrixByMatrixMultiplication.vhd was successful.
+# Compile of matrixAddition.vhd was successful.
+# Compile of matrixByScalarMultiplication.vhd was successful.
+# Compile of timePiGate.vhd was successful.
+# Compile of itMultiplication.vhd failed with 3 errors.
+# Compile of tb_matrixAddition_simple.vhd was successful.
+# Compile of tb_matrixScalarMultiplication.vhd was successful.
+# 14 compiles, 1 failed with 3 errors.
+# Compile of qTypes.vhd was successful.
+# Compile of itMultiplication.vhd was successful.
+# Compile of itMultiplication.vhd was successful.
+vsim -gui work.itmultiplication
+# vsim -gui work.itmultiplication 
+# Start time: 02:41:08 on Feb 05,2025
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading ieee.numeric_std(body)
+# Loading ieee.fixed_float_types
+# Loading ieee.math_real(body)
+# Loading ieee.fixed_generic_pkg(body)
+# Loading ieee.fixed_pkg
+# Loading work.qtypes(body)
+# Loading work.itmultiplication(structural)
+# ** Error: (vsim-13) Recompile work.matrixscalarmultiplication because work.qtypes has changed.
+# ** Error (suppressible): (vsim-12) Recompile work.matrixscalarmultiplication(concurrent) after work.matrixscalarmultiplication is recompiled.
+# ** Error: (vsim-13) Recompile work.matrixscalarmultiplication(concurrent) because work.qtypes has changed.
+# Load interrupted
+# Error loading design
+# End time: 02:41:11 on Feb 05,2025, Elapsed time: 0:00:03
+# Errors: 3, Warnings: 37
+# Compile of qTypes.vhd was successful.
+# Compile of C_ALU.vhd was successful.
+# Compile of multiplyColumnByScalar.vhd was successful.
+# Compile of addTwoVectors.vhd was successful.
+# Compile of multiplyThenAddVectors.vhd was successful.
+# Compile of matrixByVectorMultiplication.vhd was successful.
+# Compile of matrixByMatrixMultiplication.vhd was successful.
+# Compile of matrixAddition.vhd was successful.
+# Compile of matrixByScalarMultiplication.vhd was successful.
+# Compile of timePiGate.vhd was successful.
+# Compile of itMultiplication.vhd was successful.
+# Compile of tb_matrixAddition_simple.vhd was successful.
+vsim -gui work.itmultiplication
+# vsim -gui work.itmultiplication 
+# Start time: 02:41:54 on Feb 05,2025
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading ieee.numeric_std(body)
+# Loading ieee.fixed_float_types
+# Loading ieee.math_real(body)
+# Loading ieee.fixed_generic_pkg(body)
+# Loading ieee.fixed_pkg
+# Loading work.qtypes(body)
+# Loading work.itmultiplication(structural)
+# Loading work.matrixscalarmultiplication(concurrent)
+add wave -position insertpoint library
+# ** Warning: (vsim-WLF-5000) WLF file currently in use: vsim.wlf
+#           File in use by: mwd  Hostname: WIN-5F3DJOGAKN0  ProcessID: 9568
+#           Attempting to use alternate WLF file "./wlftzg5efk".
+# ** Warning: (vsim-WLF-5001) Could not open WLF file: vsim.wlf
+#           Using alternate file: ./wlftzg5efk
+# ** UI-Msg: (vish-4014) No objects found matching 'library'.
+# Compile of tb_matrixScalarMultiplication.vhd was successful.
+# 13 compiles, 0 failed with no errors.
+add wave -position insertpoint  \
+sim:/itmultiplication/scalar_in \
+sim:/itmultiplication/C_out \
+sim:/itmultiplication/intermediate_matrix \
+sim:/itmultiplication/final_low \
+sim:/itmultiplication/FIXED_MATRIX \
+sim:/itmultiplication/FIXED_SCALAR
+force -freeze sim:/itmultiplication/scalar_in.re 0000000000000100000000000 0
+force -freeze sim:/itmultiplication/scalar_in.im 0000000000000100000000000 0
+run
+quit -sim
+# End time: 02:47:41 on Feb 05,2025, Elapsed time: 0:05:47
+# Errors: 0, Warnings: 4
+# Compile of normAndCompare.vhd was successful.

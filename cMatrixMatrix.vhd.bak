@@ -1,0 +1,41 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use IEEE.fixed_pkg.ALL;
+library work;
+use work.qTypes.ALL;
+
+entity cMatrixMatrix is
+    Port (
+        A : in  cmatrix;        -- Input matrix A (columns as subvectors)
+        B : in  cmatrix;        -- Input matrix B (columns as subvectors)
+        C : out cmatrix         -- Output matrix C (columns as subvectors)
+    );
+end cMatrixMatrix;
+
+architecture Behavioral of cMatrixMatrix is
+
+    -- Declare the cMatrixVector component for column-wise multiplication
+    component cMatrixVector
+        Port (
+            A : in  cmatrix;    -- Input matrix (column-oriented)
+            v : in  cvector;    -- Input vector (treated as a column multiplier)
+            y : out cvector     -- Resulting vector (becomes a column in C)
+        );
+    end component;
+
+begin
+
+    -- Generate one cMatrixVector instance per column of matrix B
+    gen_column_processing: for j in 0 to numBasisStates - 1 generate
+    begin
+        -- Each instance processes one cbvolumn from B as the multiplier vector
+        col_multiplier: cMatrixVector
+            port map (
+                A => A,         -- Full input matrix A
+                v => B(j),      -- j-th column of B used as multiplier vector
+                y => C(j)       -- Result stored in j-th column of C
+            );
+    end generate gen_column_processing;
+
+end Behavioral;

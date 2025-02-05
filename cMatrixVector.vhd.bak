@@ -1,0 +1,41 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use IEEE.fixed_pkg.ALL;
+library work;
+use work.qTypes.ALL;
+
+entity MatrixByVector is
+    Port (
+        A : in  cmatrix;        -- Input matrix of complex numbers
+        v : in  cvector;        -- Input vector of complex numbers
+        y : out cvector         -- Output vector after matrix-vector "multiplication"
+    );
+end MatrixByVector;
+
+architecture Behavioral of MatrixByVector is
+
+    -- Declare the MultAndAddVector component
+    component MultAndAddVector
+        Port (
+            A : in  cvector;
+            x : in  cfixed;
+            y : out cfixed
+        );
+    end component;
+
+begin
+
+    -- Generate a MultAndAddVector instance for each row in the matrix
+    gen_matrix_vector: for i in 0 to numBasisStates - 1 generate
+    begin
+        -- Instantiate the component for row i
+        mult_add_inst: MultAndAddVector
+            port map (
+                A => A(i),      -- Row i of matrix A
+                x => v(i),      -- Element i of vector v (used as scalar multiplier)
+                y => y(i)       -- Result for row i stored in output vector y
+            );
+    end generate gen_matrix_vector;
+
+end Behavioral;
