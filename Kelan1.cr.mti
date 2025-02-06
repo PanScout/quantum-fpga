@@ -11,9 +11,9 @@ Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 
 -- Loading package body fixed_generic_pkg
 -- Loading package qTypes
 -- Compiling entity normAndCompare
--- Compiling architecture Behavioral of normAndCompare
+-- Compiling architecture structural of normAndCompare
 
-} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyThenAddVectors.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\multiplyThenAddVectors.vhd}
+} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyThenAddVectors.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyThenAddVectors.vhd}
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -28,7 +28,7 @@ Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 
 -- Compiling entity multiplyThenAddVectors
 -- Compiling architecture Concurrent of multiplyThenAddVectors
 
-} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/tb_matrixScalarMultiplication.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\tb_matrixScalarMultiplication.vhd}
+} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/tb_matrixScalarMultiplication.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/tb_matrixScalarMultiplication.vhd}
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -43,7 +43,7 @@ Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 
 -- Compiling entity tb_matrixScalarMultiplication
 -- Compiling architecture Behavioral of tb_matrixScalarMultiplication
 
-} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyColumnByScalar.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\multiplyColumnByScalar.vhd}
+} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyColumnByScalar.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyColumnByScalar.vhd}
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -58,7 +58,7 @@ Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 
 -- Compiling entity multiplyColumnByScalar
 -- Compiling architecture Behavioral of multiplyColumnByScalar
 
-} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/addTwoVectors.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\addTwoVectors.vhd}
+} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/addTwoVectors.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/addTwoVectors.vhd}
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -88,7 +88,22 @@ Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 
 -- Compiling entity timePiGate
 -- Compiling architecture Concurrent of timePiGate
 
-} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/C_ALU.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\C_ALU.vhd}
+} {} {}} {C:/Users/Kelan Zielinski/Desktop/ModelSim Projects/quantum-fpga/matrixRowSummation.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:\Users\Kelan Zielinski\Desktop\ModelSim Projects\quantum-fpga\matrixRowSummation.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package instance fixed_pkg
+-- Loading package fixed_float_types
+-- Loading package fixed_generic_pkg
+-- Loading package MATH_REAL
+-- Loading package body fixed_generic_pkg
+-- Loading package qTypes
+-- Compiling entity matrixRowSummation
+-- Compiling architecture Behavioral of matrixRowSummation
+
+} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/C_ALU.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/C_ALU.vhd}
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -117,6 +132,21 @@ Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 
 -- Loading package qTypes
 -- Compiling entity matrixScalarMultiplication
 -- Compiling architecture Concurrent of matrixScalarMultiplication
+
+} {} {}} {C:/Users/Kelan Zielinski/Desktop/ModelSim Projects/quantum-fpga/infinityNormComparator.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:\Users\Kelan Zielinski\Desktop\ModelSim Projects\quantum-fpga\infinityNormComparator.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package instance fixed_pkg
+-- Loading package fixed_float_types
+-- Loading package fixed_generic_pkg
+-- Loading package MATH_REAL
+-- Loading package body fixed_generic_pkg
+-- Loading package qTypes
+-- Compiling entity infinityNormComparator
+-- Compiling architecture gen of infinityNormComparator
 
 } {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/qTypes.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\qTypes.vhd}
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
@@ -148,7 +178,7 @@ Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 
 -- Compiling entity tb_matrixAddition_simple
 -- Compiling architecture Behavioral of tb_matrixAddition_simple
 
-} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByVectorMultiplication.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByVectorMultiplication.vhd}
+} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByVectorMultiplication.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByVectorMultiplication.vhd}
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -178,6 +208,21 @@ Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 
 -- Compiling entity matrixAddition
 -- Compiling architecture Concurrent of matrixAddition
 
+} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByMatrixMultiplication.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByMatrixMultiplication.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package instance fixed_pkg
+-- Loading package fixed_float_types
+-- Loading package fixed_generic_pkg
+-- Loading package MATH_REAL
+-- Loading package body fixed_generic_pkg
+-- Loading package qTypes
+-- Compiling entity matrixByMatrixMultiplication
+-- Compiling architecture Concurrent of matrixByMatrixMultiplication
+
 } {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/itMultiplication.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\itMultiplication.vhd}
 Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
 -- Loading package STANDARD
@@ -192,20 +237,5 @@ Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 
 -- Loading package qTypes
 -- Compiling entity itMultiplication
 -- Compiling architecture Structural of itMultiplication
-
-} {} {}} {G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByMatrixMultiplication.vhd} {1 {vcom -work work -2002 -explicit -stats=none {G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByMatrixMultiplication.vhd}
-Model Technology ModelSim - Intel FPGA Edition vcom 2020.1 Compiler 2020.02 Feb 28 2020
--- Loading package STANDARD
--- Loading package TEXTIO
--- Loading package std_logic_1164
--- Loading package NUMERIC_STD
--- Loading package instance fixed_pkg
--- Loading package fixed_float_types
--- Loading package fixed_generic_pkg
--- Loading package MATH_REAL
--- Loading package body fixed_generic_pkg
--- Loading package qTypes
--- Compiling entity matrixByMatrixMultiplication
--- Compiling architecture Concurrent of matrixByMatrixMultiplication
 
 } {} {}}
