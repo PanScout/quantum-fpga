@@ -27,7 +27,7 @@ architecture structural of normAndCompare is
     -- 2) Define the constant THETA
     ----------------------------------------------------------------------------
     -- Adjust these bounds (40 downto -64) as needed to match 'fixedHigh'
-    constant THETA : fixedHigh := to_sfixed(1.0, fixedHigh'high, fixedHigh'low);
+    constant THETA : fixedHigh := to_sfixed(2.1, fixedHigh'high, fixedHigh'low);
 
     ----------------------------------------------------------------------------
     -- 3) Component declarations
