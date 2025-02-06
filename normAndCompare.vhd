@@ -5,56 +5,76 @@ use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
 entity normAndCompare is
-    Port (
-        A       : in  cmatrixHigh;  -- Input matrix (N x N) in high precision
-        norm_out: out fixedHigh     -- Output: 1-norm (maximum column sum) in high precision
+    port (
+        -- Input matrix: dimension = numBasisStates × numBasisStates (from qTypes)
+        A       : in  cmatrixHigh;
+        
+        -- Output: '1' if THETA > infinityNorm(A), else '0'
+        isBelow : out std_logic;
+	InfinityNormOut : out fixedHigh
     );
-end normAndCompare;
+end entity normAndCompare;
 
-architecture Behavioral of normAndCompare is
+architecture structural of normAndCompare is
 
     ----------------------------------------------------------------------------
-    -- Function: cabs
-    --
-    -- Returns the absolute value (magnitude) of a complex fixed-point number.
-    -- Since each number is assumed to be either purely real or purely imaginary,
-    -- the magnitude is simply the sum of the absolute values of the components.
+    -- 1) Internal signals
     ----------------------------------------------------------------------------
-    function cabs(x : cfixedHigh) return fixedHigh is
-    begin
-        return abs(x.re) + abs(x.im);
-    end function cabs;
+    signal rowSums    : cvectorHigh; -- from matrixRowSummation
+    signal largestVal : fixedHigh;   -- from infinityNormComparator
+
+    ----------------------------------------------------------------------------
+    -- 2) Define the constant THETA
+    ----------------------------------------------------------------------------
+    -- Adjust these bounds (40 downto -64) as needed to match 'fixedHigh'
+    constant THETA : fixedHigh := to_sfixed(1.0, fixedHigh'high, fixedHigh'low);
+
+    ----------------------------------------------------------------------------
+    -- 3) Component declarations
+    ----------------------------------------------------------------------------
+    component matrixRowSummation is
+        port (
+            A       : in  cmatrixHigh;
+            rowSums : out cvectorHigh
+        );
+    end component;
+
+    component infinityNormComparator is
+        port (
+            inputVector  : in  cvectorHigh;
+            largestValue : out fixedHigh
+        );
+    end component;
 
 begin
 
     ----------------------------------------------------------------------------
-    -- Process: Compute 1-Norm of the Matrix
-    --
-    -- The 1-norm is defined as the maximum over columns of the sum of the
-    -- absolute values of the entries in that column.
+    -- 4) Instantiate matrixRowSummation
     ----------------------------------------------------------------------------
-    process(A)
-        variable col_sum : fixedHigh;
-        variable max_sum : fixedHigh;
-    begin
-        -- Initialize max_sum to zero in high precision.
-        max_sum := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+    sum_inst: matrixRowSummation
+        port map (
+            A       => A,
+            rowSums => rowSums
+        );
 
-        -- Loop over each column.
-        for col in A(0)'range loop
-            col_sum := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
-            -- Sum the absolute values for all rows in this column.
-            for row in A'range loop
-                col_sum := col_sum + cabs(A(row)(col));
-            end loop;
-            -- Update maximum if this column sum is larger.
-            if col_sum > max_sum then
-                max_sum := col_sum;
-            end if;
-        end loop;
+    ----------------------------------------------------------------------------
+    -- 5) Instantiate infinityNormComparator
+    ----------------------------------------------------------------------------
+    norm_inst: infinityNormComparator
+        port map (
+            inputVector  => rowSums,
+            largestValue => largestVal
+        );
 
-        norm_out <= max_sum;
-    end process;
+    ----------------------------------------------------------------------------
+    -- 6) Compare the resulting infinity norm with THETA
+    ----------------------------------------------------------------------------
+    -- "If THETA > largestVal then output '1' else '0'"
+    isBelow <= '1' when THETA > largestVal else '0';
+    infinityNormOut <= largestVal;
 
-end Behavioral;
+end architecture structural;
+
+
+
 
