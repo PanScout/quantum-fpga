@@ -61,7 +61,7 @@ R15
 R16
 R17
 Ec_alu
-Z19 w1738019048
+Z19 w1738813865
 Z20 DPx4 work 6 qtypes 0 22 cnlOJeK6j:]6nZb8zGKTj1
 R2
 R3
@@ -69,21 +69,36 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 !i122 384
 Z21 dC:/Users/Kelan Zielinski/Desktop/ModelSim Projects/quantum-fpga
 Z22 8G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/C_ALU.vhd
 Z23 FG:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/C_ALU.vhd
+=======
+!i122 365
+Z21 dC:/Users/mwd/Desktop/quantum-fpga
+Z22 8C:/Users/mwd/Desktop/quantum-fpga/C_ALU.vhd
+Z23 FC:/Users/mwd/Desktop/quantum-fpga/C_ALU.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L8 1
 V>ha]<@@9?el9gXD^IG2F^3
 !s100 eD>^RgVhJ9Vbi@;;QWlF32
 R11
 32
+<<<<<<< HEAD
 Z24 !s110 1738801078
 !i10b 1
 Z25 !s108 1738801078.000000
 Z26 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/C_ALU.vhd|
 Z27 !s107 G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/C_ALU.vhd|
+=======
+Z24 !s110 1738814602
+!i10b 1
+Z25 !s108 1738814602.000000
+Z26 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/C_ALU.vhd|
+Z27 !s107 C:/Users/mwd/Desktop/quantum-fpga/C_ALU.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -96,7 +111,11 @@ R5
 R6
 R7
 DEx4 work 5 c_alu 0 22 >ha]<@@9?el9gXD^IG2F^3
+<<<<<<< HEAD
 !i122 384
+=======
+!i122 365
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l27
 L22 47
 V6X5z]Hf]?IWA2EMzZ2n>l0
@@ -283,11 +302,19 @@ Vf;BPYSUKGD;[VjRi1mMcY3
 !s100 B^MnN387oV1?2?GTYTfU:0
 R11
 32
+<<<<<<< HEAD
 Z55 !s110 1738042885
 !i10b 1
 Z56 !s108 1738042885.000000
 Z57 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/My Drive/Senior Design/Project/VHDL/columnMultiplication.vhd|
 Z58 !s107 G:/My Drive/Senior Design/Project/VHDL/columnMultiplication.vhd|
+=======
+Z54 !s110 1738042885
+!i10b 1
+Z55 !s108 1738042885.000000
+Z56 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/My Drive/Senior Design/Project/VHDL/columnMultiplication.vhd|
+Z57 !s107 G:/My Drive/Senior Design/Project/VHDL/columnMultiplication.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -307,16 +334,28 @@ VhdjcZXD]B<M5SGi47dXFo0
 !s100 @On?571]0TZD8>dTY096R3
 R11
 32
+<<<<<<< HEAD
+=======
+R54
+!i10b 1
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R55
 !i10b 1
 R56
 R57
+<<<<<<< HEAD
 R58
+=======
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Ecvector_adder
+<<<<<<< HEAD
 Z59 w1738198415
+=======
+R19
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R3
@@ -324,21 +363,36 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 !i122 386
 R21
 Z60 8G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/addTwoVectors.vhd
 Z61 FG:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/addTwoVectors.vhd
+=======
+!i122 364
+R21
+Z58 8C:/Users/mwd/Desktop/quantum-fpga/addTwoVectors.vhd
+Z59 FC:/Users/mwd/Desktop/quantum-fpga/addTwoVectors.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L7 1
 V<4;ON]XD5P?Eh:d3<GTc62
 !s100 A=f1j`FalF:bdk>>j9LjT3
 R11
 32
+<<<<<<< HEAD
 Z62 !s110 1738801079
 !i10b 1
 Z63 !s108 1738801079.000000
 Z64 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/addTwoVectors.vhd|
 Z65 !s107 G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/addTwoVectors.vhd|
+=======
+R24
+!i10b 1
+R25
+Z60 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/addTwoVectors.vhd|
+Z61 !s107 C:/Users/mwd/Desktop/quantum-fpga/addTwoVectors.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -351,23 +405,39 @@ R5
 R6
 R7
 DEx4 work 13 cvector_adder 0 22 <4;ON]XD5P?Eh:d3<GTc62
+<<<<<<< HEAD
 !i122 386
+=======
+!i122 364
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l16
 L15 10
 V^MQEI:8?HYh:zn4l;S?5U3
 !s100 ggOC3Y0C0dPRQ_Iz^YC8G0
 R11
 32
+<<<<<<< HEAD
 R62
 !i10b 1
 R63
 R64
 R65
+=======
+R24
+!i10b 1
+R25
+R60
+R61
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Ecvectoradd
+<<<<<<< HEAD
 Z66 w1738089956
+=======
+Z62 w1738089956
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R1
 R2
 R3
@@ -377,19 +447,32 @@ R6
 R7
 !i122 235
 R8
+<<<<<<< HEAD
 Z67 8G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\cVectorAdd.vhd
 Z68 FG:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\cVectorAdd.vhd
+=======
+Z63 8G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\cVectorAdd.vhd
+Z64 FG:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\cVectorAdd.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L8 1
 VKe4P;NO_RNdWO1AVnW[CP2
 !s100 h_UBj>G;jfRHmnRSM0P@W3
 R11
 32
+<<<<<<< HEAD
 Z69 !s110 1738194684
 !i10b 1
 Z70 !s108 1738194683.000000
 Z71 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\cVectorAdd.vhd|
 Z72 !s107 G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\cVectorAdd.vhd|
+=======
+Z65 !s110 1738194684
+!i10b 1
+Z66 !s108 1738194683.000000
+Z67 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\cVectorAdd.vhd|
+Z68 !s107 G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\cVectorAdd.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -401,7 +484,11 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 Z73 DEx4 work 10 cvectoradd 0 22 Ke4P;NO_RNdWO1AVnW[CP2
+=======
+Z69 DEx4 work 10 cvectoradd 0 22 Ke4P;NO_RNdWO1AVnW[CP2
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i122 235
 l31
 R18
@@ -409,6 +496,7 @@ VHelFgo1YV`cdDj;7Bdh?z2
 !s100 RN_880L]`6H96gIKif[Ch0
 R11
 32
+<<<<<<< HEAD
 R69
 !i10b 1
 R70
@@ -465,11 +553,22 @@ R77
 R78
 R79
 R80
+=======
+R65
+!i10b 1
+R66
+R67
+R68
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Eitmultiplication
+<<<<<<< HEAD
 Z81 w1738712446
+=======
+R19
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R5
@@ -477,21 +576,36 @@ R3
 R4
 R6
 R7
+<<<<<<< HEAD
 !i122 393
 R21
 R30
 R31
+=======
+!i122 366
+R21
+Z70 8C:/Users/mwd/Desktop/quantum-fpga/itMultiplication.vhd
+Z71 FC:/Users/mwd/Desktop/quantum-fpga/itMultiplication.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L6 1
 VjMAbHZYe?Oe=CF6kjnR510
 !s100 m`OAbVPnT3Uki>chQiRkY2
 R11
 32
+<<<<<<< HEAD
 Z82 !s110 1738801080
 !i10b 1
 Z83 !s108 1738801080.000000
 R32
 R33
+=======
+Z72 !s110 1738814603
+!i10b 1
+Z73 !s108 1738814603.000000
+Z74 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/itMultiplication.vhd|
+Z75 !s107 C:/Users/mwd/Desktop/quantum-fpga/itMultiplication.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -504,23 +618,39 @@ R4
 R6
 R7
 DEx4 work 16 itmultiplication 0 22 jMAbHZYe?Oe=CF6kjnR510
+<<<<<<< HEAD
 !i122 393
+=======
+!i122 366
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l58
 L13 66
 VJJ[^FYKBoYzCPmo`UJG5J2
 !s100 4XgP7RT_:n@VzHo9Z0Z;W2
 R11
 32
+<<<<<<< HEAD
 R82
 !i10b 1
 R83
 R32
 R33
+=======
+R72
+!i10b 1
+R73
+R74
+R75
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Ematrixaddition
+<<<<<<< HEAD
 Z84 w1738707892
+=======
+R19
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R3
@@ -528,21 +658,36 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 !i122 390
 R21
 Z85 8G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixAddition.vhd
 Z86 FG:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixAddition.vhd
+=======
+!i122 367
+R21
+Z76 8C:/Users/mwd/Desktop/quantum-fpga/matrixAddition.vhd
+Z77 FC:/Users/mwd/Desktop/quantum-fpga/matrixAddition.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L7 1
 V?RLcTFYD@U=XdlG7dXKmG2
 !s100 Y=NPlIWW0nUF3SbHLai041
 R11
 32
+<<<<<<< HEAD
 R82
 !i10b 1
 R63
 Z87 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixAddition.vhd|
 Z88 !s107 G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixAddition.vhd|
+=======
+R72
+!i10b 1
+R73
+Z78 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/matrixAddition.vhd|
+Z79 !s107 C:/Users/mwd/Desktop/quantum-fpga/matrixAddition.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -555,23 +700,39 @@ R5
 R6
 R7
 DEx4 work 14 matrixaddition 0 22 ?RLcTFYD@U=XdlG7dXKmG2
+<<<<<<< HEAD
 !i122 390
+=======
+!i122 367
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l16
 L15 14
 VzVH@<M@QGS]<lBGngOHCb2
 !s100 :W:HGc3R``MV<IT1Lbgl90
 R11
 32
+<<<<<<< HEAD
 R82
 !i10b 1
 R63
 R87
 R88
+=======
+R72
+!i10b 1
+R73
+R78
+R79
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Ematrixbymatrix
+<<<<<<< HEAD
 Z89 w1738107696
+=======
+Z80 w1738107696
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R50
 R2
 R3
@@ -581,19 +742,32 @@ R6
 R7
 !i122 196
 R51
+<<<<<<< HEAD
 Z90 8G:/My Drive/Senior Design/Project/VHDL/cMatrixMatrix.vhd
 Z91 FG:/My Drive/Senior Design/Project/VHDL/cMatrixMatrix.vhd
+=======
+Z81 8G:/My Drive/Senior Design/Project/VHDL/cMatrixMatrix.vhd
+Z82 FG:/My Drive/Senior Design/Project/VHDL/cMatrixMatrix.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L8 1
 VZbE_BUQ6L;>M:4ZfgSc4l3
 !s100 1DSDX[Cd_=OWQRl?KMjDI1
 R11
 32
+<<<<<<< HEAD
 Z92 !s110 1738107698
 !i10b 1
 Z93 !s108 1738107697.000000
 Z94 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/My Drive/Senior Design/Project/VHDL/cMatrixMatrix.vhd|
 Z95 !s107 G:/My Drive/Senior Design/Project/VHDL/cMatrixMatrix.vhd|
+=======
+Z83 !s110 1738107698
+!i10b 1
+Z84 !s108 1738107697.000000
+Z85 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/My Drive/Senior Design/Project/VHDL/cMatrixMatrix.vhd|
+Z86 !s107 G:/My Drive/Senior Design/Project/VHDL/cMatrixMatrix.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -613,16 +787,28 @@ VHP8oKo[W_]X]SOZZ`f:d]2
 !s100 ;cO?N8d_<F=W;[Jmm2]7W2
 R11
 32
+<<<<<<< HEAD
 R92
 !i10b 1
 R93
 R94
 R95
+=======
+R83
+!i10b 1
+R84
+R85
+R86
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Ematrixbymatrixmult
+<<<<<<< HEAD
 Z96 w1738199429
+=======
+Z87 w1738199429
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R1
 R2
 R3
@@ -632,19 +818,32 @@ R6
 R7
 !i122 255
 R8
+<<<<<<< HEAD
 Z97 8G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByMatrixMultiplication.vhd
 Z98 FG:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByMatrixMultiplication.vhd
+=======
+Z88 8G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByMatrixMultiplication.vhd
+Z89 FG:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByMatrixMultiplication.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L7 1
 V>KF5beg_1:;BGz^DBJ:Y<3
 !s100 >OjV@LC?8KR<Mbz7QmPVU3
 R11
 32
+<<<<<<< HEAD
 Z99 !s110 1738199431
 !i10b 1
 Z100 !s108 1738199430.000000
 Z101 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByMatrixMultiplication.vhd|
 Z102 !s107 G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByMatrixMultiplication.vhd|
+=======
+Z90 !s110 1738199431
+!i10b 1
+Z91 !s108 1738199430.000000
+Z92 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByMatrixMultiplication.vhd|
+Z93 !s107 G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByMatrixMultiplication.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -659,21 +858,37 @@ R7
 DEx4 work 18 matrixbymatrixmult 0 22 >KF5beg_1:;BGz^DBJ:Y<3
 !i122 255
 l27
+<<<<<<< HEAD
 Z103 L15 42
+=======
+Z94 L15 42
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 VJC5<W5@dd5WB7e7^lhaza3
 !s100 EfdY81:K5KAV6hl4Ck_MQ1
 R11
 32
+<<<<<<< HEAD
 R99
 !i10b 1
 R100
 R101
 R102
+=======
+R90
+!i10b 1
+R91
+R92
+R93
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Ematrixbymatrixmultiplication
+<<<<<<< HEAD
 Z104 w1738199480
+=======
+R19
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R3
@@ -681,21 +896,36 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 !i122 389
 R21
 Z105 8G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByMatrixMultiplication.vhd
 Z106 FG:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByMatrixMultiplication.vhd
+=======
+!i122 368
+R21
+Z95 8C:/Users/mwd/Desktop/quantum-fpga/matrixByMatrixMultiplication.vhd
+Z96 FC:/Users/mwd/Desktop/quantum-fpga/matrixByMatrixMultiplication.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L7 1
 VHKj@DM;GfE6M[P;81BXRg2
 !s100 O10g<8I0lP[VQB:J2Vdib2
 R11
 32
+<<<<<<< HEAD
 R62
 !i10b 1
 R63
 Z107 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByMatrixMultiplication.vhd|
 Z108 !s107 G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByMatrixMultiplication.vhd|
+=======
+Z97 !s110 1738814604
+!i10b 1
+R73
+Z98 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/matrixByMatrixMultiplication.vhd|
+Z99 !s107 C:/Users/mwd/Desktop/quantum-fpga/matrixByMatrixMultiplication.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -708,23 +938,41 @@ R5
 R6
 R7
 DEx4 work 28 matrixbymatrixmultiplication 0 22 HKj@DM;GfE6M[P;81BXRg2
+<<<<<<< HEAD
 !i122 389
 l27
 R103
+=======
+!i122 368
+l27
+R94
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 Vo1OHU6^Mj]z<E@kC?h=kN0
 !s100 SfagKjZz^XjBI6:<iji3F0
 R11
 32
+<<<<<<< HEAD
 R62
 !i10b 1
 R63
 R107
 R108
+=======
+R97
+!i10b 1
+R73
+R98
+R99
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Ematrixbyvector
+<<<<<<< HEAD
 Z109 w1738105030
+=======
+Z100 w1738105030
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R50
 R2
 R3
@@ -734,14 +982,20 @@ R6
 R7
 !i122 187
 R51
+<<<<<<< HEAD
 Z110 8G:/My Drive/Senior Design/Project/VHDL/cMatrixVector.vhd
 Z111 FG:/My Drive/Senior Design/Project/VHDL/cMatrixVector.vhd
+=======
+Z101 8G:/My Drive/Senior Design/Project/VHDL/cMatrixVector.vhd
+Z102 FG:/My Drive/Senior Design/Project/VHDL/cMatrixVector.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L8 1
 VWUcd5:enFlU;VVhPHN40o1
 !s100 TzE[YGLY2_dei>UNDeW5n1
 R11
 33
+<<<<<<< HEAD
 Z112 !s110 1738105128
 !i10b 1
 Z113 !s108 1738105127.000000
@@ -749,6 +1003,15 @@ Z114 !s90 -reportprogress|300|-work|work|-2008|-explicit|-check_synthesis|-stats
 Z115 !s107 G:/My Drive/Senior Design/Project/VHDL/cMatrixVector.vhd|
 !i113 1
 Z116 o-work work -2008 -explicit -check_synthesis
+=======
+Z103 !s110 1738105128
+!i10b 1
+Z104 !s108 1738105127.000000
+Z105 !s90 -reportprogress|300|-work|work|-2008|-explicit|-check_synthesis|-stats=none|G:/My Drive/Senior Design/Project/VHDL/cMatrixVector.vhd|
+Z106 !s107 G:/My Drive/Senior Design/Project/VHDL/cMatrixVector.vhd|
+!i113 1
+Z107 o-work work -2008 -explicit -check_synthesis
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R17
 Abehavioral
 R50
@@ -766,6 +1029,7 @@ VFh@26?fCOY8d>iaAIPb;Q1
 !s100 QSC2FT:VT_`]lCT<5TD:Y1
 R11
 33
+<<<<<<< HEAD
 R112
 !i10b 1
 R113
@@ -776,6 +1040,18 @@ R116
 R17
 Ematrixbyvectormultiplication
 Z117 w1738197647
+=======
+R103
+!i10b 1
+R104
+R105
+R106
+!i113 1
+R107
+R17
+Ematrixbyvectormultiplication
+R19
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R3
@@ -783,21 +1059,36 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 !i122 388
 R21
 Z118 8G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByVectorMultiplication.vhd
 Z119 FG:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByVectorMultiplication.vhd
+=======
+!i122 370
+R21
+Z108 8C:/Users/mwd/Desktop/quantum-fpga/matrixByVectorMultiplication.vhd
+Z109 FC:/Users/mwd/Desktop/quantum-fpga/matrixByVectorMultiplication.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L7 1
 Voh3Am^Z1Fa2zm1RE0H0GO1
 !s100 jYS0;f:2O9ad>l>FzdkWH2
 R11
 32
+<<<<<<< HEAD
 R62
 !i10b 1
 R63
 Z120 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByVectorMultiplication.vhd|
 Z121 !s107 G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/matrixByVectorMultiplication.vhd|
+=======
+R97
+!i10b 1
+Z110 !s108 1738814604.000000
+Z111 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/matrixByVectorMultiplication.vhd|
+Z112 !s107 C:/Users/mwd/Desktop/quantum-fpga/matrixByVectorMultiplication.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -810,24 +1101,43 @@ R5
 R6
 R7
 DEx4 work 28 matrixbyvectormultiplication 0 22 oh3Am^Z1Fa2zm1RE0H0GO1
+<<<<<<< HEAD
 !i122 388
 l32
 Z122 L15 40
+=======
+!i122 370
+l32
+Z113 L15 40
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 VdP>V;4QY53?kmSd>Q5lJT3
 !s100 hDk[Y0gmUUhUWKE1m=P[n0
 R11
 32
+<<<<<<< HEAD
 R62
 !i10b 1
 R63
 R120
 R121
+=======
+R97
+!i10b 1
+R110
+R111
+R112
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Abehavioral
+<<<<<<< HEAD
 R73
 Z123 DEx4 work 7 rowmult 0 22 `0nkDBka>UEl[N0BfHn@d3
+=======
+R69
+Z114 DEx4 work 7 rowmult 0 22 `0nkDBka>UEl[N0BfHn@d3
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R1
 R2
 R3
@@ -846,17 +1156,29 @@ R11
 !s110 1738195692
 !i10b 1
 !s108 1738195691.000000
+<<<<<<< HEAD
 Z124 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByVectorMultiplication.vhd|
 Z125 !s107 G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByVectorMultiplication.vhd|
+=======
+Z115 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByVectorMultiplication.vhd|
+Z116 !s107 G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByVectorMultiplication.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 w1738195690
 R8
+<<<<<<< HEAD
 Z126 FG:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByVectorMultiplication.vhd
 Z127 8G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByVectorMultiplication.vhd
 Ematrixbyvectormultplication
 Z128 w1738197535
+=======
+Z117 FG:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByVectorMultiplication.vhd
+Z118 8G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByVectorMultiplication.vhd
+Ematrixbyvectormultplication
+Z119 w1738197535
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R1
 R2
 R3
@@ -866,19 +1188,32 @@ R6
 R7
 !i122 249
 R8
+<<<<<<< HEAD
 R127
 R126
+=======
+R118
+R117
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L7 1
 V?F9IZC<?<`gZz6?VJWoEV3
 !s100 Th3DGc=MP1XXCCbPDSdZ=3
 R11
 32
+<<<<<<< HEAD
 Z129 !s110 1738197574
 !i10b 1
 Z130 !s108 1738197573.000000
 R124
 R125
+=======
+Z120 !s110 1738197574
+!i10b 1
+Z121 !s108 1738197573.000000
+R115
+R116
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -893,11 +1228,16 @@ R7
 DEx4 work 27 matrixbyvectormultplication 0 22 ?F9IZC<?<`gZz6?VJWoEV3
 !i122 249
 l32
+<<<<<<< HEAD
 R122
+=======
+R113
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 VmA_IV:ebWj=gSY2mFi2LH2
 !s100 KJgP=MgF1^2[AD8XQ32Xa3
 R11
 32
+<<<<<<< HEAD
 R129
 !i10b 1
 R130
@@ -908,6 +1248,18 @@ R16
 R17
 Ematrixrowsummation
 Z131 w1738803054
+=======
+R120
+!i10b 1
+R121
+R115
+R116
+!i113 1
+R16
+R17
+Ematrixplusscalar
+Z122 w1738814660
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R3
@@ -915,6 +1267,7 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 !i122 409
 R21
 Z132 8C:\Users\Kelan Zielinski\Desktop\ModelSim Projects\quantum-fpga\matrixRowSummation.vhd
@@ -934,6 +1287,27 @@ Z137 !s107 C:\Users\Kelan Zielinski\Desktop\ModelSim Projects\quantum-fpga\matri
 R16
 R17
 Abehavioral
+=======
+!i122 377
+R21
+Z123 8C:/Users/mwd/Desktop/quantum-fpga/MatrixPlusScalar.vhd
+Z124 FC:/Users/mwd/Desktop/quantum-fpga/MatrixPlusScalar.vhd
+l0
+L8 1
+VENn4X2UY[g0MVLDf7cOMB3
+!s100 h>EE=z;oEg7BGIdNTgWKk3
+R11
+32
+Z125 !s110 1738814666
+!i10b 1
+Z126 !s108 1738814666.000000
+Z127 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/mwd/Desktop/quantum-fpga/MatrixPlusScalar.vhd|
+!s107 C:/Users/mwd/Desktop/quantum-fpga/MatrixPlusScalar.vhd|
+!i113 1
+R16
+R17
+Astructural
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R3
@@ -941,6 +1315,7 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 DEx4 work 18 matrixrowsummation 0 22 ?[H`OM_^LF>aKU8^85PX;2
 !i122 409
 l25
@@ -954,11 +1329,30 @@ R134
 R135
 R136
 R137
+=======
+DEx4 work 16 matrixplusscalar 0 22 ENn4X2UY[g0MVLDf7cOMB3
+!i122 377
+l18
+L16 21
+VAPoYd>gdld@R7iUoVG>D00
+!s100 5Zhd@_GIm6b0D9:8a?VSZ1
+R11
+32
+R125
+!i10b 1
+R126
+R127
+Z128 !s107 C:/Users/mwd/Desktop/quantum-fpga/MatrixPlusScalar.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Ematrixscalarmultiplication
+<<<<<<< HEAD
 Z138 w1738707920
+=======
+R19
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R3
@@ -966,21 +1360,36 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 !i122 391
 R21
 Z139 8G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByScalarMultiplication.vhd
 Z140 FG:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByScalarMultiplication.vhd
+=======
+!i122 369
+R21
+Z129 8C:/Users/mwd/Desktop/quantum-fpga/matrixByScalarMultiplication.vhd
+Z130 FC:/Users/mwd/Desktop/quantum-fpga/matrixByScalarMultiplication.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L7 1
 VaQ:lgjJ;Ml=YSlW>;JMhi0
 !s100 IO:gUT8<bH:?[R2@9U^?10
 R11
 32
+<<<<<<< HEAD
 R82
 !i10b 1
 R83
 Z141 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByScalarMultiplication.vhd|
 Z142 !s107 G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\matrixByScalarMultiplication.vhd|
+=======
+R97
+!i10b 1
+R110
+Z131 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/matrixByScalarMultiplication.vhd|
+Z132 !s107 C:/Users/mwd/Desktop/quantum-fpga/matrixByScalarMultiplication.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -993,18 +1402,30 @@ R5
 R6
 R7
 DEx4 work 26 matrixscalarmultiplication 0 22 aQ:lgjJ;Ml=YSlW>;JMhi0
+<<<<<<< HEAD
 !i122 391
+=======
+!i122 369
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l16
 L15 21
 VeM:ZZXje96g8ml5imT2XM1
 !s100 BL=e?aeK0I`9Mf=NOGJfJ1
 R11
 32
+<<<<<<< HEAD
 R82
 !i10b 1
 R83
 R141
 R142
+=======
+R97
+!i10b 1
+R110
+R131
+R132
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -1057,14 +1478,22 @@ R11
 !s90 -reportprogress|300|-work|work|-2008|-explicit|-check_synthesis|-stats=none|G:/My Drive/Senior Design/Project/VHDL/measure.vhd|
 !s107 G:/My Drive/Senior Design/Project/VHDL/measure.vhd|
 !i113 1
+<<<<<<< HEAD
 R116
+=======
+R107
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R17
 R51
 FG:/My Drive/Senior Design/Project/VHDL/measure.vhd
 8G:/My Drive/Senior Design/Project/VHDL/measure.vhd
 w1738175587
 Emultandaddvector
+<<<<<<< HEAD
 Z143 w1738104197
+=======
+Z133 w1738104197
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R1
 R2
 R3
@@ -1074,25 +1503,43 @@ R6
 R7
 !i122 233
 R8
+<<<<<<< HEAD
 Z144 8G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/MultAndSumVector.vhd
 Z145 FG:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/MultAndSumVector.vhd
+=======
+Z134 8G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/MultAndSumVector.vhd
+Z135 FG:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/MultAndSumVector.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L9 1
 VJ^dgGVYQmz8WWf6e7C]II1
 !s100 99Q21X1X``Czm`4EA7JYO2
 R11
 32
+<<<<<<< HEAD
 Z146 !s110 1738190093
 !i10b 1
 Z147 !s108 1738190091.000000
 Z148 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/MultAndSumVector.vhd|
 Z149 !s107 G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/MultAndSumVector.vhd|
+=======
+Z136 !s110 1738190093
+!i10b 1
+Z137 !s108 1738190091.000000
+Z138 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/MultAndSumVector.vhd|
+Z139 !s107 G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/MultAndSumVector.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Abehavioral
+<<<<<<< HEAD
 R73
 R123
+=======
+R69
+R114
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R1
 R2
 R3
@@ -1108,16 +1555,28 @@ Vd3k1iAf=8MB2[A2Vc9AGP3
 !s100 QTHc:cO:OeCb5kn5YCD=c3
 R11
 32
+<<<<<<< HEAD
 R146
 !i10b 1
 R147
 R148
 R149
+=======
+R136
+!i10b 1
+R137
+R138
+R139
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Emultiplycolumnbyscalar
+<<<<<<< HEAD
 Z150 w1738194996
+=======
+R19
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R3
@@ -1125,21 +1584,36 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 !i122 385
 R21
 Z151 8G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyColumnByScalar.vhd
 Z152 FG:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyColumnByScalar.vhd
+=======
+!i122 371
+R21
+Z140 8C:/Users/mwd/Desktop/quantum-fpga/multiplyColumnByScalar.vhd
+Z141 FC:/Users/mwd/Desktop/quantum-fpga/multiplyColumnByScalar.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L9 1
 Ve79QcDzOTK_YB6P?;JhJ;3
 !s100 8gVMine]@m<z@n2dY8l7U2
 R11
 32
+<<<<<<< HEAD
 R24
 !i10b 1
 R25
 Z153 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyColumnByScalar.vhd|
 Z154 !s107 G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyColumnByScalar.vhd|
+=======
+R97
+!i10b 1
+R110
+Z142 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/multiplyColumnByScalar.vhd|
+Z143 !s107 C:/Users/mwd/Desktop/quantum-fpga/multiplyColumnByScalar.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -1152,23 +1626,39 @@ R5
 R6
 R7
 DEx4 work 22 multiplycolumnbyscalar 0 22 e79QcDzOTK_YB6P?;JhJ;3
+<<<<<<< HEAD
 !i122 385
+=======
+!i122 371
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l29
 L17 26
 VcdKAeZJ:j@8aXMOi6THho0
 !s100 ZUTcFdAh8G8EKefULV^UN0
 R11
 32
+<<<<<<< HEAD
 R24
 !i10b 1
 R25
 R153
 R154
+=======
+R97
+!i10b 1
+R110
+R142
+R143
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Emultiplythenaddvectors
+<<<<<<< HEAD
 Z155 w1738197118
+=======
+R19
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R3
@@ -1176,21 +1666,36 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 !i122 387
 R21
 Z156 8G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyThenAddVectors.vhd
 Z157 FG:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyThenAddVectors.vhd
+=======
+!i122 372
+R21
+Z144 8C:/Users/mwd/Desktop/quantum-fpga/multiplyThenAddVectors.vhd
+Z145 FC:/Users/mwd/Desktop/quantum-fpga/multiplyThenAddVectors.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L7 1
 Vf;I1ZLV``YXFg_ZmECeVR0
 !s100 OzfkfM`z?K?7AYc`PW1@L2
 R11
 32
+<<<<<<< HEAD
 R62
 !i10b 1
 R63
 Z158 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyThenAddVectors.vhd|
 Z159 !s107 G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/multiplyThenAddVectors.vhd|
+=======
+Z146 !s110 1738814605
+!i10b 1
+R110
+Z147 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/multiplyThenAddVectors.vhd|
+Z148 !s107 C:/Users/mwd/Desktop/quantum-fpga/multiplyThenAddVectors.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -1203,23 +1708,39 @@ R5
 R6
 R7
 DEx4 work 22 multiplythenaddvectors 0 22 f;I1ZLV``YXFg_ZmECeVR0
+<<<<<<< HEAD
 !i122 387
+=======
+!i122 372
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l37
 L16 39
 VKi8hY;X2e8a4K<]LBVAaB0
 !s100 fM[e575D0JR6FOPlKRcE[1
 R11
 32
+<<<<<<< HEAD
 R62
 !i10b 1
 R63
 R158
 R159
+=======
+R146
+!i10b 1
+R110
+R147
+R148
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Enormandcompare
+<<<<<<< HEAD
 Z160 w1738806071
+=======
+R19
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R3
@@ -1227,16 +1748,24 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 !i122 412
 R21
 Z161 8G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\normAndCompare.vhd
 Z162 FG:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\normAndCompare.vhd
+=======
+!i122 373
+R21
+Z149 8C:/Users/mwd/Desktop/quantum-fpga/normAndCompare.vhd
+Z150 FC:/Users/mwd/Desktop/quantum-fpga/normAndCompare.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L7 1
 V47lOa[b_X]NkBMRIe?kG]2
 !s100 SF3c8TLTZAZKzdN89G5cA2
 R11
 32
+<<<<<<< HEAD
 Z163 !s110 1738806077
 !i10b 1
 Z164 !s108 1738806077.000000
@@ -1266,6 +1795,13 @@ R163
 R164
 R165
 R166
+=======
+R146
+!i10b 1
+Z151 !s108 1738814605.000000
+Z152 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/normAndCompare.vhd|
+Z153 !s107 C:/Users/mwd/Desktop/quantum-fpga/normAndCompare.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -1278,34 +1814,58 @@ R5
 R6
 R7
 DEx4 work 14 normandcompare 0 22 ]j`MlW>3ZJgR^LKfJ22DW3
+<<<<<<< HEAD
 !i122 395
+=======
+!i122 373
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l28
 L14 46
 V4chMXmO5fdc5<ZhV=9OeM1
 !s100 X4ZJ6a3AHb^?XcmKg<=UP2
 R11
 32
+<<<<<<< HEAD
 Z167 !s110 1738801081
 !i10b 1
 R83
 R165
 R166
+=======
+R146
+!i10b 1
+R151
+R152
+R153
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 w1738713160
 Pqtypes
 R2
+<<<<<<< HEAD
 Z168 DBx4 ieee 17 fixed_generic_pkg 4 body 22 YX7o<=i^@69Sm1gW_d;XB1
+=======
+Z154 DBx4 ieee 17 fixed_generic_pkg 4 body 22 YX7o<=i^@69Sm1gW_d;XB1
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R4
 R5
 R6
 R7
+<<<<<<< HEAD
 !i122 383
 Z169 w1738712364
 R21
 Z170 8G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\qTypes.vhd
 Z171 FG:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\qTypes.vhd
+=======
+!i122 363
+R19
+R21
+Z155 8C:/Users/mwd/Desktop/quantum-fpga/qTypes.vhd
+Z156 FC:/Users/mwd/Desktop/quantum-fpga/qTypes.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L7 1
 VcnlOJeK6j:]6nZb8zGKTj1
@@ -1313,39 +1873,67 @@ VcnlOJeK6j:]6nZb8zGKTj1
 R11
 32
 b1
+<<<<<<< HEAD
 R24
 !i10b 1
 R25
 Z172 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\qTypes.vhd|
 Z173 !s107 G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\qTypes.vhd|
+=======
+Z157 !s110 1738814601
+!i10b 1
+Z158 !s108 1738814601.000000
+Z159 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/qTypes.vhd|
+Z160 !s107 C:/Users/mwd/Desktop/quantum-fpga/qTypes.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Bbody
 R20
 R2
+<<<<<<< HEAD
 R168
+=======
+R154
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R4
 R5
 R6
 R7
+<<<<<<< HEAD
 !i122 383
+=======
+!i122 363
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L63 1
 VV@Sa7XReBM2Xkbdd>n52e3
 !s100 98?ahWn9>^2B=aVM7b=oz1
 R11
 32
+<<<<<<< HEAD
 R24
 !i10b 1
 R25
 R172
 R173
+=======
+R157
+!i10b 1
+R158
+R159
+R160
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Erowmult
+<<<<<<< HEAD
 Z174 w1738103475
+=======
+Z161 w1738103475
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R1
 R2
 R3
@@ -1355,19 +1943,32 @@ R6
 R7
 !i122 234
 R8
+<<<<<<< HEAD
 Z175 8G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/rowMult.vhd
 Z176 FG:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/rowMult.vhd
+=======
+Z162 8G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/rowMult.vhd
+Z163 FG:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/rowMult.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L11 1
 V`0nkDBka>UEl[N0BfHn@d3
 !s100 SglM4hNfG`MYK5<F:8eDX2
 R11
 32
+<<<<<<< HEAD
 Z177 !s110 1738190095
 !i10b 1
 Z178 !s108 1738190094.000000
 Z179 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/rowMult.vhd|
 Z180 !s107 G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/rowMult.vhd|
+=======
+Z164 !s110 1738190095
+!i10b 1
+Z165 !s108 1738190094.000000
+Z166 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/rowMult.vhd|
+Z167 !s107 G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/rowMult.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -1379,7 +1980,11 @@ R4
 R5
 R6
 R7
+<<<<<<< HEAD
 R123
+=======
+R114
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i122 234
 l31
 L19 26
@@ -1387,11 +1992,19 @@ V99Q4TjnN<N65P2z1CiVil3
 !s100 g7Y?kER9`QK7jI5;KHfK92
 R11
 32
+<<<<<<< HEAD
 R177
 !i10b 1
 R178
 R179
 R180
+=======
+R164
+!i10b 1
+R165
+R166
+R167
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -1423,7 +2036,11 @@ R11
 R16
 R17
 Etb_matrixaddition_simple
+<<<<<<< HEAD
 Z181 w1738708366
+=======
+R19
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R5
@@ -1431,21 +2048,36 @@ R3
 R4
 R6
 R7
+<<<<<<< HEAD
 !i122 396
 R21
 Z182 8G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\tb_matrixAddition_simple.vhd
 Z183 FG:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\tb_matrixAddition_simple.vhd
+=======
+!i122 374
+R21
+Z168 8C:/Users/mwd/Desktop/quantum-fpga/tb_matrixAddition_simple.vhd
+Z169 FC:/Users/mwd/Desktop/quantum-fpga/tb_matrixAddition_simple.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L6 1
 V241>zG:d157i@3MO3[M330
 !s100 o>Vgkhz8=D7nRCHz3e=a21
 R11
 32
+<<<<<<< HEAD
 R167
 !i10b 1
 Z184 !s108 1738801081.000000
 Z185 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\tb_matrixAddition_simple.vhd|
 Z186 !s107 G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\tb_matrixAddition_simple.vhd|
+=======
+R146
+!i10b 1
+R151
+Z170 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/tb_matrixAddition_simple.vhd|
+Z171 !s107 C:/Users/mwd/Desktop/quantum-fpga/tb_matrixAddition_simple.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -1458,23 +2090,39 @@ R4
 R6
 R7
 DEx4 work 24 tb_matrixaddition_simple 0 22 241>zG:d157i@3MO3[M330
+<<<<<<< HEAD
 !i122 396
+=======
+!i122 374
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l22
 L9 65
 VRlZGQ[o`<kPjf>:GfMXZR0
 !s100 I^QkS@In2nYgNSJ?go30W0
 R11
 32
+<<<<<<< HEAD
 R167
 !i10b 1
 R184
 R185
 R186
+=======
+R146
+!i10b 1
+R151
+R170
+R171
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Etb_matrixscalarmultiplication
+<<<<<<< HEAD
 Z187 w1738708546
+=======
+R19
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R5
@@ -1482,21 +2130,36 @@ R3
 R4
 R6
 R7
+<<<<<<< HEAD
 !i122 397
 R21
 Z188 8G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/tb_matrixScalarMultiplication.vhd
 Z189 FG:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/tb_matrixScalarMultiplication.vhd
+=======
+!i122 375
+R21
+Z172 8C:/Users/mwd/Desktop/quantum-fpga/tb_matrixScalarMultiplication.vhd
+Z173 FC:/Users/mwd/Desktop/quantum-fpga/tb_matrixScalarMultiplication.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L6 1
 V7g2Vj83e=lBg74j]<23bi1
 !s100 PPRmL=^zzHHVMcWILY=7Z0
 R11
 32
+<<<<<<< HEAD
 R167
 !i10b 1
 R184
 Z190 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/tb_matrixScalarMultiplication.vhd|
 Z191 !s107 G:/.shortcut-targets-by-id/1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k/Senior Design/Project/VHDL/tb_matrixScalarMultiplication.vhd|
+=======
+Z174 !s110 1738814606
+!i10b 1
+R151
+Z175 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/tb_matrixScalarMultiplication.vhd|
+Z176 !s107 C:/Users/mwd/Desktop/quantum-fpga/tb_matrixScalarMultiplication.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -1509,23 +2172,39 @@ R4
 R6
 R7
 DEx4 work 29 tb_matrixscalarmultiplication 0 22 7g2Vj83e=lBg74j]<23bi1
+<<<<<<< HEAD
 !i122 397
+=======
+!i122 375
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l22
 L9 71
 V?4:JD<VE^nonUN?WZk:oR2
 !s100 WJPgZ6nX;omAKj30^Y[og3
 R11
 32
+<<<<<<< HEAD
 R167
 !i10b 1
 R184
 R190
 R191
+=======
+R174
+!i10b 1
+R151
+R175
+R176
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
 Etimepigate
+<<<<<<< HEAD
 Z192 w1738709472
+=======
+R19
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 R20
 R2
 R5
@@ -1533,21 +2212,36 @@ R3
 R4
 R6
 R7
+<<<<<<< HEAD
 !i122 392
 R21
 Z193 8G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\timePiGate.vhd
 Z194 FG:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\timePiGate.vhd
+=======
+!i122 376
+R21
+Z177 8C:/Users/mwd/Desktop/quantum-fpga/timePiGate.vhd
+Z178 FC:/Users/mwd/Desktop/quantum-fpga/timePiGate.vhd
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l0
 L6 1
 Vi81PeG5H=W89:LagL8H[71
 !s100 bkBYH7T7`7<lhP<6Ik04X0
 R11
 32
+<<<<<<< HEAD
 R82
 !i10b 1
 R83
 Z195 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\timePiGate.vhd|
 Z196 !s107 G:\.shortcut-targets-by-id\1VdfQmRJjWVQJ23Ik-k7f7L95skZ92E6k\Senior Design\Project\VHDL\timePiGate.vhd|
+=======
+R174
+!i10b 1
+Z179 !s108 1738814606.000000
+Z180 !s90 -reportprogress|300|-work|work|-2002|-explicit|C:/Users/mwd/Desktop/quantum-fpga/timePiGate.vhd|
+Z181 !s107 C:/Users/mwd/Desktop/quantum-fpga/timePiGate.vhd|
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
@@ -1560,18 +2254,30 @@ R4
 R6
 R7
 DEx4 work 10 timepigate 0 22 i81PeG5H=W89:LagL8H[71
+<<<<<<< HEAD
 !i122 392
+=======
+!i122 376
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 l29
 L13 22
 V`8h<M<k?d4d<9UFlLPVik3
 !s100 9]9bCbn=QGn7[LaHX@U@[0
 R11
 32
+<<<<<<< HEAD
 R82
 !i10b 1
 R83
 R195
 R196
+=======
+R174
+!i10b 1
+R179
+R180
+R181
+>>>>>>> d65753367ef666682062dfdb942ae292c405be66
 !i113 1
 R16
 R17
