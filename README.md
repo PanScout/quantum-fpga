@@ -1,2 +1,0 @@
-# quantum-fpga
-senior project
