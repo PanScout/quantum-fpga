@@ -106,6 +106,27 @@ begin
     -- For example:
     -- output <= toCmatrix(Hamiltonian);
 
+    signal: IHTtoNormAndCompareandD1 cmatrixHigh;
+    signal: TorF std_logic;
+    signal: MatrixNorm fixedHigh;
+    signal: s fixedHigh;
+    -- ETC...
+
+
+    IHT: Insert_Imaginary_Time_Into_CMatrix port map();
+    Norm_And_Compare: Calculate_Norm_And_Compare port map();
+    D1: One_to_Two_Demux_CMatrixHigh port map();
+    D2: One_to_Two_Demux_CMatrixHigh port map();
+    D3: One_to_Two_Demux_CMatrixHigh port map();
+    Gen_Scaling_Factor: Generate_Scaling_Factor port map();
+    Scale_Down: Scale_CMatrixHigh_Down port map();
+    P_num: Pade_Numerator port map();
+    P_den: Pade_Denominator port map();
+    Invert: Matrix_Inversion port map();
+    MULT: Matrix_By_Matrix_Multiplication_High port map();
+    Scale_Up: Scale_CMatrixHigh_Up port map();
+
+
     
 
 end Behavioral;
