@@ -9,5 +9,8 @@
 !*.mpf
 !*.do
 
+# Include Markdown documentation
+!*.md
+
 # Except the .gitignore file itself (optional, but recommended)
 !.gitignore
