@@ -5,7 +5,7 @@ use work.qTypes.ALL;
 
 entity Insert_Imaginary_Time_Into_CMatrix is
     Port (
-        scalar_in : in  cfixed;       -- Input scalar for second multiplication
+        t : in  cfixed;       -- Input scalar for second multiplication
         C_out     : out cmatrixHigh    -- Final output matrix in high precision
     );
 end Insert_Imaginary_Time_Into_CMatrix;
@@ -68,7 +68,7 @@ begin
     Mult2: Matrix_By_Scalar_Multiplication
         port map (
             A      => intermediate_matrix,
-            scalar => scalar_in,
+            scalar => t,
             C      => final_low
         );
 
