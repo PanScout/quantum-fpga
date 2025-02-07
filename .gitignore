@@ -1,0 +1,13 @@
+# Ignore everything
+*
+
+# Except VHDL files
+!*.vhd
+!*.vhdl
+
+# Except ModelSim project files
+!*.mpf
+!*.do
+
+# Except the .gitignore file itself (optional, but recommended)
+!.gitignore
