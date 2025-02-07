@@ -5,14 +5,14 @@ use IEEE.fixed_pkg.ALL;
 
 use work.qTypes.all;
 
-entity log2_LUT is
+entity Ceiling_Of_Log2 is
     port (
         scalar : in cfixedHigh;
         result : out cfixedHigh
     );
-end log2_LUT;
+end Ceiling_Of_Log2;
 
-architecture Structural of log2_LUT is
+architecture Structural of Ceiling_Of_Log2 is
     -- Threshold constants for 2^(n-1) where n is output value
     constant TH_25 : fixedHigh := to_sfixed(2**24, fixedHigh'high, fixedHigh'low);
     constant TH_24 : fixedHigh := to_sfixed(2**23, fixedHigh'high, fixedHigh'low);

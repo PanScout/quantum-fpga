@@ -4,16 +4,16 @@ use IEEE.NUMERIC_STD.ALL;
 use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
-entity matrixByMatrixMultiplication is
+entity Matrix_By_Matrix_Multiplication is
     Port (
         A : in  cmatrix;    -- First input matrix (M x N)
         B : in  cmatrix;    -- Second input matrix (N x P)
         C : out cmatrix     -- Output matrix (M x P)
     );
-end matrixByMatrixMultiplication;
+end Matrix_By_Matrix_Multiplication;
 
-architecture Concurrent of matrixByMatrixMultiplication is
-    component matrixByVectorMultiplication is
+architecture Concurrent of Matrix_By_Matrix_Multiplication is
+    component Matrix_By_Vector_Multiplication is
         Port (
             A      : in  cmatrix;
             V      : in  cvector;
@@ -38,7 +38,7 @@ begin
         end generate gen_column_extraction;
 
         -- Multiply matrix A with current column of B
-        VectorMult : matrixByVectorMultiplication
+        VectorMult : Matrix_By_Vector_Multiplication
             port map (
                 A      => A,
                 V      => b_column,

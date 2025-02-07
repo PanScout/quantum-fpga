@@ -4,7 +4,7 @@ use IEEE.NUMERIC_STD.ALL;
 use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
-entity normAndCompare is
+entity Calculate_Norm_And_Compare is
     port (
         -- Input matrix: dimension = numBasisStates × numBasisStates (from qTypes)
         A       : in  cmatrixHigh;
@@ -13,15 +13,15 @@ entity normAndCompare is
         isBelow : out std_logic;
 	InfinityNormOut : out fixedHigh
     );
-end entity normAndCompare;
+end entity Calculate_Norm_And_Compare;
 
-architecture structural of normAndCompare is
+architecture structural of Calculate_Norm_And_Compare is
 
     ----------------------------------------------------------------------------
     -- 1) Internal signals
     ----------------------------------------------------------------------------
-    signal rowSums    : cvectorHigh; -- from matrixRowSummation
-    signal largestVal : fixedHigh;   -- from infinityNormComparator
+    signal rowSums    : cvectorHigh; -- from Absolute_Row_Summation
+    signal largestVal : fixedHigh;   -- from Max_Of_CVector
 
     ----------------------------------------------------------------------------
     -- 2) Define the constant THETA
@@ -32,14 +32,14 @@ architecture structural of normAndCompare is
     ----------------------------------------------------------------------------
     -- 3) Component declarations
     ----------------------------------------------------------------------------
-    component matrixRowSummation is
+    component Absolute_Row_Summation is
         port (
             A       : in  cmatrixHigh;
             rowSums : out cvectorHigh
         );
     end component;
 
-    component infinityNormComparator is
+    component Max_Of_CVector is
         port (
             inputVector  : in  cvectorHigh;
             largestValue : out fixedHigh
@@ -49,18 +49,18 @@ architecture structural of normAndCompare is
 begin
 
     ----------------------------------------------------------------------------
-    -- 4) Instantiate matrixRowSummation
+    -- 4) Instantiate Absolute_Row_Summation
     ----------------------------------------------------------------------------
-    sum_inst: matrixRowSummation
+    sum_inst: Absolute_Row_Summation
         port map (
             A       => A,
             rowSums => rowSums
         );
 
     ----------------------------------------------------------------------------
-    -- 5) Instantiate infinityNormComparator
+    -- 5) Instantiate Max_Of_CVector
     ----------------------------------------------------------------------------
-    norm_inst: infinityNormComparator
+    norm_inst: Max_Of_CVector
         port map (
             inputVector  => rowSums,
             largestValue => largestVal

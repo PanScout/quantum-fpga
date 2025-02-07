@@ -5,7 +5,7 @@ use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;  -- Import the qTypes package
 
 -- Entity Declaration
-entity C_ALU is
+entity Complex_ALU is
     Port (
         -- Inputs: Complex Number A and B
         A       : in  cfixed;
@@ -16,10 +16,10 @@ entity C_ALU is
         -- Output: Resultant Complex Number
         Result  : out cfixed
     );
-end C_ALU;
+end Complex_ALU;
 
 -- Architecture Definition
-architecture Behavioral of C_ALU is
+architecture Behavioral of Complex_ALU is
 
     -- Keep only this signal for division
     signal div_denom : fixed;

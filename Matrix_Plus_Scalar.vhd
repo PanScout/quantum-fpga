@@ -5,15 +5,15 @@ use IEEE.fixed_pkg.ALL;
 
 use work.qTypes.all;
 
-entity MatrixPlusScalar is
+entity Matrix_Plus_Scalar is
     port (
         input_cMatrixH : in cmatrixHigh;
         scalar         : in cfixedHigh;
         output_cMatrixH : out cmatrixHigh
     );
-end MatrixPlusScalar;
+end Matrix_Plus_Scalar;
 
-architecture Structural of MatrixPlusScalar is
+architecture Structural of Matrix_Plus_Scalar is
 
 begin
     -- Generate matrix elements using nested generate statements

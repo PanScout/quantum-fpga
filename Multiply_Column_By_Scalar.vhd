@@ -16,8 +16,8 @@ end multiplyColumnByScalar;
 
 architecture Behavioral of multiplyColumnByScalar is
 
-    -- Component Declaration for C_ALU using qTypes
-    component C_ALU
+    -- Component Declaration for Complex_ALU using qTypes
+    component Complex_ALU
         Port (
             A      : in  cfixed;
             B      : in  cfixed;
@@ -30,7 +30,7 @@ begin
 
     -- Generate Loop for Multiplying each element in the columnVector with constComplex
     gen_multiply: for i in 0 to numBasisStates - 1 generate
-        C_ALU_inst: C_ALU
+        C_ALU_inst: Complex_ALU
             port map (
                 A      => constComplex,
                 B      => rowVector(i),

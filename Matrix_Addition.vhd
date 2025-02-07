@@ -4,15 +4,15 @@ use IEEE.NUMERIC_STD.ALL;
 use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
-entity matrixAddition is
+entity Matrix_Addition is
     Port (
         A : in  cmatrix;    -- First input matrix
         B : in  cmatrix;    -- Second input matrix
         C : out cmatrix     -- Output matrix (A + B)
     );
-end matrixAddition;
+end Matrix_Addition;
 
-architecture Concurrent of matrixAddition is
+architecture Concurrent of Matrix_Addition is
 begin
     -- Generate adders for each matrix element
     gen_row_adders : for row_idx in 0 to numBasisStates-1 generate

@@ -3,14 +3,14 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
-entity timePiGate is
+entity Filter_Time_To_nPi is
     Port (
         t_in  : in  fixed;     -- Input time value (14.10 format)
         t_out : out fixed      -- Output (t_in or high-impedance)
     );
-end timePiGate;
+end Filter_Time_To_nPi;
 
-architecture Concurrent of timePiGate is
+architecture Concurrent of Filter_Time_To_nPi is
     -- Pre-calculated ? approximation in fixed(14.10) format
     constant PI : fixed := to_sfixed(3.1416015625, fixed'high, fixed'low);
     

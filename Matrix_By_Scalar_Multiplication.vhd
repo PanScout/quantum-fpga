@@ -4,15 +4,15 @@ use IEEE.NUMERIC_STD.ALL;
 use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
-entity matrixScalarMultiplication is
+entity Matrix_By_Scalar_Multiplication is
     Port (
         A      : in  cmatrix;    -- Input matrix
         scalar : in  cfixed;     -- Scalar to multiply
         C      : out cmatrix     -- Output matrix (A * scalar)
     );
-end matrixScalarMultiplication;
+end Matrix_By_Scalar_Multiplication;
 
-architecture Concurrent of matrixScalarMultiplication is
+architecture Concurrent of Matrix_By_Scalar_Multiplication is
 begin
     -- Generate multipliers for each matrix element
     gen_row_mult : for row_idx in 0 to numBasisStates-1 generate
