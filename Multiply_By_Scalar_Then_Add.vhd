@@ -4,18 +4,18 @@ use IEEE.NUMERIC_STD.ALL;
 use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
-entity multiplyThenAddVectors is
+entity Multiply_By_Scalar_Then_Add is
     Port (
         A : in  cvector;   -- Input complex vector 1
         B : in  cvector;   -- Input complex vector 2
         C : in  cfixed;    -- Complex scalar multiplier
         Result : out cvector  -- Output complex vector (C*A + B)
     );
-end multiplyThenAddVectors;
+end Multiply_By_Scalar_Then_Add;
 
-architecture Concurrent of multiplyThenAddVectors is
+architecture Concurrent of Multiply_By_Scalar_Then_Add is
     -- Declare components
-    component multiplyColumnByScalar is
+    component Multiply_Column_By_Scalar is
         Port (
             constComplex : in  cfixed;
             rowVector    : in  cvector;
@@ -23,7 +23,7 @@ architecture Concurrent of multiplyThenAddVectors is
         );
     end component;
 
-    component cvector_adder is
+    component Add_Vectors_Element_Wise is
         Port (
             a : in  cvector;
             b : in  cvector;
@@ -36,7 +36,7 @@ architecture Concurrent of multiplyThenAddVectors is
 
 begin
     -- Stage 1: Multiply C * A
-    Multiply_Stage: multiplyColumnByScalar
+    Multiply_Stage: Multiply_Column_By_Scalar
         port map (
             constComplex => C,
             rowVector    => A,
@@ -44,7 +44,7 @@ begin
         );
 
     -- Stage 2: Add (C*A) + B
-    Add_Stage: cvector_adder
+    Add_Stage: Add_Vectors_Element_Wise
         port map (
             a => c_times_A,
             b => B,

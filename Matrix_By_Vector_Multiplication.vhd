@@ -4,17 +4,17 @@ use IEEE.NUMERIC_STD.ALL;
 use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
-entity matrixByVectorMultiplication is
+entity Matrix_By_Vector_Multiplication is
     Port (
         A      : in  cmatrix;    -- Input complex matrix
         V      : in  cvector;    -- Input complex vector
-        Result : out cvector     -- Output complex vector (A × V)
+        Result : out cvector     -- Output complex vector (A ï¿½ V)
     );
-end matrixByVectorMultiplication;
+end Matrix_By_Vector_Multiplication;
 
-architecture Concurrent of matrixByVectorMultiplication is
+architecture Concurrent of Matrix_By_Vector_Multiplication is
     -- Declare component for vector scaling and addition
-    component multiplyThenAddVectors is
+    component Multiply_By_Scalar_Then_Add is
         Port (
             A      : in  cvector;
             B      : in  cvector;
@@ -40,7 +40,7 @@ begin
         end generate gen_column_extraction;
 
         -- Multiply column by vector element and accumulate
-        MTA_stage : multiplyThenAddVectors
+        MTA_stage : Multiply_By_Scalar_Then_Add
             port map (
                 A      => column_vector,  -- Current matrix column
                 B      => sum(j),         -- Previous accumulation

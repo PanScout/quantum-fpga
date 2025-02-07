@@ -7,17 +7,17 @@ use work.qTypes.ALL;
 -------------------------------------------------------------------------------
 -- Entity
 -------------------------------------------------------------------------------
-entity matrixRowSummation is
+entity Absolute_Row_Summation is
   port (
-    A : in  cmatrixHigh;  -- 4×4 matrix when nQubits=2
+    A : in  cmatrixHigh;  -- 4ï¿½4 matrix when nQubits=2
 
     -- Output 1: The computed infinity norm in cfixedHigh (imag part = 0)
     rowSums : out cvectorHigh
   );
-end entity matrixRowSummation;
+end entity Absolute_Row_Summation;
 
 
-architecture Behavioral of matrixRowSummation is
+architecture Behavioral of Absolute_Row_Summation is
 
   type partialSum_array is array (0 to numBasisStates-1, 0 to numBasisStates-1) of fixedHigh;
   signal partialSum : partialSum_array;

@@ -4,7 +4,7 @@ use IEEE.NUMERIC_STD.ALL;
 use IEEE.fixed_pkg.ALL;
 use work.qTypes.all;  -- Use your custom package
 
-entity cvector_adder is
+entity Add_Vectors_Element_Wise is
     port(
         a : in  cvector;  -- Input complex vector 1
         b : in  cvector;  -- Input complex vector 2
@@ -12,7 +12,7 @@ entity cvector_adder is
     );
 end entity;
 
-architecture concurrent_arch of cvector_adder is
+architecture concurrent_arch of Add_Vectors_Element_Wise is
 begin
     -- Generate adders for each element in the cvector
     gen_adders : for i in 0 to numBasisStates-1 generate

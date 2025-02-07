@@ -4,14 +4,14 @@ use IEEE.NUMERIC_STD.ALL;
 use IEEE.fixed_pkg.ALL;
 use work.qTypes.all;
 
-entity normThetaRatio is
+entity Norm_Theta_Ratio is
     Port (
         input  : in  fixedHigh;
         output : out fixedHigh
     );
-end normThetaRatio;
+end Norm_Theta_Ratio;
 
-architecture behav of normThetaRatio is
+architecture behav of Norm_Theta_Ratio is
     -- Example: divide by 4.0 (modify this constant as needed)
     constant DIVISOR : fixedHigh := 
         to_sfixed(2.1, fixedHigh'high, fixedHigh'low);

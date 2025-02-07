@@ -3,14 +3,14 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
-entity itMultiplication is
+entity Insert_Imaginary_Time_Into_CMatrix is
     Port (
         scalar_in : in  cfixed;       -- Input scalar for second multiplication
         C_out     : out cmatrixHigh    -- Final output matrix in high precision
     );
-end itMultiplication;
+end Insert_Imaginary_Time_Into_CMatrix;
 
-architecture Structural of itMultiplication is
+architecture Structural of Insert_Imaginary_Time_Into_CMatrix is
     -- Hardcoded 4x4 matrix (values in lower precision)
     constant FIXED_MATRIX : cmatrix := (
         -- Row 0
@@ -47,7 +47,7 @@ architecture Structural of itMultiplication is
     signal intermediate_matrix : cmatrix;  -- Result from the first multiplication
     signal final_low           : cmatrix;  -- Result from the second multiplication (low precision)
 
-    component matrixScalarMultiplication is
+    component Matrix_By_Scalar_Multiplication is
         Port (
             A      : in  cmatrix;
             scalar : in  cfixed;
@@ -57,7 +57,7 @@ architecture Structural of itMultiplication is
 
 begin
     -- First multiplication: Multiply fixed matrix by fixed scalar
-    Mult1: matrixScalarMultiplication
+    Mult1: Matrix_By_Scalar_Multiplication
         port map (
             A      => FIXED_MATRIX,
             scalar => FIXED_SCALAR,
@@ -65,7 +65,7 @@ begin
         );
 
     -- Second multiplication: Multiply intermediate matrix by input scalar
-    Mult2: matrixScalarMultiplication
+    Mult2: Matrix_By_Scalar_Multiplication
         port map (
             A      => intermediate_matrix,
             scalar => scalar_in,

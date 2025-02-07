@@ -6,7 +6,7 @@ use IEEE.fixed_pkg.ALL;
 -- Import your custom types (cfixedHigh, cvectorHigh, fixedHigh, etc.)
 use work.qTypes.all;
 
-entity infinityNormComparator is
+entity Max_Of_CVector is
     port (
         -- Input vector of complex values (high precision)
         -- We'll only look at the 're' field.
@@ -15,9 +15,9 @@ entity infinityNormComparator is
         -- Output: the largest real value found in 'inputVector'.
         largestValue : out fixedHigh
     );
-end entity infinityNormComparator;
+end entity Max_Of_CVector;
 
-architecture gen of infinityNormComparator is
+architecture gen of Max_Of_CVector is
 
     -- A local array to hold the "running max" at each position
     type fixedHighVector is array(inputVector'range) of fixedHigh;
