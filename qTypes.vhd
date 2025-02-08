@@ -2,8 +2,8 @@
 -- #  << Quantum FPGA Emulator >>                                              #
 -- #############################################################################
 -- #  File        : qTypes.vhd                                                 #
--- #  Authors      : Kelan Zielinski, Michael Denis, Jasem Alkhashti           #
--- #  Emails       : ksz12@miami.edu, mwd47@miami.edu, jta568@miami.edu        #
+-- #  Authors     : Kelan Zielinski, Michael Denis, Jasem Alkhashti            #
+-- #  Emails      : ksz12@miami.edu, mwd47@miami.edu, jta568@miami.edu         #
 -- #  Affiliation : University of Miami - College of Engineering               #
 -- #  Created     : 02-07-2025                                                 #
 -- #  Revised     : 02-07-2025 - Present                                       #
