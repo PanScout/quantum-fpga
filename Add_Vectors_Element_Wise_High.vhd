@@ -20,5 +20,5 @@ begin
         c(i).re <= resize (a(i).re + b(i).re, fixedHigh'high, fixedHigh'low);
         -- Imaginary part addition
         c(i).im <= resize (a(i).im + b(i).im, fixedHigh'high, fixedHigh'low);
-    end generate gen_adders;
+    end generate gen_adders_High;
 end architecture;
