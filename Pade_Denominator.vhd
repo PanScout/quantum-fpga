@@ -33,26 +33,26 @@ architecture Structural of Pade_Denominator is
     end component;
     
     ----------------------------------------------------------------------------
-    -- Constant Coefficient Declarations for Denominator (all imaginary parts are zero)
+    -- Constant Coefficient Declarations for Numerator (all imaginary parts are zero)
     ----------------------------------------------------------------------------
-    constant coeff1 : cfixedHigh := ( re => to_sfixed(-90, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,    fixedHigh'high, fixedHigh'low) );
-    constant coeff2 : cfixedHigh := ( re => to_sfixed(3960, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,    fixedHigh'high, fixedHigh'low) );
-    constant coeff3 : cfixedHigh := ( re => to_sfixed(-110880, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,         fixedHigh'high, fixedHigh'low) );
-    constant coeff4 : cfixedHigh := ( re => to_sfixed(2162160, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,         fixedHigh'high, fixedHigh'low) );
-    constant coeff5 : cfixedHigh := ( re => to_sfixed(-30270240, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,          fixedHigh'high, fixedHigh'low) );
-    constant coeff6 : cfixedHigh := ( re => to_sfixed(302702400, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,          fixedHigh'high, fixedHigh'low) );
-    constant coeff7 : cfixedHigh := ( re => to_sfixed(-2075673600, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,           fixedHigh'high, fixedHigh'low) );
-    constant coeff8 : cfixedHigh := ( re => to_sfixed(8821612800, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,           fixedHigh'high, fixedHigh'low) );
-    constant coeff9 : cfixedHigh := ( re => to_sfixed(-17643225600, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,            fixedHigh'high, fixedHigh'low) );
+    constant coeff1 : cfixedHigh := ( re => "1111111111111111111111111111111111111111111101001100000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff2 : cfixedHigh := ( re => "0000000000000000000000000000000000000001111011110000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff3 : cfixedHigh := ( re => "1111111111111111111111111111111111001001110111000000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff4 : cfixedHigh := ( re => "0000000000000000000000000000010000011111101111100000000000000000000000000000000000000000000000000000000000000000000",
+				      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff5 : cfixedHigh := ( re => "1111111111111111111111111100011001000011100111000000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff6 : cfixedHigh := ( re => "0000000000000000000000100100000101011011111010000000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff7 : cfixedHigh := ( re => "1111111111111111111100001000100011110111100000000000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff8 : cfixedHigh := ( re => "0000000000000000010000011011100111100100001000000000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff9 : cfixedHigh := ( re => "1111111111111111011111001000110000110111110000000000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
                                       
     ----------------------------------------------------------------------------
     -- Signal Declarations for Intermediate Results
@@ -62,7 +62,7 @@ architecture Structural of Pade_Denominator is
 
 begin
 
-    -- T0 = B + coeff1  (i.e. B - 90)
+    -- T0 = B + coeff1  (i.e. B + 90)
     U0: Matrix_Plus_Scalar_High
         port map (
             input_cMatrixH => B,
