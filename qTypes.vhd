@@ -1,3 +1,36 @@
+-- #############################################################################
+-- #  << Quantum FPGA Emulator >>                                              #
+-- #############################################################################
+-- #  File        : qTypes.vhd                                                 #
+-- #  Authors      : Kelan Zielinski, Michael Denis, Jasem Alkhashti           #
+-- #  Emails       : ksz12@miami.edu, mwd47@miami.edu, jta568@miami.edu        #
+-- #  Affiliation : University of Miami - College of Engineering               #
+-- #  Created     : 02-07-2025                                                 #
+-- #  Revised     : 02-07-2025 - Present                                       #
+-- #  Description : data types that will be used throughout the project        #
+-- #  Dependencies: [List key dependencies (e.g., libraries, other entities)]  #
+-- #  Parameters  : [List key generics/parameters]                             #
+-- #  Usage       : [Usage constraints or target applications]                 #
+-- #############################################################################
+-- #  Copyright (c) 2025 University of Miami. All rights reserved.             #
+-- #  Licensed under the [License Name, e.g., MIT License]. See LICENSE file.  #
+-- #############################################################################
+
+-- =============================================================================
+--                               Revision History
+-- =============================================================================
+-- [DD-MM-YYYY] [Your Initials]: [Description of changes]
+-- =============================================================================
+
+-- =============================================================================
+--                              Module Description
+-- =============================================================================
+-- Defines data types for fixed-point numbers with both low and high precision.
+-- Scaling with the number of qubits (nQubits).
+-- Defines vectors (cvector, cvectorHigh) and matrices (cmatrix, cmatrixHigh). 
+-- Defines conversion functions between low and high precision datatypes.
+-- =============================================================================
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
