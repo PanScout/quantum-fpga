@@ -4,7 +4,7 @@ use IEEE.NUMERIC_STD.ALL;
 use IEEE.fixed_pkg.ALL;
 use work.qTypes.all;  -- Use your custom package
 
-entity Add_Vectors_Element_Wise is
+entity Add_Vectors_Element_Wise_High is
     port(
         a : in  cvectorHigh;  -- Input complex vector 1
         b : in  cvectorHigh;  -- Input complex vector 2
@@ -12,10 +12,10 @@ entity Add_Vectors_Element_Wise is
     );
 end entity;
 
-architecture concurrent_arch of Add_Vectors_Element_Wise is
+architecture concurrent_arch of Add_Vectors_Element_Wise_High is
 begin
     -- Generate adders for each element in the cvector
-    gen_adders : for i in 0 to numBasisStates-1 generate
+    gen_adders_High : for i in 0 to numBasisStates-1 generate
         -- Real part addition
         c(i).re <= resize (a(i).re + b(i).re, fixedHigh'high, fixedHigh'low);
         -- Imaginary part addition
