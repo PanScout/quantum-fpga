@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
-entity Insert_Imaginary_Time_Into_CMatrix is
+entity Insert_Imaginary_Time_Into_CMatrix is --H and i are hardcoded while time is an input
     Port (
         t : in  cfixed;       -- Input scalar for second multiplication
         C_out     : out cmatrixHigh    -- Final output matrix in high precision
@@ -12,7 +12,7 @@ end Insert_Imaginary_Time_Into_CMatrix;
 
 architecture Structural of Insert_Imaginary_Time_Into_CMatrix is
     -- Hardcoded 4x4 matrix (values in lower precision)
-    constant FIXED_MATRIX : cmatrix := (
+    constant FIXED_MATRIX : cmatrix := ( --Hamiltonian
         -- Row 0
         (0 => (re => to_sfixed(1.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
          1 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),

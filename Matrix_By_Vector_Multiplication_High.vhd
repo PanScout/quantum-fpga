@@ -14,7 +14,7 @@ end Matrix_By_Vector_Multiplication_High;
 
 architecture Concurrent of Matrix_By_Vector_Multiplication_High is
     -- Declare component for vector scaling and addition
-    component Multiply_By_Scalar_Then_Add is
+    component Multiply_By_Scalar_Then_Add_High is
         Port (
             A      : in  cvectorHigh;
             B      : in  cvectorHigh;
@@ -40,7 +40,7 @@ begin
         end generate gen_column_extraction;
 
         -- Multiply column by vector element and accumulate
-        MTA_stage : Multiply_By_Scalar_Then_Add
+        MTA_stage : Multiply_By_Scalar_Then_Add_High
             port map (
                 A      => column_vector,  -- Current matrix column
                 B      => sum(j),         -- Previous accumulation

@@ -15,13 +15,15 @@ end One_to_Two_Demux_CMatrixHigh;
 
 architecture Behavioral of One_to_Two_Demux_CMatrixHigh is
     -- Define a constant zero matrix (all elements zero)
-    constant ZERO_MATRIX : cmatrixHigh := (
-        others => (others => (re => to_sfixed(0, fixedHigh'high, fixedHigh'low),
-                              im => to_sfixed(0, fixedHigh'high, fixedHigh'low)))
+    constant Z_MATRIX : cmatrixHigh := (
+        others => (others => (
+            re => (others => 'Z'),  -- Set all bits of real part to 'Z'
+            im => (others => 'Z')   -- Set all bits of imaginary part to 'Z'
+        ))
     );
 begin
     -- If sel = '0', drive out0 with data_in and out1 with zeros.
     -- If sel = '1', drive out1 with data_in and out0 with zeros.
-    out0 <= data_in when sel = '0' else ZERO_MATRIX;
-    out1 <= data_in when sel = '1' else ZERO_MATRIX;
+    out0 <= data_in when sel = '0' else Z_MATRIX;
+    out1 <= data_in when sel = '1' else Z_MATRIX;
 end Behavioral;

@@ -15,7 +15,7 @@ end Multiply_By_Scalar_Then_Add_High;
 
 architecture Concurrent of Multiply_By_Scalar_Then_Add_High is
     -- Declare components
-    component Multiply_Column_By_Scalar is
+    component Multiply_Column_By_Scalar_High is
         Port (
             constComplex : in  cfixedHigh;
             rowVector    : in  cvectorHigh;
@@ -23,7 +23,7 @@ architecture Concurrent of Multiply_By_Scalar_Then_Add_High is
         );
     end component;
 
-    component Add_Vectors_Element_Wise is
+    component Add_Vectors_Element_Wise_High is
         Port (
             a : in  cvectorHigh;
             b : in  cvectorHigh;
@@ -36,7 +36,7 @@ architecture Concurrent of Multiply_By_Scalar_Then_Add_High is
 
 begin
     -- Stage 1: Multiply C * A
-    Multiply_Stage: Multiply_Column_By_Scalar
+    Multiply_Stage: Multiply_Column_By_Scalar_High
         port map (
             constComplex => C,
             rowVector    => A,
@@ -44,7 +44,7 @@ begin
         );
 
     -- Stage 2: Add (C*A) + B
-    Add_Stage: Add_Vectors_Element_Wise
+    Add_Stage: Add_Vectors_Element_Wise_High
         port map (
             a => c_times_A,
             b => B,

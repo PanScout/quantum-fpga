@@ -17,7 +17,7 @@ end Multiply_Column_By_Scalar_High;
 architecture Behavioral of Multiply_Column_By_Scalar_High is
 
     -- Component Declaration for Complex_ALU using qTypes
-    component Complex_ALU
+    component Complex_ALU_High
         Port (
             A      : in  cfixedHigh;
             B      : in  cfixedHigh;
@@ -30,7 +30,7 @@ begin
 
     -- Generate Loop for Multiplying each element in the columnVector with constComplex
     gen_multiply: for i in 0 to numBasisStates - 1 generate
-        C_ALU_inst: Complex_ALU
+        C_ALU_inst: Complex_ALU_High
             port map (
                 A      => constComplex,
                 B      => rowVector(i),

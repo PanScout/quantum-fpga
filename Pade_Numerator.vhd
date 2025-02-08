@@ -35,24 +35,24 @@ architecture Structural of Pade_Numerator is
     ----------------------------------------------------------------------------
     -- Constant Coefficient Declarations for Numerator (all imaginary parts are zero)
     ----------------------------------------------------------------------------
-    constant coeff1 : cfixedHigh := ( re => to_sfixed(90, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,  fixedHigh'high, fixedHigh'low) );
-    constant coeff2 : cfixedHigh := ( re => to_sfixed(3960, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,   fixedHigh'high, fixedHigh'low) );
-    constant coeff3 : cfixedHigh := ( re => to_sfixed(110880, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,      fixedHigh'high, fixedHigh'low) );
-    constant coeff4 : cfixedHigh := ( re => to_sfixed(2162160, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,       fixedHigh'high, fixedHigh'low) );
-    constant coeff5 : cfixedHigh := ( re => to_sfixed(30270240, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,        fixedHigh'high, fixedHigh'low) );
-    constant coeff6 : cfixedHigh := ( re => to_sfixed(302702400, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,         fixedHigh'high, fixedHigh'low) );
-    constant coeff7 : cfixedHigh := ( re => to_sfixed(2075673600, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,          fixedHigh'high, fixedHigh'low) );
-    constant coeff8 : cfixedHigh := ( re => to_sfixed(8821612800, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,          fixedHigh'high, fixedHigh'low) );
-    constant coeff9 : cfixedHigh := ( re => to_sfixed(17643225600, fixedHigh'high, fixedHigh'low),
-                                      im => to_sfixed(0,           fixedHigh'high, fixedHigh'low) );
+    constant coeff1 : cfixedHigh := ( re => "0000000000000000000000000000000000000000000010110100000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff2 : cfixedHigh := ( re => "0000000000000000000000000000000000000001111011110000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff3 : cfixedHigh := ( re => "0000000000000000000000000000000000110110001001000000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff4 : cfixedHigh := ( re => "0000000000000000000000000000010000011111101111100000000000000000000000000000000000000000000000000000000000000000000",
+				      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff5 : cfixedHigh := ( re => "0000000000000000000000000011100110111100011001000000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff6 : cfixedHigh := ( re => "0000000000000000000000100100000101011011111010000000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff7 : cfixedHigh := ( re => "0000000000000000000011110111011100001000100000000000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff8 : cfixedHigh := ( re => "0000000000000000010000011011100111100100001000000000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    constant coeff9 : cfixedHigh := ( re => "0000000000000000100000110111001111001000010000000000000000000000000000000000000000000000000000000000000000000000000",
+                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
                                       
     ----------------------------------------------------------------------------
     -- Signal Declarations for Intermediate Results
