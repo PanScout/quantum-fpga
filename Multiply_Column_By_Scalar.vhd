@@ -8,21 +8,21 @@ use work.qTypes.ALL;  -- Import the qTypes package
 
 entity Multiply_Column_By_Scalar is
     Port (
-        constComplex  : in  cfixedHigh;               -- Combined constant complex input
-        rowVector  : in  cvectorHigh;              -- Input vector of complex numbers
-        outputVector  : out cvectorHigh              -- Output vector of complex numbers
+        constComplex  : in  cfixed;               -- Combined constant complex input
+        rowVector  : in  cvector;              -- Input vector of complex numbers
+        outputVector  : out cvector              -- Output vector of complex numbers
     );
 end Multiply_Column_By_Scalar;
 
 architecture Behavioral of Multiply_Column_By_Scalar is
 
     -- Component Declaration for Complex_ALU_High using qTypes
-    component Complex_ALU_High
+    component Complex_ALU
         Port (
-            A      : in  cfixedHigh;
-            B      : in  cfixedHigh;
+            A      : in  cfixed;
+            B      : in  cfixed;
             Op     : in  std_logic_vector(1 downto 0);  -- 2-bit operation code
-            Result : out cfixedHigh
+            Result : out cfixed
         );
     end component;
 
@@ -30,7 +30,7 @@ begin
 
     -- Generate Loop for Multiplying each element in the columnVector with constComplex
     gen_multiply: for i in 0 to numBasisStates - 1 generate
-        C_ALU_inst: Complex_ALU_High
+        C_ALU_inst: Complex_ALU
             port map (
                 A      => constComplex,
                 B      => rowVector(i),

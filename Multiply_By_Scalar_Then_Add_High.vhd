@@ -36,7 +36,7 @@ architecture Concurrent of Multiply_By_Scalar_Then_Add_High is
 
 begin
     -- Stage 1: Multiply C * A
-    Multiply_Stage: Multiply_Column_By_Scalar_High
+    Multiply_Stage_High: Multiply_Column_By_Scalar_High
         port map (
             constComplex => C,
             rowVector    => A,
@@ -44,7 +44,7 @@ begin
         );
 
     -- Stage 2: Add (C*A) + B
-    Add_Stage: Add_Vectors_Element_Wise_High
+    Add_Stage_High: Add_Vectors_Element_Wise_High
         port map (
             a => c_times_A,
             b => B,
