@@ -21,13 +21,7 @@ architecture Behavioral of TB_Matrix_By_Matrix_Multiplication_High_2_By_2 is
         1 => ( 0 => (re => to_sfixed(3, fixedHigh'high, fixedHigh'low), im => to_sfixed(0, fixedHigh'high, fixedHigh'low)),
                1 => (re => to_sfixed(4, fixedHigh'high, fixedHigh'low), im => to_sfixed(0, fixedHigh'high, fixedHigh'low))
 
-             ),
-        2 => ( 0 => (re => to_sfixed(0, fixedHigh'high, fixedHigh'low), im => to_sfixed(0, fixedHigh'high, fixedHigh'low)),
-               1 => (re => to_sfixed(0, fixedHigh'high, fixedHigh'low), im => to_sfixed(0, fixedHigh'high, fixedHigh'low))
-
-             ),
-        3 => ( 0 => (re => to_sfixed(0, fixedHigh'high, fixedHigh'low), im => to_sfixed(0, fixedHigh'high, fixedHigh'low)),
-               1 => (re => to_sfixed(0, fixedHigh'high, fixedHigh'low), im => to_sfixed(0, fixedHigh'high, fixedHigh'low))
+        
 
              )
     );
@@ -43,14 +37,6 @@ architecture Behavioral of TB_Matrix_By_Matrix_Multiplication_High_2_By_2 is
              ),
         1 => ( 0 => (re => to_sfixed(7, fixedHigh'high, fixedHigh'low), im => to_sfixed(0, fixedHigh'high, fixedHigh'low)),
                1 => (re => to_sfixed(8, fixedHigh'high, fixedHigh'low), im => to_sfixed(0, fixedHigh'high, fixedHigh'low))
-
-             ),
-        2 => ( 0 => (re => to_sfixed(0, fixedHigh'high, fixedHigh'low), im => to_sfixed(0, fixedHigh'high, fixedHigh'low)),
-               1 => (re => to_sfixed(0, fixedHigh'high, fixedHigh'low), im => to_sfixed(0, fixedHigh'high, fixedHigh'low))
-
-             ),
-        3 => ( 0 => (re => to_sfixed(0, fixedHigh'high, fixedHigh'low), im => to_sfixed(0, fixedHigh'high, fixedHigh'low)),
-               1 => (re => to_sfixed(0, fixedHigh'high, fixedHigh'low), im => to_sfixed(0, fixedHigh'high, fixedHigh'low))
 
              )
     );
