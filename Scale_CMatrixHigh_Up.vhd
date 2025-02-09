@@ -9,7 +9,7 @@ entity Scale_CMatrixHigh_Up is
         clk    : in  std_logic;
         reset  : in  std_logic;
         B      : in  cmatrixHigh;
-        S      : in  fixedHigh;
+        S      : in  cfixedHigh;
         Result : out cmatrixHigh;
         done   : out std_logic
     );
@@ -63,7 +63,7 @@ begin
                     done <= '0';
                     
                 when INIT =>
-                    s_val := to_integer(S);
+                    s_val := to_integer(S.re);
                     
                     if s_val = 0 then
                         Result <= B;

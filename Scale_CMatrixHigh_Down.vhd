@@ -7,7 +7,7 @@ use work.qTypes.ALL;
 entity Scale_CMatrixHigh_Down is
 port (
     Input_Matrix  : in  cmatrixHigh;
-    Shift_Amount  : in  fixedHigh; -- Integer shift value (absolute value used)
+    Shift_Amount  : in  cfixedHigh; -- Integer shift value (absolute value used)
     Output_Matrix : out cmatrixHigh
 );
 end Scale_CMatrixHigh_Down;
@@ -19,7 +19,7 @@ architecture Structural of Scale_CMatrixHigh_Down is
     signal shift_mag : natural := 0;
 begin
     -- Convert fixed-point shift amount to natural number
-    shift_mag <= abs(to_integer(Shift_Amount));
+    shift_mag <= abs(to_integer(Shift_Amount.re));
 
     -- Generate scaling logic for matrix elements
     row_gen: for i in 0 to numBasisStates-1 generate
