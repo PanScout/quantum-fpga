@@ -11,7 +11,7 @@ entity Calculate_Norm_And_Compare is
         
         -- Output: '1' if THETA > infinityNorm(A), else '0'
         isBelow : out std_logic;
-	InfinityNormOut : out fixedHigh
+	InfinityNormOut : out cfixedHigh
     );
 end entity Calculate_Norm_And_Compare;
 
@@ -71,7 +71,8 @@ begin
     ----------------------------------------------------------------------------
     -- "If THETA > largestVal then output '1' else '0'"
     isBelow <= '1' when THETA > largestVal else '0';
-    infinityNormOut <= largestVal;
+    infinityNormOut.re <= largestVal;
+    infinityNormOut.im <= to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
 
 end architecture structural;
 
