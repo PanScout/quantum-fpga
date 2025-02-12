@@ -99,8 +99,12 @@ architecture Behavioral of Pade_Top_Level is
 
     component Matrix_Inversion 
     Port (
-        input_matrix  : in  cmatrixHigh;
-        output_matrix : out cmatrixHigh
+        clk             : in  std_logic;
+        rst             : in  std_logic;
+        start           : in  std_logic;
+        input_matrix    : in  cmatrixHigh;
+        output_matrix   : out cmatrixHigh;
+        done            : out std_logic
     );
     end component Matrix_Inversion;
 
@@ -146,7 +150,7 @@ begin
     D2: Two_to_One_Mux_CMatrixHigh port map(in0 => IHTdirect, in1 => ScaleDownOut, sel => TorF, data_out => Mux2Out);
     P_num: Pade_Numerator port map(B => Mux2Out, P => PNumeratorOut);
     P_den: Pade_Denominator port map(B => Mux2Out, P => PDenominatorOut);
-    Invert: Matrix_Inversion port map(input_matrix => PDenominatorOut, output_matrix => InvOut);
+    Invert: Matrix_Inversion port map(clk => clk, rst => reset, input_matrix => PDenominatorOut, output_matrix => InvOut);
     MULT: Matrix_By_Matrix_Multiplication_High port map(A => PNumeratorOut, B => InvOut, C => MatrixMultOut);
     D3: One_to_Two_Demux_CMatrixHigh port map(data_in => MatrixMultOut, sel => TorF, out0 => Mux4In, out1 => MatriPowIn);
     Scale_Up: Scale_CMatrixHigh_Up port map(clk => clk, reset => reset, B => MatriPowIn, S => ScalingFactorOut, Result => ScaleUpOut, done => done);

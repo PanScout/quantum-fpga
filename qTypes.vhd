@@ -12,7 +12,7 @@
 -- #  Parameters  : [List key generics/parameters]                             #
 -- #  Usage       : [Usage constraints or target applications]                 #
 -- #############################################################################
--- #  Copyright (c) 2025 University of Miami. All rights reserved.             #
+-- #  Copyright (c) 2025 Khizroev's Greatest Minions. All rights reserved.     #
 -- #  Licensed under the [License Name, e.g., MIT License]. See LICENSE file.  #
 -- #############################################################################
 
