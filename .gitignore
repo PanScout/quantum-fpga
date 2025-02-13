@@ -12,5 +12,11 @@
 # Include Markdown documentation
 !*.md
 
+# Include Python files
+!*.py
+
+# Include Jupyter notebooks
+!*.ipynb
+
 # Except the .gitignore file itself (optional, but recommended)
 !.gitignore
