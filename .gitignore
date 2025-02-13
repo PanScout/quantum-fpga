@@ -1,6 +1,9 @@
 # Ignore everything
 *
 
+# Allow Git to look inside directories
+!*/
+
 # Except VHDL files
 !*.vhd
 !*.vhdl
