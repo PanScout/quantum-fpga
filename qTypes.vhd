@@ -34,7 +34,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use IEEE.fixed_pkg.ALL;
 
 -- Package Specification
 package qTypes is
@@ -45,21 +45,25 @@ package qTypes is
     constant numBasisStates : integer := 2 ** nQubits;
     
     -- Fixed-point subtype with lower precision
-    subtype fixed is sfixed(14 downto -10); 
+    --subtype fixed is sfixed(14 downto -10); 
     
     -- Fixed-point subtype with higher precision
-    subtype fixedHigh is sfixed(50 downto -64); 
+    --subtype fixedHigh is sfixed(50 downto -64); 
     
     -- Complex fixed-point record for lower precision
     type cfixed is record
-        re : fixed;
-        im : fixed;
+        --re : fixed;
+        --im : fixed;
+        re : std_logic_vector(15 downto 0); -- 16-bit real part
+        im : std_logic_vector(15 downto 0); -- 16-bit imaginary part
     end record;
     
     -- Complex fixed-point record for higher precision
     type cfixedHigh is record
-        re : fixedHigh;
-        im : fixedHigh;
+        --re : fixedHigh;
+        --im : fixedHigh;
+        re : std_logic_vector(63 downto 0); -- 64-bit real part
+        im : std_logic_vector(63 downto 0); -- 64-bit imaginary part
     end record;
     
     -- Vector of complex fixed, length numBasisStates (lower precision)
@@ -103,8 +107,10 @@ package body qTypes is
     function toCfixedHigh(x : cfixed) return cfixedHigh is
         variable ret : cfixedHigh;
     begin
-        ret.re := resize(x.re, fixedHigh'high, fixedHigh'low);
-        ret.im := resize(x.im, fixedHigh'high, fixedHigh'low);
+        --ret.re := resize(x.re, fixedHigh'high, fixedHigh'low);
+        --ret.im := resize(x.im, fixedHigh'high, fixedHigh'low);
+        ret.re := std_logic_vector(resize(signed(x.re), 64));
+        ret.im := std_logic_vector(resize(signed(x.im), 64));
         return ret;
     end function;
     
@@ -112,8 +118,10 @@ package body qTypes is
     function toCfixed(x : cfixedHigh) return cfixed is
         variable ret : cfixed;
     begin
-        ret.re := resize(x.re, fixed'high, fixed'low);
-        ret.im := resize(x.im, fixed'high, fixed'low);
+        --ret.re := resize(x.re, fixed'high, fixed'low);
+        --ret.im := resize(x.im, fixed'high, fixed'low);
+        ret.re := std_logic_vector(resize(signed(x.re), 16));
+        ret.im := std_logic_vector(resize(signed(x.im), 16));
         return ret;
     end function;
     

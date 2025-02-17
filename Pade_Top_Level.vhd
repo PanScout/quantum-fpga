@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use IEEE.fixed_pkg.ALL;
 use work.qTypes.all;
 
 entity Pade_Top_Level is
@@ -17,8 +17,10 @@ architecture Behavioral of Pade_Top_Level is
 
     -- Declare a constant Hamiltonian of type cmatrixHigh.
     constant Hamiltonian : cmatrixHigh := (
-        others => (others => ( re => to_sfixed(0, fixedHigh'high, fixedHigh'low),
-                                im => to_sfixed(0, fixedHigh'high, fixedHigh'low) ))
+        --others => (others => ( re => to_sfixed(0, fixedHigh'high, fixedHigh'low),
+                                --im => to_sfixed(0, fixedHigh'high, fixedHigh'low) ))
+        others => (others => ( re => std_logic_vector(to_signed(0, 64)),
+                                im => std_logic_vector(to_signed(0, 64)) ))
     );
 
     component Insert_Imaginary_Time_Into_CMatrix

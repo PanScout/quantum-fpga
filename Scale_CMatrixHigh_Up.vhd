@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
 entity Scale_CMatrixHigh_Up is
@@ -46,14 +46,24 @@ begin
             state <= IDLE;
             done <= '0';
             -- Proper complex matrix initialization
-            Result <= (others => (others => (
-                re => to_sfixed(0.0, fixedHigh'high, fixedHigh'low),
-                im => to_sfixed(0.0, fixedHigh'high, fixedHigh'low)
-            )));
-            current_matrix <= (others => (others => (
-                re => to_sfixed(0.0, fixedHigh'high, fixedHigh'low),
-                im => to_sfixed(0.0, fixedHigh'high, fixedHigh'low)
-            )));
+            --Result <= (others => (others => (
+                --re => to_sfixed(0.0, fixedHigh'high, fixedHigh'low),
+                --im => to_sfixed(0.0, fixedHigh'high, fixedHigh'low)
+            --)));
+            --current_matrix <= (others => (others => (
+                --re => to_sfixed(0.0, fixedHigh'high, fixedHigh'low),
+                --im => to_sfixed(0.0, fixedHigh'high, fixedHigh'low)
+            --)));
+            --counter <= 0;
+            for i in 0 to numBasisStates - 1 loop
+                for j in 0 to numBasisStates - 1 loop
+                    Result(i)(j).re <= (others => '0');
+                    Result(i)(j).im <= (others => '0');
+                    current_matrix(i)(j).re <= (others => '0');
+                    current_matrix(i)(j).im <= (others => '0');
+                end loop;
+            end loop;
+
             counter <= 0;
             
         elsif rising_edge(clk) then
@@ -63,7 +73,8 @@ begin
                     done <= '0';
                     
                 when INIT =>
-                    s_val := to_integer(S.re);
+                    --s_val := to_integer(S.re);
+                    s_val := to_integer(signed(S.re));
                     
                     if s_val = 0 then
                         Result <= B;

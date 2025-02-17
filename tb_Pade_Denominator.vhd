@@ -37,6 +37,7 @@ begin
         -- Fill matrix with specified real value (1.0) and 0 imaginary
         procedure fill_ones is
             variable temp: cfixedHigh;
+
         begin
             temp.re := to_sfixed(1.0, fixedHigh'high, fixedHigh'low);
             temp.im := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
@@ -47,16 +48,23 @@ begin
             end loop;
         end procedure;
 
+
         procedure verify_matrix(constant expected_real: real) is
             variable expected, actual: real;
+            variable real_part, imag_part: signed(63 downto 0);
         begin
             wait until rising_edge(clk);
             wait for 1 ns;
             for i in 0 to MATRIX_SIZE-1 loop
                 for j in 0 to MATRIX_SIZE-1 loop
-                    -- Check real part
+                    real_part := signed(P(i)(j).re);
+                    imag_part := signed(P(i)(j).im);
+
                     expected := expected_real;
                     actual := to_real(P(i)(j).re);
+
+                    -- Check real part
+                
                     assert abs(actual - expected) <= DELTA
                         report "Real mismatch at (" & integer'image(i) & "," & integer'image(j) & "): " &
                                "Expected " & real'image(expected) & 
@@ -69,6 +77,7 @@ begin
                         report "Imaginary mismatch at (" & integer'image(i) & "," & integer'image(j) & "): " &
                                "Expected 0.0, Got " & real'image(actual)
                         severity error;
+                    assert imag_part = 0
                 end loop;
             end loop;
         end procedure;

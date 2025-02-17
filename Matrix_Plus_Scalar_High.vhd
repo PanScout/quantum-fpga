@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use IEEE.fixed_pkg.ALL;
 
 use work.qTypes.all;
 
@@ -22,12 +22,18 @@ begin
             -- Diagonal elements: input + scalar
             -- Off-diagonal elements: pass through input
             output_cMatrixH(i)(j).re <= 
-                resize(input_cMatrixH(i)(j).re + scalar.re, fixedHigh'high, fixedHigh'low) 
+                --resize(input_cMatrixH(i)(j).re + scalar.re, fixedHigh'high, fixedHigh'low) 
+                --when (i = j) else 
+                --input_cMatrixH(i)(j).re;
+                std_logic_vector(resize(signed(input_cMatrixH(i)(j).re) + signed(scalar.re), 64))
                 when (i = j) else 
                 input_cMatrixH(i)(j).re;
             
             output_cMatrixH(i)(j).im <= 
-                resize(input_cMatrixH(i)(j).im + scalar.im, fixedHigh'high, fixedHigh'low) 
+                --resize(input_cMatrixH(i)(j).im + scalar.im, fixedHigh'high, fixedHigh'low) 
+                --when (i = j) else 
+                --input_cMatrixH(i)(j).im;
+                std_logic_vector(resize(signed(input_cMatrixH(i)(j).im) + signed(scalar.im), 64))
                 when (i = j) else 
                 input_cMatrixH(i)(j).im;
         end generate gen_cols;

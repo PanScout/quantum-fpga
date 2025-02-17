@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use IEEE.fixed_pkg.ALL;
 use work.qTypes.all;
 
 entity Matrix_Inversion_State_Machine is
@@ -42,7 +42,9 @@ architecture Behavioral of Matrix_Inversion_State_Machine is
     signal iteration : natural range 0 to 15 := 0;
     
     -- Error calculation signals
-    signal error_norm : real := 0.0;
+    --signal error_norm : real := 0.0;
+    signal norm_sum : unsigned(63 downto 0) := (others => '0');
+    constant error_threshold : unsigned(63 downto 0) := to_unsigned(1000, 64);
     
 begin
 
@@ -56,8 +58,10 @@ begin
 
     process(clk)
         variable identity : cmatrixHigh;
-        variable tmp_re, tmp_im : real;
-        variable error_sum : real;
+        --variable tmp_re, tmp_im : real;
+        --variable error_sum : real;
+        variable tmp_sum : unsigned(63 downto 0);
+        variable diff : signed(63 downto 0);
     begin
         if rising_edge(clk) then
             if rst = '1' then
@@ -68,7 +72,7 @@ begin
                     im => (others => '0'))));
                 iteration <= 0;
                 mult_start <= '0';
-                error_norm <= 0.0;
+                --error_norm <= 0.0;
             else
                 case state is
                     when IDLE =>
@@ -97,11 +101,15 @@ begin
                         for i in 0 to numBasisStates-1 loop
                             for j in 0 to numBasisStates-1 loop
                                 if i = j then
-                                    identity(i)(j).re := to_sfixed(2.0, fixedHigh'high, fixedHigh'low);
-                                    identity(i)(j).im := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+                                    --identity(i)(j).re := to_sfixed(2.0, fixedHigh'high, fixedHigh'low);
+                                    --identity(i)(j).im := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+                                    identity(i)(j).re := std_logic_vector(to_signed(2, 64));
+                                    identity(i)(j).im := (others => '0');
                                 else
-                                    identity(i)(j).re := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
-                                    identity(i)(j).im := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+                                    --identity(i)(j).re := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+                                    --identity(i)(j).im := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+                                    identity(i)(j).re := (others => '0');
+                                    identity(i)(j).im := (others => '0');
                                 end if;
                             end loop;
                         end loop;
@@ -112,14 +120,16 @@ begin
                     when SUB_2I =>
                         for i in 0 to numBasisStates-1 loop
                             for j in 0 to numBasisStates-1 loop
-                                twoI_minus_AX(i)(j).re <= resize(
-                                    matA(i)(j).re - matB(i)(j).re,
-                                    fixedHigh'high, fixedHigh'low
-                                );
-                                twoI_minus_AX(i)(j).im <= resize(
-                                    matA(i)(j).im - matB(i)(j).im,
-                                    fixedHigh'high, fixedHigh'low
-                                );
+                                --twoI_minus_AX(i)(j).re <= resize(
+                                    --matA(i)(j).re - matB(i)(j).re,
+                                    --fixedHigh'high, fixedHigh'low
+                                --);
+                                --twoI_minus_AX(i)(j).im <= resize(
+                                    --matA(i)(j).im - matB(i)(j).im,
+                                    --fixedHigh'high, fixedHigh'low
+                                --);
+                                twoI_minus_AX(i)(j).re <= std_logic_vector(signed(matA(i)(j).re) - signed(matB(i)(j).re));
+                                twoI_minus_AX(i)(j).im <= std_logic_vector(signed(matA(i)(j).im) - signed(matB(i)(j).im));
                             end loop;
                         end loop;
                         state <= LOAD_XNEXT;
@@ -141,35 +151,52 @@ begin
                         state <= CHECK_CONV;
                         
                     when CHECK_CONV =>
-                        -- Calculate residual norm ||AX - I||
-                        error_sum := 0.0;
+                        --Calculate residual norm ||AX - I||
+                        --error_sum := 0.0;
+                        tmp_sum := (others => '0');
                         for i in 0 to numBasisStates-1 loop
                             for j in 0 to numBasisStates-1 loop
-                                -- Convert fixed-point to real
-                                tmp_re := to_real(AX(i)(j).re);
-                                tmp_im := to_real(AX(i)(j).im);
+                                 --Convert fixed-point to real
+                                --tmp_re := to_real(AX(i)(j).re);
+                                --tmp_im := to_real(AX(i)(j).im);
                                 
                                 -- Subtract identity matrix
                                 if i = j then
-                                    tmp_re := tmp_re - 1.0;
+                                    --tmp_re := tmp_re - 1.0;
+                                    diff := signed(AX(i)(j).re) - to_signed(1, 64);
+                                else
+                                    diff := signed(AX(i)(j).re);
                                 end if;
+                                tmp_sum := tmp_sum + unsigned(abs(diff));
+                                tmp_sum := tmp_sum + unsigned(abs(signed(AX(i)(j).im)));
                                 
-                                -- Accumulate squared magnitude
-                                error_sum := error_sum + (tmp_re**2 + tmp_im**2);
+                                --Accumulate squared magnitude
+                                --error_sum := error_sum + (tmp_re**2 + tmp_im**2);
                             end loop;
                         end loop;
                         --error_norm <= sqrt(error_sum);
-                        
-                        -- Simulation-only print statement
-                        report "Iteration: " & integer'image(iteration) 
-                            & " Error: " & real'image(error_norm)
-                            severity note;
-                            
-                        if iteration < 4 then
+                        -- Check convergence based on threshold
+                        norm_sum <= tmp_sum;
+
+                         --Simulation-only print statement
+                        --report "Iteration: " & integer'image(iteration) 
+                            --& " Error: " & real'image(error_norm)
+                            --severity note;
+                        if tmp_sum < error_threshold then
+                            report "Converged with error sum: " & integer'image(to_integer(tmp_sum));
+                            state <= FINISH;
+                        elsif iteration < 15 then
                             state <= INIT;
                         else
+                            report "Maximum iterations reached.";
                             state <= FINISH;
                         end if;
+                           
+                        --if iteration < 4 then
+                            --state <= INIT;
+                        --else
+                            --state <= FINISH;
+                        --end if;
                         
                     when FINISH =>
                         output_matrix <= Xk;

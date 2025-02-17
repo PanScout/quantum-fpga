@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use IEEE.fixed_pkg.ALL;
 use work.qTypes.all;
 
 entity Generate_Scaling_Factor is
@@ -14,16 +14,20 @@ end Generate_Scaling_Factor;
 architecture Structural of Generate_Scaling_Factor is
 
     -- Intermediate signals
-    signal norm_in  : fixedHigh;    -- Real value to be processed by Norm_Theta_Ratio
-    signal norm_out : fixedHigh;    -- Output from Norm_Theta_Ratio
+    --signal norm_in  : fixedHigh;    -- Real value to be processed by Norm_Theta_Ratio
+    --signal norm_out : fixedHigh;    -- Output from Norm_Theta_Ratio
+    signal norm_in  : std_logic_vector(63 downto 0); -- Real value to be processed by Norm_Theta_Ratio
+    signal norm_out : std_logic_vector(63 downto 0); -- Output from Norm_Theta_Ratio
     signal ceil_in  : cfixedHigh;   -- Input to Ceiling_Of_Log2 (constructed from norm_out)
     signal ceil_out : cfixedHigh;   -- Output from Ceiling_Of_Log2
 
     -- Component declaration for Norm_Theta_Ratio (operates on fixedHigh)
     component Norm_Theta_Ratio is
         Port (
-            input  : in  fixedHigh;
-            output : out fixedHigh
+            --input  : in  fixedHigh;
+            --output : out fixedHigh
+            input  : in  std_logic_vector(63 downto 0);
+            output : out std_logic_vector(63 downto 0)
         );
     end component;
 
@@ -49,7 +53,8 @@ begin
 
     -- Reassemble norm_out into a cfixedHigh signal (with imaginary part zero)
     ceil_in.re <= norm_out;
-    ceil_in.im <= to_sfixed(0, fixedHigh'high, fixedHigh'low);
+    --ceil_in.im <= to_sfixed(0, fixedHigh'high, fixedHigh'low);
+    ceil_in.im <= (others => '0');
 
     -- Instantiate Ceiling_Of_Log2
     CeilingOfLog2_inst: Ceiling_Of_Log2

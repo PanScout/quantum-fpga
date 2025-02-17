@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
 entity Matrix_By_Scalar_Multiplication is
@@ -20,16 +20,24 @@ begin
         begin
             -- Complex multiplication implementation
             -- Real part: (A.re * scalar.re) - (A.im * scalar.im)
-            C(row_idx)(col_idx).re <= resize(
-                A(row_idx)(col_idx).re * scalar.re - 
-                A(row_idx)(col_idx).im * scalar.im, fixed'high, fixed'low
-            );
+            --C(row_idx)(col_idx).re <= resize(
+                --A(row_idx)(col_idx).re * scalar.re - 
+                --A(row_idx)(col_idx).im * scalar.im, fixed'high, fixed'low
+            --);
+            C(row_idx)(col_idx).re <= std_logic_vector(resize(
+                signed(A(row_idx)(col_idx).re) * signed(scalar.re) - 
+                signed(A(row_idx)(col_idx).im) * signed(scalar.im), 16
+            ));
             
             -- Imaginary part: (A.re * scalar.im) + (A.im * scalar.re)
-            C(row_idx)(col_idx).im <= resize(
-                A(row_idx)(col_idx).re * scalar.im + 
-                A(row_idx)(col_idx).im * scalar.re, fixed'high, fixed'low
-            );
+            --C(row_idx)(col_idx).im <= resize(
+                --A(row_idx)(col_idx).re * scalar.im + 
+                --A(row_idx)(col_idx).im * scalar.re, fixed'high, fixed'low
+            --);
+            C(row_idx)(col_idx).im <= std_logic_vector(resize(
+                signed(A(row_idx)(col_idx).re) * signed(scalar.im) + 
+                signed(A(row_idx)(col_idx).im) * signed(scalar.re), 16
+            ));
         end generate gen_col_mult;
     end generate gen_row_mult;
 end architecture Concurrent;
