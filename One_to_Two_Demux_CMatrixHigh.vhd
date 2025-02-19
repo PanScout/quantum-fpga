@@ -24,6 +24,6 @@ architecture Behavioral of One_to_Two_Demux_CMatrixHigh is
 begin
     -- If sel = '0', drive out0 with data_in and out1 with zeros.
     -- If sel = '1', drive out1 with data_in and out0 with zeros.
-    out0 <= data_in when sel = '0' else Z_MATRIX;
-    out1 <= data_in when sel = '1' else Z_MATRIX;
+    out0 <= data_in when sel = '1' else Z_MATRIX;
+    out1 <= data_in when sel = '0' else Z_MATRIX;
 end Behavioral;

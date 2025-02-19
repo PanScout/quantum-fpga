@@ -86,8 +86,8 @@ begin
                     end if;
                     
                 when EOE =>
-                    null;
-                    
+		    null;
+                                   
                 when others =>
                     state <= IDLE;
             end case;
