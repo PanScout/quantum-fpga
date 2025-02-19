@@ -39,7 +39,7 @@ architecture Behavioral of Matrix_Inversion_State_Machine is
     
     -- Control signals
     signal mult_start, mult_done : std_logic := '0';
-    signal iteration : natural range 0 to 15 := 0;
+    signal iteration : natural range 0 to 50 := 0;
     
     -- Error calculation signals
     signal error_norm : real := 0.0;
@@ -74,6 +74,7 @@ begin
                     when IDLE =>
                         done <= '0';
                         if start = '1' then
+			    --matA <= input_matrix;
                             Xk <= input_guess;
                             iteration <= 0;
                             state <= INIT;
@@ -138,6 +139,7 @@ begin
                     when UPDATE_X =>
                         Xk <= Xnext;
                         iteration <= iteration + 1;
+
                         state <= CHECK_CONV;
                         
                     when CHECK_CONV =>
@@ -165,7 +167,7 @@ begin
                             & " Error: " & real'image(error_norm)
                             severity note;
                             
-                        if iteration < 4 then
+                        if iteration < 40 then
                             state <= INIT;
                         else
                             state <= FINISH;

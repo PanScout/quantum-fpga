@@ -108,6 +108,16 @@ architecture Behavioral of Pade_Top_Level is
     );
     end component Matrix_Inversion;
 
+    component Register_cmatrixHigh
+    Port (
+        clk      : in  std_logic;
+        rst      : in  std_logic;
+        load     : in  std_logic;
+        data_in  : in  cmatrixHigh;
+        data_out : out cmatrixHigh
+    );
+    end component;
+
     component Matrix_By_Matrix_Multiplication_High 
     Port (
         A : in  cmatrixHigh;    -- First input matrix (M x N)
@@ -139,6 +149,7 @@ architecture Behavioral of Pade_Top_Level is
     signal ScaleUpOut : cmatrixHigh;
     signal done : std_logic;
     signal Mux4Out : cmatrixHigh;
+    signal reg1Out, reg2Out : cmatrixHigh;
     -- ETC...
 
 begin
@@ -150,7 +161,9 @@ begin
     D2: Two_to_One_Mux_CMatrixHigh port map(in0 => IHTdirect, in1 => ScaleDownOut, sel => TorF, data_out => Mux2Out);
     P_num: Pade_Numerator port map(B => Mux2Out, P => PNumeratorOut);
     P_den: Pade_Denominator port map(B => Mux2Out, P => PDenominatorOut);
-    Invert: Matrix_Inversion port map(clk => clk, rst => reset, input_matrix => PDenominatorOut, output_matrix => InvOut);
+    reg1: Register_cmatrixHigh port map(clk => clk, rst => reset, load => '1', data_in => PDenominatorOut, data_out => reg1Out);
+    reg2: Register_cmatrixHigh port map(clk => clk, rst => reset, load => '1', data_in => reg1Out, data_out => reg2Out);
+    Invert: Matrix_Inversion port map(clk => clk, rst => reset, start => '1',input_matrix => reg2Out, output_matrix => InvOut);
     MULT: Matrix_By_Matrix_Multiplication_High port map(A => PNumeratorOut, B => InvOut, C => MatrixMultOut);
     D3: One_to_Two_Demux_CMatrixHigh port map(data_in => MatrixMultOut, sel => TorF, out0 => Mux4In, out1 => MatriPowIn);
     Scale_Up: Scale_CMatrixHigh_Up port map(clk => clk, reset => reset, B => MatriPowIn, S => ScalingFactorOut, Result => ScaleUpOut, done => done);

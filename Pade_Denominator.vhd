@@ -199,6 +199,6 @@ begin
             output_cMatrixH=> T8
         );
 
-   
+   P <= T8;
 
 end Structural;

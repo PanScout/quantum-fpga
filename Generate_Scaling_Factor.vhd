@@ -59,6 +59,9 @@ begin
         );
 
     -- The final result is assigned to S
-    S <= ceil_out;
+    S <= ( re => resize(ceil_out.re + to_sfixed(3, fixedHigh'high, fixedHigh'low), fixedHigh'high, fixedHigh'low), im => ceil_out.im );
+
+
+
 
 end Structural;
