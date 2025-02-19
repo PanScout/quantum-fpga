@@ -1,25 +1,24 @@
 # Ignore everything
 *
 
-# Allow Git to look inside directories
+# Allow directories so that git can recurse into them.
 !*/
 
-# Except VHDL files
+# Unignore the .gitignore file itself
+!.gitignore
+
+# Unignore Python files
+!*.py
+
+# Unignore VHDL files (adjust extensions as needed)
 !*.vhd
 !*.vhdl
 
-# Except ModelSim project files
-!*.mpf
+# Unignore ModelSim project files (adjust extensions as needed)
 !*.do
+!*.prj
 
-# Include Markdown documentation
-!*.md
-
-# Include Python files
-!*.py
-
-# Include Jupyter notebooks
-!*.ipynb
-
-# Except the .gitignore file itself (optional, but recommended)
-!.gitignore
+# Unignore image files (PNGs and JPEGs)
+!*.png
+!*.jpg
+!*.jpeg
