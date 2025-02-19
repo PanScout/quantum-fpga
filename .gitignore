@@ -22,3 +22,6 @@
 !*.png
 !*.jpg
 !*.jpeg
+
+# Unignore text files
+!*.txt
