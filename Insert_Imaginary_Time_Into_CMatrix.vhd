@@ -39,13 +39,14 @@ architecture Structural of Insert_Imaginary_Time_Into_CMatrix is
     );
 
     -- First stage hard-coded scalar in lower precision
-    constant FIXED_SCALAR : cfixed := (
-        re => to_sfixed(2.0, fixed'high, fixed'low),
-        im => to_sfixed(1.0, fixed'high, fixed'low)
-    );
+--    constant FIXED_SCALAR : cfixed := (
+--        re => to_sfixed(2.0, fixed'high, fixed'low),
+--       im => to_sfixed(1.0, fixed'high, fixed'low)
+--   );
 
-    signal intermediate_matrix : cmatrix;  -- Result from the first multiplication
+--    signal intermediate_matrix : cmatrix;  -- Result from the first multiplication
     signal final_low           : cmatrix;  -- Result from the second multiplication (low precision)
+    signal t_imag : cfixed;
 
     component Matrix_By_Scalar_Multiplication is
         Port (
@@ -56,21 +57,24 @@ architecture Structural of Insert_Imaginary_Time_Into_CMatrix is
     end component;
 
 begin
+
+    t_imag <= (re => to_sfixed(0.0, fixed'high, fixed'low), im => t.re);
+
     -- First multiplication: Multiply fixed matrix by fixed scalar
     Mult1: Matrix_By_Scalar_Multiplication
         port map (
             A      => FIXED_MATRIX,
-            scalar => FIXED_SCALAR,
-            C      => intermediate_matrix
+            scalar => t_imag,
+            C      => final_low
         );
 
     -- Second multiplication: Multiply intermediate matrix by input scalar
-    Mult2: Matrix_By_Scalar_Multiplication
-        port map (
-            A      => intermediate_matrix,
-            scalar => t,
-            C      => final_low
-        );
+ --   Mult2: Matrix_By_Scalar_Multiplication
+ --       port map (
+ --           A      => intermediate_matrix,
+ --           scalar => t_imag,
+ --           C      => final_low
+ --       );
 
     -- Convert the low-precision final result to high-precision using the conversion function
     C_out <= toCmatrixHigh(final_low);

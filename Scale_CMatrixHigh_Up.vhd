@@ -8,6 +8,7 @@ entity Scale_CMatrixHigh_Up is
     Port (
         clk    : in  std_logic;
         reset  : in  std_logic;
+	start : in std_logic;
         B      : in  cmatrixHigh;
         S      : in  cfixedHigh;
         Result : out cmatrixHigh;
@@ -59,8 +60,10 @@ begin
         elsif rising_edge(clk) then
             case state is
                 when IDLE =>
-                    state <= INIT;
                     done <= '0';
+		    if start = '1' then
+                        state <= INIT;
+                    end if;
                     
                 when INIT =>
                     s_val := to_integer(S.re);
@@ -86,7 +89,9 @@ begin
                     end if;
                     
                 when EOE =>
-		    null;
+		    if start = '0' then
+                        state <= IDLE;
+                    end if;
                                    
                 when others =>
                     state <= IDLE;
