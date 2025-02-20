@@ -63,7 +63,9 @@ sim:/pade_top_level/done \
 sim:/pade_top_level/Mux4Out \
 sim:/pade_top_level/reg1Out \
 sim:/pade_top_level/reg2Out \
-sim:/pade_top_level/Hamiltonian
+sim:/pade_top_level/Hamiltonian \
+sim:/pade_top_level/tBuffOut \
+sim:/pade_top_level/tBuffStart
 force -freeze sim:/pade_top_level/reset 1 0
 force -freeze sim:/pade_top_level/clk 1 0, 0 {50 ps} -r 100
 force -freeze sim:/pade_top_level/t.re 0000000000000001000000000 0
@@ -71,3 +73,4 @@ force -freeze sim:/pade_top_level/t.im 0000000000000000000000000 0
 run
 force -freeze sim:/pade_top_level/reset 0 0
 run 40000
+
