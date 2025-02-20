@@ -22,3 +22,9 @@
 !*.png
 !*.jpg
 !*.jpeg
+
+# Unignore text files
+!*.txt
+
+# Unignore MP4 files
+!*.mp4
