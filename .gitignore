@@ -28,3 +28,6 @@
 
 # Unignore MP4 files
 !*.mp4
+
+# Unignore Jupyter Notebook files
+!*.ipynb
