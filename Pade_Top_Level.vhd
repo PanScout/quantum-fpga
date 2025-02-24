@@ -8,6 +8,7 @@ entity Pade_Top_Level is
     Port (
         clk    : in std_logic;
         reset  : in std_logic;
+	H      : in cmatrix;
         t      : in  cfixed;
         output : out cmatrix
     );
@@ -24,7 +25,8 @@ architecture Behavioral of Pade_Top_Level is
     component Insert_Imaginary_Time_Into_CMatrix
     Port (
         t : in  cfixed;       -- Input scalar for second multiplication
-        C_out     : out cmatrixHigh    -- Final output matrix in high precision
+	H : in cmatrix;
+        C_out     : out cmatrixHigh  
     ); 
     end component Insert_Imaginary_Time_Into_CMatrix;
 
@@ -181,7 +183,7 @@ architecture Behavioral of Pade_Top_Level is
     -- ETC...
 
 begin
-    IHT: Insert_Imaginary_Time_Into_CMatrix port map(t=> t, C_out => IHTtoNormAndCompareandD1);
+    IHT: Insert_Imaginary_Time_Into_CMatrix port map(t=> t, H => H, C_out => IHTtoNormAndCompareandD1);
     Norm_And_Compare: Calculate_Norm_And_Compare port map(A => IHTtoNormAndCompareandD1, isBelow => TorF, infinityNormOut => InfNormOut);
     --D1: One_to_Two_Demux_CMatrixHigh port map(data_in => IHTtoNormAndCompareandD1, sel => TorF, out0 => IHTtoScalar, out1 => IHTdirect);
     Gen_Scaling_Factor: Generate_Scaling_Factor port map(input => InfNormOut, S => ScalingFactorOut);
