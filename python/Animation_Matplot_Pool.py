@@ -22,8 +22,8 @@ from tqdm import tqdm
 plt.style.use('Solarize_Light2')
 
 # === Configuration ===
-t_min, t_max = 0, 1
-render_fps = 120       # Rendering frames per second (for smooth slow motion)
+t_min, t_max = 0, 7
+render_fps = 60       # Rendering frames per second (for smooth slow motion)
 output_fps = 60       # Final video playback FPS
 n_qubits = 10         # Number of qubits
 system_dim = 2 ** n_qubits  # Hilbert space dimension
