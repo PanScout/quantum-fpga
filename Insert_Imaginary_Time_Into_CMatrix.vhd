@@ -6,37 +6,38 @@ use work.qTypes.ALL;
 entity Insert_Imaginary_Time_Into_CMatrix is --H and i are hardcoded while time is an input
     Port (
         t : in  cfixed;       -- Input scalar for second multiplication
+	H : in cmatrix;
         C_out     : out cmatrixHigh    -- Final output matrix in high precision
     );
 end Insert_Imaginary_Time_Into_CMatrix;
 
 architecture Structural of Insert_Imaginary_Time_Into_CMatrix is
     -- Hardcoded 4x4 matrix (values in lower precision)
-    constant FIXED_MATRIX : cmatrix := ( --Hamiltonian
+    --constant FIXED_MATRIX : cmatrix := ( --Hamiltonian
         -- Row 0
-        (0 => (re => to_sfixed(1.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
-         1 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
-         2 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
-         3 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low))),
+        --(0 => (re => to_sfixed(1.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
+         --1 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
+         --2 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
+         --3 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low))),
         
         -- Row 1
-        (0 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
-         1 => (re => to_sfixed(1.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
-         2 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
-         3 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low))),
+        --(0 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
+         --1 => (re => to_sfixed(1.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
+         --2 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
+         --3 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low))),
         
         -- Row 2
-        (0 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
-         1 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
-         2 => (re => to_sfixed(1.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
-         3 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low))),
+        --(0 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
+         --1 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
+         --2 => (re => to_sfixed(1.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
+         --3 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low))),
         
         -- Row 3
-        (0 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
-         1 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
-         2 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
-         3 => (re => to_sfixed(1.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)))
-    );
+        --(0 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
+         --1 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
+         --2 => (re => to_sfixed(0.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)),
+         --3 => (re => to_sfixed(1.0, fixed'high, fixed'low), im => to_sfixed(0.0, fixed'high, fixed'low)))
+    --);
 
     -- First stage hard-coded scalar in lower precision
 --    constant FIXED_SCALAR : cfixed := (
@@ -63,7 +64,7 @@ begin
     -- First multiplication: Multiply fixed matrix by fixed scalar
     Mult1: Matrix_By_Scalar_Multiplication
         port map (
-            A      => FIXED_MATRIX,
+            A      => H,
             scalar => t_imag,
             C      => final_low
         );

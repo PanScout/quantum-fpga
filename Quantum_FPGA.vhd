@@ -8,6 +8,7 @@ entity Quantum_FPGA is
     Port (
         clk    : in std_logic;
         reset  : in std_logic;
+	H      : in cmatrix;
         t      : in  cfixed;
         output : out cmatrix
     );
@@ -19,14 +20,15 @@ component Pade_Top_Level
     Port (
         clk    : in std_logic;
         reset  : in std_logic;
+	H      : in cmatrix;
         t      : in  cfixed;
         output : out cmatrix
     );
 end component;
 
 
-
 begin
     
+pade: Pade_Top_Level port map(clk => clk, reset => reset, H => H, t => t, output => output);
 
 end Behavioral;
