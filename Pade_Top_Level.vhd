@@ -10,6 +10,7 @@ entity Pade_Top_Level is
         reset  : in std_logic;
 	H      : in cmatrix;
         t      : in  cfixed;
+	done : out std_logic;
         output : out cmatrix
     );
 end Pade_Top_Level;
@@ -133,6 +134,7 @@ architecture Behavioral of Pade_Top_Level is
     Port (
         clk   : in  std_logic;
         reset : in  std_logic;
+	load  : in std_logic;
         d     : in  std_logic;
         q     : out std_logic
     );
@@ -197,7 +199,7 @@ begin
     tBuffS: triStateBuffer_std_logic port map(clk => clk, rst => reset, out_signal => tBuffStart);
     Invert: Matrix_Inversion port map(clk => clk, rst => reset, start => tBuffStart ,input_matrix => PDenominatorOut, output_matrix => InvOut, done => matrixInvDone);
     MULT: Matrix_By_Matrix_Multiplication_High port map(A => PNumeratorOut, B => InvOut, C => MatrixMultOut);
-    reg3: Register_std_logic port map(clk => clk, reset => reset, d => matrixInvDone, q => regStdLogicOut); 
+    reg3: Register_std_logic port map(clk => clk, reset => reset, load => '1', d => matrixInvDone, q => regStdLogicOut); 
     --D3: One_to_Two_Demux_CMatrixHigh port map(data_in => MatrixMultOut, sel => TorF, out0 => MatriPowIn, out1 => Mux4In);
     Scale_Up: Scale_CMatrixHigh_Up port map(clk => clk, reset => reset, start => regStdLogicOut, B => MatrixMultOut, S => ScalingFactorOut, Result => ScaleUpOut, done => done);
     --D4: Two_to_One_Mux_CMatrixHigh port map(in0 => Mux4In, in1 => ScaleUpOut, sel => TorF, data_out => Mux4Out);
