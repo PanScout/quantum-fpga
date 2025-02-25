@@ -22,14 +22,14 @@ from tqdm import tqdm
 plt.style.use('Solarize_Light2')
 
 # === Configuration ===
-t_min, t_max = 0, 7
+t_min, t_max = 0, 1
 render_fps = 60       # Rendering frames per second (for smooth slow motion)
 output_fps = 60       # Final video playback FPS
-n_qubits = 10         # Number of qubits
+n_qubits = 4         # Number of qubits
 system_dim = 2 ** n_qubits  # Hilbert space dimension
 s = int(np.sqrt(system_dim))  # Grid size (assumed square)
 height_scale = 1
-sigma = 1.5
+sigma = 0
 
 # Figure settings
 fig_size = (18, 10)   # Figure size in inches for rendering
@@ -142,8 +142,10 @@ def main():
     print(f"Initializing {system_dim}-dim quantum system on {device}...")
     H = build_hamiltonian()
 
-    V_rand = (torch.randn(system_dim, dtype=torch.complex64, device=device) +
-              1j * torch.randn(system_dim, dtype=torch.complex64, device=device))
+    #V_rand = (torch.randn(system_dim, dtype=torch.complex64, device=device) +
+              #1j * torch.randn(system_dim, dtype=torch.complex64, device=device))
+    V_rand = torch.zeros(system_dim, dtype=torch.complex64, device=device)
+    V_rand[0] = 1
     norm = torch.sqrt(torch.sum(torch.abs(V_rand) ** 2))
     V_rand /= norm
 
