@@ -14,7 +14,7 @@ entity Quantum_FPGA is
         t      : in  cfixed;
 
 	loadTime, loadHamiltonian, loadPsi: std_logic; -- load signals
-	tEnable, : std_logic; --tri state enable
+	tEnable : std_logic; --tri state enable
 	done   : out std_logic;
         output : out cvector
     );
@@ -28,7 +28,7 @@ component Pade_Top_Level
         reset  : in std_logic;
 	H      : in cmatrix;
         t      : in  cfixed;
-	done : out std_logic;
+	padeDone : out std_logic;
         output : out cmatrix
     );
 end component;
@@ -105,7 +105,7 @@ begin
 regt : Register_cfixed port map(clk => clk, reset => reset, load => loadTime, d => t, q => timeOut); 
 regHam : Register_cmatrix port map(clk => clk, rst => reset, load => loadHamiltonian, data_in => H, data_out => HamiltonianOut); 
 regPsi : Register_cvector port map(clk => clk, rst => reset, load => loadPsi, data_in => psi, data_out => psiOut); 
-pade: Pade_Top_Level port map(clk => clk, reset => reset, H => H, t => t, done => padeDone, output => padeOutput);
+pade: Pade_Top_Level port map(clk => clk, reset => reset, H => H, t => t, padeDone => padeDone, output => padeOutput);
 padeBuff: triStateBuffer_cmatrix port map(data_in => padeOutput, enable => tEnable, data_out => padeBuffOut);
 mult: Matrix_By_Vector_Multiplication port map(A => padeBuffOut, V => psiOut, Result => UxPsiOut);
 stateBuff: TristateBuffer_cvector port map(data_in => UxPsiOut, enable => padeDone, data_out => stateOut);
