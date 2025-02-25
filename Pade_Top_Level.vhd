@@ -8,7 +8,9 @@ entity Pade_Top_Level is
     Port (
         clk    : in std_logic;
         reset  : in std_logic;
+	H      : in cmatrix;
         t      : in  cfixed;
+	padeDone : out std_logic;
         output : out cmatrix
     );
 end Pade_Top_Level;
@@ -24,7 +26,8 @@ architecture Behavioral of Pade_Top_Level is
     component Insert_Imaginary_Time_Into_CMatrix
     Port (
         t : in  cfixed;       -- Input scalar for second multiplication
-        C_out     : out cmatrixHigh    -- Final output matrix in high precision
+	H : in cmatrix;
+        C_out     : out cmatrixHigh  
     ); 
     end component Insert_Imaginary_Time_Into_CMatrix;
 
@@ -131,6 +134,7 @@ architecture Behavioral of Pade_Top_Level is
     Port (
         clk   : in  std_logic;
         reset : in  std_logic;
+	load  : in std_logic;
         d     : in  std_logic;
         q     : out std_logic
     );
@@ -181,7 +185,7 @@ architecture Behavioral of Pade_Top_Level is
     -- ETC...
 
 begin
-    IHT: Insert_Imaginary_Time_Into_CMatrix port map(t=> t, C_out => IHTtoNormAndCompareandD1);
+    IHT: Insert_Imaginary_Time_Into_CMatrix port map(t=> t, H => H, C_out => IHTtoNormAndCompareandD1);
     Norm_And_Compare: Calculate_Norm_And_Compare port map(A => IHTtoNormAndCompareandD1, isBelow => TorF, infinityNormOut => InfNormOut);
     --D1: One_to_Two_Demux_CMatrixHigh port map(data_in => IHTtoNormAndCompareandD1, sel => TorF, out0 => IHTtoScalar, out1 => IHTdirect);
     Gen_Scaling_Factor: Generate_Scaling_Factor port map(input => InfNormOut, S => ScalingFactorOut);
@@ -195,9 +199,9 @@ begin
     tBuffS: triStateBuffer_std_logic port map(clk => clk, rst => reset, out_signal => tBuffStart);
     Invert: Matrix_Inversion port map(clk => clk, rst => reset, start => tBuffStart ,input_matrix => PDenominatorOut, output_matrix => InvOut, done => matrixInvDone);
     MULT: Matrix_By_Matrix_Multiplication_High port map(A => PNumeratorOut, B => InvOut, C => MatrixMultOut);
-    reg3: Register_std_logic port map(clk => clk, reset => reset, d => matrixInvDone, q => regStdLogicOut); 
+    reg3: Register_std_logic port map(clk => clk, reset => reset, load => '1', d => matrixInvDone, q => regStdLogicOut); 
     --D3: One_to_Two_Demux_CMatrixHigh port map(data_in => MatrixMultOut, sel => TorF, out0 => MatriPowIn, out1 => Mux4In);
-    Scale_Up: Scale_CMatrixHigh_Up port map(clk => clk, reset => reset, start => regStdLogicOut, B => MatrixMultOut, S => ScalingFactorOut, Result => ScaleUpOut, done => done);
+    Scale_Up: Scale_CMatrixHigh_Up port map(clk => clk, reset => reset, start => regStdLogicOut, B => MatrixMultOut, S => ScalingFactorOut, Result => ScaleUpOut, done => padeDone);
     --D4: Two_to_One_Mux_CMatrixHigh port map(in0 => Mux4In, in1 => ScaleUpOut, sel => TorF, data_out => Mux4Out);
     
     output <= toCmatrix(ScaleUpOut);
