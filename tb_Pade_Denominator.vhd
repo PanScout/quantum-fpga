@@ -77,7 +77,7 @@ begin
                         report "Imaginary mismatch at (" & integer'image(i) & "," & integer'image(j) & "): " &
                                "Expected 0.0, Got " & real'image(actual)
                         severity error;
-                    assert imag_part = 0
+                    assert imag_part = 0;
                 end loop;
             end loop;
         end procedure;

@@ -39,7 +39,7 @@ use IEEE.NUMERIC_STD.ALL;
 -- Package Specification
 package qTypes is
     -- Number of qubits
-    constant nQubits : integer := 12;
+    constant nQubits : integer := 4;
     
     -- Number of basis states = 2^nQubits
     constant numBasisStates : integer := 2 ** nQubits;
