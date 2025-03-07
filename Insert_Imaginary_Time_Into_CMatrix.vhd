@@ -1,6 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.fixed_pkg.ALL;
+use work.fixed.ALL;
 use work.qTypes.ALL;
 
 entity Insert_Imaginary_Time_Into_CMatrix is --H and i are hardcoded while time is an input
