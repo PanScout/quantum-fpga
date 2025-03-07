@@ -1,6 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.fixed_pkg.ALL;
+use work.fixed.ALL;
 use work.qTypes.ALL;
 
 entity tb_matrixAddition_simple is

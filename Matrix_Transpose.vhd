@@ -2,6 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.qTypes.all;
+use work.fixed.ALL;
 
 entity Matrix_Transpose is
     Port (
