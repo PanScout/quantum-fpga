@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 --use work.fixed.ALL;
-use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
 
 library work;
 use work.qTypes.ALL;  -- Import the qTypes package

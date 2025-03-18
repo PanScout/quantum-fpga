@@ -21,7 +21,7 @@ package sfixed is
 
   -- Compatibility resize function.
   -- The extra arguments (integer_size and decimal_size) are ignored.
-  function resize(num : sfixed; integer_size : integer; decimal_size : integer) return sfixed;
+function resize(num : sfixed; target_high: integer; target_low: integer) return sfixed;
 
   -- Helper conversion functions: These convert between our sfixed type and the signed type.
   function to_signed_sf(x: sfixed) return signed;
@@ -176,25 +176,94 @@ package body sfixed is
   -- For an sfixed number defined over (I downto -F) with total width N = I - (-F) + 1,
   -- assume F = -L'low (if L'low is negative). Extend operands to 2*N bits, multiply,
   -- arithmetic shift right by F bits, then truncate to N bits.
-  function "*" (L, R : sfixed) return sfixed is
-    constant N: integer := L'length;
-    variable F: integer;
-    variable L_ext, R_ext: signed((N * 2) - 1 downto 0);
-    variable product: signed((N * 2) - 1 downto 0);
-    variable result: signed(N - 1 downto 0);
-  begin
-    if L'low < 0 then
-      F := -L'low;
-    else
-      F := 0;
-    end if;
-    L_ext := IEEE.NUMERIC_STD.resize(to_signed_sf(L), N * 2);
-    R_ext := IEEE.NUMERIC_STD.resize(to_signed_sf(R), N * 2);
-    product := L_ext * R_ext;
-    product := arith_shift_right(product, F);
-    result := product(product'high downto product'high - N + 1);
-    return to_sfixed(result, L);
-  end function;
+  --function "*" (L, R : sfixed) return sfixed is
+    --constant N: integer := L'length;
+    --variable F: integer;
+    --variable L_ext, R_ext: signed((N * 2) - 1 downto 0);
+    --variable product: signed((N * 2) - 1 downto 0);
+    --variable result: signed(N - 1 downto 0);
+  --begin
+    --if L'low < 0 then
+      --F := -L'low;
+    --else
+      --F := 0;
+    --end if;
+    --L_ext := IEEE.NUMERIC_STD.resize(to_signed_sf(L), N * 2);
+    --R_ext := IEEE.NUMERIC_STD.resize(to_signed_sf(R), N * 2);
+    --product := L_ext * R_ext;
+    --product := arith_shift_right(product, F);
+    --result := product(product'high downto product'high - N + 1);
+    --return to_sfixed(result, L);
+  --end function;
+
+function "*" (L, R : sfixed) return sfixed is
+  constant N : integer := L'length;
+  variable F : integer;
+  variable L_fractional, R_fractional : integer;
+  variable L_ext, R_ext : signed(N - 1 downto 0);  -- Match input size
+  variable product : signed((2 * N) - 1 downto 0);  -- Proper product size
+  variable result : signed(N - 1 downto 0);
+begin
+  -- Calculate fractional bits using sequential if statements
+  if L'low < 0 then
+    L_fractional := -L'low;
+  else
+    L_fractional := 0;
+  end if;
+
+  if R'low < 0 then
+    R_fractional := -R'low;
+  else
+    R_fractional := 0;
+  end if;
+
+  F := L_fractional + R_fractional;
+
+  -- Convert to signed WITHOUT resizing
+  L_ext := to_signed_sf(L);
+  R_ext := to_signed_sf(R);
+
+  -- Multiply with proper product size (2N bits)
+  product := L_ext * R_ext;
+
+  -- Scale and truncate correctly
+  product := arith_shift_right(product, F);
+  result := product(product'high downto product'high - N + 1);
+
+  return to_sfixed(result, L);
+end function;
+
+--function "*" (L, R : sfixed) return sfixed is
+  --constant N: integer := L'length;
+  --variable F: integer;
+  --variable L_fractional, R_fractional: integer;
+  --variable L_ext: signed((N*2) - 1 downto 0);
+  --variable R_ext: signed((N) - 1 downto 0);
+  --variable product: signed((N) - 1 downto 0);
+  --variable result: signed(N - 1 downto 0);
+--begin
+  -- Calculate fractional bits using sequential if statements
+  --if L'low < 0 then
+    --L_fractional := -L'low;
+  --else
+    --L_fractional := 0;
+  --end if;
+
+  --if R'low < 0 then
+    --R_fractional := -R'low;
+  --else
+   -- R_fractional := 0;
+  ---end if;
+
+  --F := L_fractional + R_fractional;
+
+  --L_ext := IEEE.NUMERIC_STD.resize(to_signed_sf(L), N*2);
+ -- R_ext := IEEE.NUMERIC_STD.resize(to_signed_sf(R), N);
+  --product := L_ext * R_ext;
+  --product := arith_shift_right(product, F);
+  --result := product(product'high downto product'high - N + 1);
+  --return to_sfixed(result, L);
+--end function;
 
   -- Division:
   -- Extend L to 2*N bits, shift left by F bits (with F = -L'low if negative) to preserve fractional resolution,
@@ -221,21 +290,33 @@ package body sfixed is
     return to_sfixed(result, L);
   end function;
 
-function resize(num : sfixed; integer_size : integer; decimal_size : integer) return sfixed is
-  constant new_left  : integer := integer_size - 1;
-  constant new_right : integer := -decimal_size;
-  constant new_length: integer := new_left - new_right + 1;
+--function resize(num : sfixed; integer_size : integer; decimal_size : integer) return sfixed is
+  --constant new_left  : integer := integer_size - 1;
+  --constant new_right : integer := -decimal_size;
+  --constant new_length: integer := new_left - new_right + 1;
+  --variable temp    : signed(num'length - 1 downto 0);
+  --variable resized : signed(new_length - 1 downto 0);
+--begin
+  -- Convert the input to a signed vector
+  --temp := to_signed_sf(num);
+  -- Resize the signed vector to the new total length (with sign extension or truncation)
+  --resized := IEEE.NUMERIC_STD.resize(temp, new_length);
+  -- Convert back to sfixed with the target range
+  --return to_sfixed(resized, new_left, new_right);
+--end function resize;
+
+function resize(num : sfixed; target_high: integer; target_low: integer) return sfixed is
+  constant new_length: integer := target_high - target_low + 1;
   variable temp    : signed(num'length - 1 downto 0);
   variable resized : signed(new_length - 1 downto 0);
 begin
-  -- Convert the input to a signed vector
+  -- Convert the input sfixed to a signed vector.
   temp := to_signed_sf(num);
-  -- Resize the signed vector to the new total length (with sign extension or truncation)
+  -- Use IEEE.NUMERIC_STD.resize to adjust the vector length.
   resized := IEEE.NUMERIC_STD.resize(temp, new_length);
-  -- Convert back to sfixed with the target range
-  return to_sfixed(resized, new_left, new_right);
+  -- Convert the resized signed vector back to sfixed with the given target range.
+  return to_sfixed(resized, target_high, target_low);
 end function resize;
-
 
   -- Absolute value: Return the absolute value of x.
   function abss(x: sfixed) return sfixed is
