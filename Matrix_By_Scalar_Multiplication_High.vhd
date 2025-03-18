@@ -1,8 +1,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-use work.fixed.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use work.fixed.ALL;
 use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.sfixed.ALL;
 
 entity Matrix_By_Scalar_Multiplication_High is
     Port (

@@ -35,12 +35,12 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 --use IEEE.fixed_pkg.ALL;
-use work.fixed.ALL;
+use work.sfixed.ALL;
 
 -- Package Specification
-package qTypes is
+package qTypes is 
     -- Number of qubits
-    constant nQubits : integer := 2;
+    constant nQubits : integer := 1;
     
     -- Number of basis states = 2^nQubits
     constant numBasisStates : integer := 2 ** nQubits;

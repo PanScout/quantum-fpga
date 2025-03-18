@@ -13,8 +13,8 @@ entity Quantum_FPGA is
 	psi    : in cvector;
         t      : in  cfixed;
 
-	loadTime, loadHamiltonian, loadPsi: std_logic; -- load signals
-	tEnable : std_logic; --tri state enable
+	loadTime, loadHamiltonian, loadPsi: in std_logic; -- load signals
+	tEnable : in std_logic; --tri state enable
 	done   : out std_logic;
         output : out cvector
     );

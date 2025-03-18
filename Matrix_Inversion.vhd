@@ -1,8 +1,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use work.fixed.ALL;
+--use work.fixed.ALL;
 use work.qTypes.all;
+use IEEE.fixed_pkg.ALL;
 
 entity Matrix_Inversion is
     Port (

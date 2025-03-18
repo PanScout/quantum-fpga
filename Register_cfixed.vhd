@@ -1,8 +1,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use IEEE.fixed_pkg.ALL;
 use work.qTypes.all;
+use work.sfixed.ALL;
 
 entity Register_cfixed is
     Port (
@@ -20,8 +21,8 @@ begin
     process(clk, reset)
     begin
         if reset = '1' then
-            q_reg <= (re => to_sfixed(0, fixed'high, fixed'low),
-                      im => to_sfixed(0, fixed'high, fixed'low));
+            q_reg <= (re => "0000000000000000000000000",
+                      im => "0000000000000000000000000");
         elsif rising_edge(clk) then
             if load = '1' then
                 q_reg <= d;

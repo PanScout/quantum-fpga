@@ -1,8 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-use work.fixed.ALL;
 use work.qTypes.all;
+use work.sfixed.ALL;
 
 entity Matrix_Inversion_State_Machine is
     Port (
@@ -41,9 +40,6 @@ architecture Behavioral of Matrix_Inversion_State_Machine is
     signal mult_start, mult_done : std_logic := '0';
     signal iteration : natural range 0 to 50 := 0;
     
-    -- Error calculation signals
-    signal error_norm : real := 0.0;
-    
 begin
 
     -- Instantiate matrix multiplier
@@ -56,8 +52,6 @@ begin
 
     process(clk)
         variable identity : cmatrixHigh;
-        variable tmp_re, tmp_im : real;
-        variable error_sum : real;
     begin
         if rising_edge(clk) then
             if rst = '1' then
@@ -68,13 +62,11 @@ begin
                     im => (others => '0'))));
                 iteration <= 0;
                 mult_start <= '0';
-                error_norm <= 0.0;
             else
                 case state is
                     when IDLE =>
                         done <= '0';
                         if start = '1' then
-			    --matA <= input_matrix;
                             Xk <= input_guess;
                             iteration <= 0;
                             state <= INIT;
@@ -98,11 +90,11 @@ begin
                         for i in 0 to numBasisStates-1 loop
                             for j in 0 to numBasisStates-1 loop
                                 if i = j then
-                                    identity(i)(j).re := to_sfixed(2.0, fixedHigh'high, fixedHigh'low);
-                                    identity(i)(j).im := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+                                    identity(i)(j).re := "0000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000";
+                                    identity(i)(j).im := "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
                                 else
-                                    identity(i)(j).re := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
-                                    identity(i)(j).im := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+                                    identity(i)(j).re := "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+                                    identity(i)(j).im := "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
                                 end if;
                             end loop;
                         end loop;
@@ -139,34 +131,11 @@ begin
                     when UPDATE_X =>
                         Xk <= Xnext;
                         iteration <= iteration + 1;
-
                         state <= CHECK_CONV;
                         
                     when CHECK_CONV =>
-                        -- Calculate residual norm ||AX - I||
-                        error_sum := 0.0;
-                        for i in 0 to numBasisStates-1 loop
-                            for j in 0 to numBasisStates-1 loop
-                                -- Convert fixed-point to real
-                                tmp_re := to_real(AX(i)(j).re);
-                                tmp_im := to_real(AX(i)(j).im);
-                                
-                                -- Subtract identity matrix
-                                if i = j then
-                                    tmp_re := tmp_re - 1.0;
-                                end if;
-                                
-                                -- Accumulate squared magnitude
-                                error_sum := error_sum + (tmp_re**2 + tmp_im**2);
-                            end loop;
-                        end loop;
-                        --error_norm <= sqrt(error_sum);
-                        
-                        -- Simulation-only print statement
-                        report "Iteration: " & integer'image(iteration) 
-                            & " Error: " & real'image(error_norm)
-                            severity note;
-                            
+                        -- Check iteration count
+                        report "Iteration: " & integer'image(iteration) severity note;
                         if iteration < 40 then
                             state <= INIT;
                         else

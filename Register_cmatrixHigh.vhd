@@ -24,8 +24,8 @@ begin
         if rst = '1' then
             -- On reset, clear the register.
             -- Each element of the matrix is set to zero.
-            register_value <= (others => (others => (re => to_sfixed(0, fixedHigh'high, fixedHigh'low),
-                                                      im => to_sfixed(0, fixedHigh'high, fixedHigh'low))));
+            register_value <= (others => (others => (re => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")));
         elsif rising_edge(clk) then
             if load = '1' then
                 register_value <= data_in;

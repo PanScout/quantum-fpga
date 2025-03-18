@@ -1,8 +1,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use work.fixed.ALL;
+--use work.fixed.ALL;
 use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.sfixed.ALL;
 
 entity Calculate_Norm_And_Compare is
     port (
@@ -27,7 +29,7 @@ architecture structural of Calculate_Norm_And_Compare is
     -- 2) Define the constant THETA
     ----------------------------------------------------------------------------
     -- Adjust these bounds (40 downto -64) as needed to match 'fixedHigh'
-    constant THETA : fixedHigh := to_sfixed(2.1, fixedHigh'high, fixedHigh'low);
+    constant THETA : fixedHigh := b"0000000000000000000000000000000000000000000000000100001100110011001100110011001100110011001100110011010000000000000";
 
     ----------------------------------------------------------------------------
     -- 3) Component declarations
@@ -72,7 +74,7 @@ begin
     -- "If THETA > largestVal then output '1' else '0'"
     isBelow <= '1' when THETA > largestVal else '0';
     infinityNormOut.re <= largestVal;
-    infinityNormOut.im <= to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+    infinityNormOut.im <= b"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
 
 end architecture structural;
 

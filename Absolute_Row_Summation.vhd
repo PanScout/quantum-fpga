@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 --use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
-use work.fixed.ALL;
+use work.sfixed.ALL;
 
 -------------------------------------------------------------------------------
 -- Entity
@@ -22,6 +22,7 @@ architecture Behavioral of Absolute_Row_Summation is
 
   type partialSum_array is array (0 to numBasisStates-1, 0 to numBasisStates-1) of fixedHigh;
   signal partialSum : partialSum_array;
+   signal my_fixed : sfixed(14 downto -10);
 
 begin
 
@@ -36,7 +37,7 @@ begin
         BS_j0: block
           signal val : fixedHigh;
         begin
-          val <= resize(abs(A(i)(j).re) + abs(A(i)(j).im), fixedHigh'high, fixedHigh'low);
+          val <= resize(abss(A(i)(j).re) + abss(A(i)(j).im), fixedHigh'high, fixedHigh'low);
           partialSum(i, j) <= val;
         end block BS_j0;
       end generate gen_j0;
@@ -46,7 +47,7 @@ begin
         BS_j: block
           signal val : fixedHigh;
         begin
-          val <= resize(abs(A(i)(j).re) + abs(A(i)(j).im), fixedHigh'high, fixedHigh'low);
+          val <= resize(abss(A(i)(j).re) + abss(A(i)(j).im), fixedHigh'high, fixedHigh'low);
           partialSum(i, j) <= resize(partialSum(i, j-1) + val, fixedHigh'high, fixedHigh'low);
         end block BS_j;
       end generate gen_j_others;
@@ -54,7 +55,8 @@ begin
     end generate gen_cols;
 
     rowSums(i).re <= partialSum(i, numBasisStates-1);
-    rowSums(i).im <= to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+    rowSums(i).im <= b"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+
 
   end generate gen_rows;
 
