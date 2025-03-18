@@ -1,8 +1,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use work.fixed.ALL;
+--use work.fixed.ALL;
 use work.qTypes.all;
+--use IEEE.fixed_pkg.ALL;
+use work.sfixed.ALL;
 
 entity Pade_Top_Level is
     Port (
@@ -19,8 +21,8 @@ architecture Behavioral of Pade_Top_Level is
 
     -- Declare a constant Hamiltonian of type cmatrixHigh.
     constant Hamiltonian : cmatrixHigh := (
-        others => (others => ( re => to_sfixed(0, fixedHigh'high, fixedHigh'low),
-                                im => to_sfixed(0, fixedHigh'high, fixedHigh'low) ))
+        others => (others => ( re => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                                im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" ))
     );
 
     component Insert_Imaginary_Time_Into_CMatrix
@@ -87,19 +89,27 @@ architecture Behavioral of Pade_Top_Level is
     );
     end component Scale_CMatrixHigh_Up;
 
-    component Pade_Denominator 
+    component padeDenominator
     Port (
-        B : in  cmatrixHigh;
-        P : out cmatrixHigh
+        clk   : in  std_logic;
+        reset : in  std_logic;
+        start : in  std_logic;
+        B     : in  cmatrixHigh;
+        P     : out cmatrixHigh;
+        done  : out std_logic
     );
-    end component Pade_Denominator;
+    end component;
 
-    component Pade_Numerator 
+    component padeNumerator
     Port (
-        B : in  cmatrixHigh;
-        P : out cmatrixHigh
+        clk   : in  std_logic;
+        reset : in  std_logic;
+        start : in  std_logic;
+        B     : in  cmatrixHigh;
+        P     : out cmatrixHigh;
+        done  : out std_logic
     );
-    end component Pade_Numerator;
+    end component;
 
     component Matrix_Inversion 
     Port (
@@ -179,7 +189,7 @@ architecture Behavioral of Pade_Top_Level is
     signal MatriPowIn : cmatrixHigh;
     signal Mux4In : cmatrixHigh;
     signal ScaleUpOut : cmatrixHigh;
-    signal done, matrixInvDone, regStdLogicOut, tBuffStart : std_logic;
+    signal done, matrixInvDone, regStdLogicOut, tBuffStart, PNumDone, PDenDone : std_logic;
     signal Mux4Out : cmatrixHigh;
     signal reg1Out, reg2Out, tBuffOut : cmatrixHigh;
     -- ETC...
@@ -191,8 +201,10 @@ begin
     Gen_Scaling_Factor: Generate_Scaling_Factor port map(input => InfNormOut, S => ScalingFactorOut);
     Scale_Down: Scale_CMatrixHigh_Down port map(Input_Matrix => IHTtoNormAndCompareandD1, Shift_Amount => ScalingFactorOut, Output_Matrix => ScaleDownOut);
     --D2: Two_to_One_Mux_CMatrixHigh port map(in0 => IHTdirect, in1 => ScaleDownOut, sel => TorF, data_out => Mux2Out);
-    P_num: Pade_Numerator port map(B => ScaleDownOut, P => PNumeratorOut);
-    P_den: Pade_Denominator port map(B => ScaleDownOut, P => PDenominatorOut);
+    --P_num: Pade_Numerator port map(B => ScaleDownOut, P => PNumeratorOut);
+    --P_den: Pade_Denominator port map(B => ScaleDownOut, P => PDenominatorOut);
+    P_num: padeNumerator port map(clk => clk, reset => reset, start => tBuffStart, B => ScaleDownOut, P => PNumeratorOut, done => PNumDone);
+    P_den: padeDenominator port map(clk => clk, reset => reset, start => tBuffStart, B => ScaleDownOut, P => PDenominatorOut, done => PDenDone);
     --reg1: Register_cmatrixHigh port map(clk => clk, rst => reset, load => '1', data_in => PDenominatorOut, data_out => reg1Out);
     --reg2: Register_cmatrixHigh port map(clk => clk, rst => reset, load => '1', data_in => reg1Out, data_out => reg2Out);
     --tBuff: triStateBuffer_cMatrixHigh port map(clk => clk, rst => reset, delay_cycles => 10, data_in => PDenominatorOut, data_out => tBuffOut);

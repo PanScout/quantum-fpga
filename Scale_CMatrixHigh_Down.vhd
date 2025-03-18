@@ -1,8 +1,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use work.fixed.ALL;
+--use work.fixed.ALL;
 use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.sfixed.ALL;
 
 entity Scale_CMatrixHigh_Down is
 port (
@@ -19,7 +21,8 @@ architecture Structural of Scale_CMatrixHigh_Down is
     signal shift_mag : natural := 0;
 begin
     -- Convert fixed-point shift amount to natural number
-    shift_mag <= abs(to_integer(Shift_Amount.re));
+    --shift_mag <= abss(to_integer(Shift_Amount.re));
+    shift_mag <= to_natural(Shift_Amount.re);
 
     -- Generate scaling logic for matrix elements
     row_gen: for i in 0 to numBasisStates-1 generate

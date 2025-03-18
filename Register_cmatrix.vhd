@@ -1,8 +1,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use IEEE.fixed_pkg.ALL;
 use work.qTypes.all;
+use work.sfixed.ALL;
 
 entity Register_cmatrix is
     Port (
@@ -22,8 +23,8 @@ begin
     begin
         if rst = '1' then
             -- Reset: set every element in the matrix to zero.
-            register_value <= (others => (others => (re => to_sfixed(0, fixed'high, fixed'low),
-                                                      im => to_sfixed(0, fixed'high, fixed'low))));
+            register_value <= (others => (others => (re => "0000000000000000000000000",
+                                                      im => "0000000000000000000000000")));
         elsif rising_edge(clk) then
             if load = '1' then
                 register_value <= data_in;

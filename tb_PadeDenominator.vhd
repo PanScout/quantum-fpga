@@ -1,39 +1,45 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.all;
-use work.qTypes.all;
+-- Include your fixed?point and complex type definitions
+--use work.fixed.ALL;
+use IEEE.fixed_pkg.ALL;
+use work.qTypes.ALL;
 
 entity tb_padeDenominator is
 end tb_padeDenominator;
 
-architecture Behavioral of tb_padeDenominator is
-
-    component padeDenominator
-        Port (
-            clk   : in  std_logic;
-            reset : in  std_logic;
-            start : in  std_logic;
-            B     : in  cmatrixHigh;
-            P     : out cmatrixHigh;
-            done  : out std_logic
-        );
-    end component;
-
+architecture sim of tb_padeDenominator is
+    -- Testbench signals
     signal clk   : std_logic := '0';
-    signal reset : std_logic := '1';
+    signal reset : std_logic := '0';
     signal start : std_logic := '0';
     signal B     : cmatrixHigh;
     signal P     : cmatrixHigh;
     signal done  : std_logic;
-
-    constant clk_period : time := 10 ns;
-
+    
+    -- For this example we assume cmatrixHigh is a 2x2 array.
+    -- We initialize a sample B matrix with nonzero fixed-point values.
+    constant sample_B : cmatrixHigh := (
+        0 => (
+            0 => ( re => to_sfixed(1, fixedHigh'high, fixedHigh'low),
+                   im => to_sfixed(0, fixedHigh'high, fixedHigh'low) ),
+            1 => ( re => to_sfixed(2, fixedHigh'high, fixedHigh'low),
+                   im => to_sfixed(0, fixedHigh'high, fixedHigh'low) )
+        ),
+        1 => (
+            0 => ( re => to_sfixed(3, fixedHigh'high, fixedHigh'low),
+                   im => to_sfixed(0, fixedHigh'high, fixedHigh'low) ),
+            1 => ( re => to_sfixed(4, fixedHigh'high, fixedHigh'low),
+                   im => to_sfixed(0, fixedHigh'high, fixedHigh'low) )
+        )
+    );
+    
 begin
 
-    -- Instantiate Unit Under Test (UUT)
-    uut: padeDenominator
-        port map (
+    -- Instantiate the DUT (Design Under Test)
+    DUT: entity work.padeDenominator
+        port map(
             clk   => clk,
             reset => reset,
             start => start,
@@ -41,53 +47,47 @@ begin
             P     => P,
             done  => done
         );
-
-    -- Clock generation process
-    clk_process: process
+        
+    -- Clock generation: 20 ns period (10 ns low, 10 ns high)
+    clk_process : process
     begin
-        clk <= '0';
-        wait for clk_period/2;
-        clk <= '1';
-        wait for clk_period/2;
-    end process;
-
-    -- Stimulus process
-    stim_proc: process
-        -- Declare a local variable for matrix initialization
-        variable temp_var : cmatrixHigh;
-    begin
-        -- Initialize B to a 3x3 identity matrix
-        for i in 0 to numBasisStates - 1 loop
-            for j in 0 to numBasisStates - 1 loop
-                if i = j then
-                    temp_var(i)(j).re := to_sfixed(1, fixedHigh'high, fixedHigh'low);
-                else
-                    temp_var(i)(j).re := to_sfixed(0, fixedHigh'high, fixedHigh'low);
-                end if;
-                temp_var(i)(j).im := to_sfixed(0, fixedHigh'high, fixedHigh'low);
-            end loop;
+        while true loop
+            clk <= '0';
+            wait for 10 ns;
+            clk <= '1';
+            wait for 10 ns;
         end loop;
-        B <= temp_var;
-
-        -- Apply reset
-        reset <= '1';
-        wait for clk_period*2;
-        reset <= '0';
-        wait for clk_period*2;
-
-        -- Start computation
-        start <= '1';
-        wait for clk_period;
-        start <= '0';
-
-        -- Wait for completion
-        wait until done = '1';
-        wait for clk_period*2;
-
-        -- End simulation
-        report "Simulation completed successfully";
-        wait;
     end process;
-
-end Behavioral;
+    
+    -- Stimulus process
+    stim_process : process
+    begin
+        -- Apply an initial value for input matrix B.
+        B <= sample_B;
+        
+        -- Assert reset to initialize the DUT.
+        reset <= '1';
+        wait for 20 ns;
+        reset <= '0';
+        wait for 20 ns;
+        
+        -- Start the operation.
+        start <= '1';
+        wait for 20 ns;
+        start <= '0';
+        
+        -- Wait until the operation is complete (done signal asserted).
+        wait until done = '1';
+        
+        -- Wait a short time to observe final output P.
+        wait for 20 ns;
+        
+        -- Report completion (if your simulation tool supports reporting complex types,
+        -- you may need to convert P to a string or inspect the waveform).
+        report "Test completed. Output matrix P has been computed." severity note;
+        
+        wait;  -- Stop simulation.
+    end process;
+    
+end sim;
 

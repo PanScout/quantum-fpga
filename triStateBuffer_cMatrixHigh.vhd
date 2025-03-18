@@ -21,8 +21,8 @@ architecture Behavioral of triStateBuffer_cMatrixHigh is
     -- A default value used while the output is "disabled."
     constant default_val : cmatrixHigh :=
       (others => (others => (
-           re => to_sfixed(0.0, fixedHigh'high, fixedHigh'low),
-           im => to_sfixed(0.0, fixedHigh'high, fixedHigh'low)
+           re => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+           im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
       )));
 begin
 

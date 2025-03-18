@@ -1,7 +1,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use work.fixed.ALL;
+--use work.fixed.ALL;
 use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.sfixed.ALL;
 
 entity Insert_Imaginary_Time_Into_CMatrix is --H and i are hardcoded while time is an input
     Port (
@@ -59,7 +61,7 @@ architecture Structural of Insert_Imaginary_Time_Into_CMatrix is
 
 begin
 
-    t_imag <= (re => to_sfixed(0.0, fixed'high, fixed'low), im => t.re);
+    t_imag <= (re => "0000000000000000000000000", im => t.re);
 
     -- First multiplication: Multiply fixed matrix by fixed scalar
     Mult1: Matrix_By_Scalar_Multiplication

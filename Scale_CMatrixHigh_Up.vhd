@@ -1,8 +1,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-use work.fixed.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use work.fixed.ALL;
 use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.sfixed.ALL;
 
 entity Scale_CMatrixHigh_Up is
     Port (
@@ -48,19 +50,19 @@ begin
             done <= '0';
             -- Proper complex matrix initialization
             Result <= (others => (others => (
-                re => to_sfixed(0.0, fixedHigh'high, fixedHigh'low),
-                im => to_sfixed(0.0, fixedHigh'high, fixedHigh'low)
+                re => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
             )));
             current_matrix <= (others => (others => (
-                re => to_sfixed(0.0, fixedHigh'high, fixedHigh'low),
-                im => to_sfixed(0.0, fixedHigh'high, fixedHigh'low)
+                re => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
             )));
             counter <= 0;
             
         elsif rising_edge(clk) then
             case state is
                 when IDLE =>
-                    done <= '0';
+                    --done <= '0';
 		    if start = '1' then
                         state <= INIT;
                     end if;

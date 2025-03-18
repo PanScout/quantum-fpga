@@ -1,7 +1,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use work.fixed.ALL;
+--use work.fixed.ALL;
 use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.sfixed.ALL;
 
 entity Filter_Time_To_nPi is
     Port (
@@ -12,7 +14,7 @@ end Filter_Time_To_nPi;
 
 architecture Concurrent of Filter_Time_To_nPi is
     -- Pre-calculated ? approximation in fixed(14.10) format
-    constant PI : fixed := to_sfixed(3.1416015625, fixed'high, fixed'low);
+    constant PI : fixed := "0000000000000000000000000000000000000000000000000110010010001000000000000000000000000000000000000000000000000000000";
     
     -- Tolerance adjusted for fixed(14.10) precision
     constant EPSILON : real := 0.002;  -- ~2 LSBs of 10 fractional bits
@@ -23,7 +25,7 @@ architecture Concurrent of Filter_Time_To_nPi is
         variable int_part : fixed := resize(ratio, ratio'high, 0);
         variable frac_part : fixed := ratio - int_part;
     begin
-        return abs(to_real(frac_part)) < EPSILON;
+        return abss(to_real(frac_part)) < EPSILON;
     end function;
 
 begin
