@@ -4,7 +4,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use work.fixed.ALL;
 --use IEEE.fixed_pkg.ALL;
 use work.qTypes.all;
-use work.sfixed.ALL;
+use work.fixed_pkg.ALL;
 
 entity Generate_Scaling_Factor is
     Port (

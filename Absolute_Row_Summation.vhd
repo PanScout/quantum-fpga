@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 --use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
-use work.sfixed.ALL;
+use work.fixed_pkg.ALL;
 
 -------------------------------------------------------------------------------
 -- Entity
@@ -37,7 +37,7 @@ begin
         BS_j0: block
           signal val : fixedHigh;
         begin
-          val <= resize(abss(A(i)(j).re) + abss(A(i)(j).im), fixedHigh'high, fixedHigh'low);
+          val <= resize(abs(A(i)(j).re) + abs(A(i)(j).im), fixedHigh'high, fixedHigh'low);
           partialSum(i, j) <= val;
         end block BS_j0;
       end generate gen_j0;
@@ -47,7 +47,7 @@ begin
         BS_j: block
           signal val : fixedHigh;
         begin
-          val <= resize(abss(A(i)(j).re) + abss(A(i)(j).im), fixedHigh'high, fixedHigh'low);
+          val <= resize(abs(A(i)(j).re) + abs(A(i)(j).im), fixedHigh'high, fixedHigh'low);
           partialSum(i, j) <= resize(partialSum(i, j-1) + val, fixedHigh'high, fixedHigh'low);
         end block BS_j;
       end generate gen_j_others;

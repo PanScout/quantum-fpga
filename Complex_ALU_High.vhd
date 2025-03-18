@@ -4,7 +4,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use work.fixed.ALL; 
 use work.qTypes.ALL;  -- Import the qTypes package
 --use IEEE.fixed_pkg.ALL;
-use work.sfixed.ALL;
+use work.fixed_pkg.ALL;
 
 -- Entity Declaration
 entity Complex_ALU_High is

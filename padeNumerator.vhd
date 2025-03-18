@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 --use work.fixed.ALL;
 use work.qTypes.ALL;
-use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
 
 entity padeNumerator is
     Port (
@@ -140,7 +140,7 @@ begin
                         end if;
                         step_counter <= step_counter + 1;
                     else
-                        state <= IDLE;
+                        --state <= IDLE;
                         done_s <= '1';
                     end if;
             end case;
@@ -149,8 +149,10 @@ begin
 
     done <= done_s;
 
-    P <= current_result when (state = IDLE and done_s = '1') else
-         init_cmatrixHigh_zero;
+    --P <= current_result when (state = IDLE and done_s = '1') else
+         --init_cmatrixHigh_zero;
+
+    P <= current_result;
 
 
 

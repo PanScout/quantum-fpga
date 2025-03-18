@@ -4,7 +4,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use work.fixed.ALL;
 --use IEEE.fixed_pkg.ALL;
 --use IEEE.fixed_pkg.ALL;
-use work.sfixed.ALL;
+use work.fixed_pkg.ALL;
 
 -- Import your custom types (cfixedHigh, cvectorHigh, fixedHigh, etc.)
 use work.qTypes.all;

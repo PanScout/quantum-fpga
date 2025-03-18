@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use work.sfixed.ALL;
+use work.fixed_pkg.ALL;
 use work.qTypes.all;
 --use IEEE.fixed_pkg.ALL;
 

@@ -4,7 +4,7 @@ use IEEE.NUMERIC_STD.ALL;
 --use work.fixed.ALL;
 use work.qTypes.all;
 --use IEEE.fixed_pkg.ALL;
-use work.sfixed.ALL;
+use work.fixed_pkg.ALL;
 
 entity Pade_Top_Level is
     Port (

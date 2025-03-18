@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.qTypes.all;
-use work.sfixed.ALL;
+use work.fixed_pkg.ALL;
 
 entity Matrix_Inversion_State_Machine is
     Port (

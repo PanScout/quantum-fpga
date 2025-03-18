@@ -2,7 +2,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
 use work.qTypes.all;
 
 entity Quantum_FPGA is
@@ -109,9 +109,10 @@ pade: Pade_Top_Level port map(clk => clk, reset => reset, H => H, t => t, padeDo
 padeBuff: triStateBuffer_cmatrix port map(data_in => padeOutput, enable => tEnable, data_out => padeBuffOut);
 mult: Matrix_By_Vector_Multiplication port map(A => padeBuffOut, V => psiOut, Result => UxPsiOut);
 stateBuff: TristateBuffer_cvector port map(data_in => UxPsiOut, enable => padeDone, data_out => stateOut);
-prob: Probability_Cvector  port map(cv_in => stateOut, prob_out => probabilities);
+--prob: Probability_Cvector  port map(cv_in => stateOut, prob_out => probabilities);
 
 done <= padeDone;
-output <= probabilities;
+--output <= probabilities;
+output <= stateOut;
 
 end Behavioral;
