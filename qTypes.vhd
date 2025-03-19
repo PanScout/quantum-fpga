@@ -49,7 +49,7 @@ package qTypes is
     subtype fixed is sfixed(14 downto -10); 
     
     -- Fixed-point subtype with higher precision
-    subtype fixedHigh is sfixed(50 downto -64); 
+    subtype fixedHigh is sfixed(13 downto -50); 
     
     -- Complex fixed-point record for lower precision
     type cfixed is record
