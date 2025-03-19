@@ -15,7 +15,7 @@ end Norm_Theta_Ratio;
 architecture behav of Norm_Theta_Ratio is
     -- Example: divide by 4.0 (modify this constant as needed)
     constant DIVISOR : fixedHigh := 
-        "0000000000000000000000000000000000000000000000000100001100110011001100110011001100110011001100110011010000000000000";
+        "0000000000000000000011110101000010010110001111111111101100000000";
 begin
     -- Concurrent division with proper resizing
     output <= resize(input / DIVISOR, fixedHigh'high, fixedHigh'low);

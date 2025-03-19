@@ -51,8 +51,8 @@ begin
 
     -- Reassemble norm_out into a cfixedHigh signal (with imaginary part zero)
     ceil_in.re <= norm_out;
-    ceil_in.im <= "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-
+    --ceil_in.im <= "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    ceil_in.im <= to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
     -- Instantiate Ceiling_Of_Log2
     CeilingOfLog2_inst: Ceiling_Of_Log2
         port map (
@@ -61,8 +61,8 @@ begin
         );
 
     -- The final result is assigned to S
-    S <= ( re => resize(ceil_out.re + "0000000000000000000000000000000000000000000000000110000000000000000000000000000000000000000000000000000000000000000", fixedHigh'high, fixedHigh'low), im => ceil_out.im );
-
+    --S <= ( re => resize(ceil_out.re + "0000000000000000000000000000000000000000000000000110000000000000000000000000000000000000000000000000000000000000000", fixedHigh'high, fixedHigh'low), im => ceil_out.im );
+    S <= ( re => resize(ceil_out.re + to_sfixed(3.0, fixedHigh'high, fixedHigh'low), fixedHigh'high, fixedHigh'low), im => ceil_out.im );
 
 
 
