@@ -4447,8 +4447,8 @@ package body fixed_pkg is
       end loop;
       if argx /= 0 or left_index < 0 or sign /= sresult(sresult'left) then
         assert NO_WARNING
-          report fixed_pkg'instance_name
-          & "TO_SFIXED(INTEGER): vector truncated"
+          --report fixed_pkg'instance_name
+          --& "TO_SFIXED(INTEGER): vector truncated"
           severity warning;
         if overflow_style = fixed_saturate then                -- saturate
           if arg < 0 then
