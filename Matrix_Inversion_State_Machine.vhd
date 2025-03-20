@@ -38,7 +38,7 @@ architecture Behavioral of Matrix_Inversion_State_Machine is
     
     -- Control signals
     signal mult_start, mult_done : std_logic := '0';
-    signal iteration : natural range 0 to 50 := 0;
+    signal iteration : natural range 0 to 150 := 0;
     
 begin
 
@@ -90,8 +90,9 @@ begin
                         for i in 0 to numBasisStates-1 loop
                             for j in 0 to numBasisStates-1 loop
                                 if i = j then
-                                    identity(i)(j).re := "0000000000000100000000000000000000000000000000000000000000000000";
-                                    identity(i)(j).im := "0000000000000000000000000000000000000000000000000000000000000000";
+                                    --identity(i)(j).re := "0000000000000100000000000000000000000000000000000000000000000000";
+                                    identity(i)(j).re := to_sfixed(2, fixedHigh'high, fixedHigh'low);
+				    identity(i)(j).im := "0000000000000000000000000000000000000000000000000000000000000000";
                                 else
                                     identity(i)(j).re := "0000000000000000000000000000000000000000000000000000000000000000";
                                     identity(i)(j).im := "0000000000000000000000000000000000000000000000000000000000000000";
