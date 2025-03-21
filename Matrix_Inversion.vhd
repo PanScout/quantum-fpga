@@ -19,8 +19,10 @@ end Matrix_Inversion;
 architecture TopLevel of Matrix_Inversion is
     component Newtons_Guess is
         Port (
-            A          : in  cmatrixHigh;
-            scaled_AT  : out cmatrixHigh
+        clk      : in  std_logic;
+        reset    : in  std_logic;
+        A        : in  cmatrixHigh;
+        scaled_AT : out cmatrixHigh
         );
     end component;
 
@@ -44,6 +46,8 @@ begin
     -- Generate initial guess using scaled transpose method
     GUESS_CALCULATOR: Newtons_Guess
     port map(
+        clk => clk,
+	reset => rst,
         A => input_matrix,
         scaled_AT => initial_guess
     );

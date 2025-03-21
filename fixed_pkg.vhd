@@ -4547,9 +4547,9 @@ package body fixed_pkg is
       return NASF;
     end if;
     if (arg >= (2.0**left_index) or arg < -(2.0**left_index)) then
-      assert NO_WARNING report fixed_pkg'instance_name
-        & "TO_SFIXED(REAL): vector truncated"
-        severity warning;
+      --assert NO_WARNING report fixed_pkg'instance_name
+        --& "TO_SFIXED(REAL): vector truncated"
+        --severity warning;
       if overflow_style = fixed_saturate then
         if arg < 0.0 then               -- saturate
           result := not saturate (result'high, result'low);        -- underflow

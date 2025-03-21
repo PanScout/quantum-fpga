@@ -5,8 +5,10 @@ use work.fixed_pkg.ALL;
 
 entity Newtons_Guess is
     Port (
-        A          : in  cmatrixHigh;
-        scaled_AT  : out cmatrixHigh
+        clk      : in  std_logic;
+        reset    : in  std_logic;
+        A        : in  cmatrixHigh;
+        scaled_AT : out cmatrixHigh
     );
 end Newtons_Guess;
 
@@ -21,63 +23,83 @@ architecture Structural of Newtons_Guess is
     component Calculate_Norm_And_Compare is
         port (
             A              : in  cmatrixHigh;
-            isBelow        : out std_logic;
             InfinityNormOut : out cfixedHigh
         );
     end component;
 
-    constant SCALE_FACTOR : integer := 24;  -- Must be <=24 for Q13.50 format
-    constant SCALE_MUL    : sfixed(13 downto -50) := 
-        to_sfixed(2.0**SCALE_FACTOR, 13, -50);
-    constant EPSILON : fixedHigh := b"0000000000000000000000000000000000000000000000000000010001100110";
+    component NewtonRaphsonReciprocal is
+        Port (
+            clk    : in  std_logic;
+            reset  : in  std_logic;
+            start  : in  std_logic;
+            X      : in  fixedHigh;
+            Y      : out fixedHigh;
+            done   : out std_logic
+        );
+    end component;
 
     signal AT : cmatrixHigh;
     signal infinity_norm, one_norm : cfixedHigh;
-    signal scaled_norm_product, reciprocal_product : sfixed(13 downto -50);
-    
+    signal norm_product : fixedHigh;
+    signal recip_start, recip_done : std_logic := '0';
+    signal reciprocal_norm : fixedHigh;
+
 begin
+    -- Stage 1: Transpose matrix and compute norms
     TRANSPOSE: Matrix_Transpose
     port map(A, AT);
 
-    INF: Calculate_Norm_And_Compare port map(A, open, infinity_norm);
-    ONE: Calculate_Norm_And_Compare port map(AT, open, one_norm);
+    INF: Calculate_Norm_And_Compare port map(A, infinity_norm);
+    ONE: Calculate_Norm_And_Compare port map(AT, one_norm);
 
-    -- Stage 1: Scale and multiply norms (keeps within 64 bits)
-    scaled_norm_product <= resize(
-        (infinity_norm.re / SCALE_MUL) * (one_norm.re / SCALE_MUL),
-        scaled_norm_product'high,
-        scaled_norm_product'low
+    -- Compute N1 * N2 directly
+    norm_product <= resize(
+        infinity_norm.re * one_norm.re,
+        fixedHigh'high,
+        fixedHigh'low,
+        fixed_overflow_style,
+        fixed_round_style
     );
 
-    -- Stage 2: Calculate reciprocal with overflow protection
-    reciprocal_process: process(scaled_norm_product)
+    -- Stage 2: Trigger Newton-Raphson unconditionally
+    process(clk)
     begin
-        if scaled_norm_product < EPSILON then
-            reciprocal_product <= (others => '0');
-        else
-            reciprocal_product <= resize(
-                reciprocal(scaled_norm_product),
-                13,
-                -50
-            );
+        if rising_edge(clk) then
+            recip_start <= '1';  -- Always start (no epsilon check)
         end if;
     end process;
 
-    -- Stage 3: Apply scaling with exact mathematical equivalence
+    -- Instantiate Newton-Raphson (20 iterations)
+    NR_INST: NewtonRaphsonReciprocal
+    port map (
+        clk    => clk,
+        reset  => reset,
+        start  => recip_start,
+        X      => norm_product,
+        Y      => reciprocal_norm,
+        done   => recip_done
+    );
+
+    -- Stage 3: Compute A^T / (N1*N2)
     gen_scaling: for i in 0 to numBasisStates-1 generate
         gen_scaling_row: for j in 0 to numBasisStates-1 generate
-            -- Original formula: AT/(N1*N2) 
-            -- New equivalent: (AT * reciprocal_product) / (SCALE_MUL^2)
-            scaled_AT(i)(j).re <= resize(
-                (AT(i)(j).re * reciprocal_product) / SCALE_MUL / SCALE_MUL,
-                fixedHigh'high,
-                fixedHigh'low
-            );
-            scaled_AT(i)(j).im <= resize(
-                (AT(i)(j).im * reciprocal_product) / SCALE_MUL / SCALE_MUL,
-                fixedHigh'high,
-                fixedHigh'low
-            );
+            process(clk)
+            begin
+                if rising_edge(clk) then
+                    if recip_done = '1' then
+                        scaled_AT(i)(j).re <= resize(
+                            AT(i)(j).re * reciprocal_norm,
+                            fixedHigh'high,
+                            fixedHigh'low
+                        );
+                        scaled_AT(i)(j).im <= resize(
+                            AT(i)(j).im * reciprocal_norm,
+                            fixedHigh'high,
+                            fixedHigh'low
+                        );
+                    end if;
+                end if;
+            end process;
         end generate;
     end generate;
 end Structural;
