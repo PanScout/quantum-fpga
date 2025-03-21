@@ -1,9 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
---use IEEE.NUMERIC_STD.ALL;
---use work.fixed.ALL;
 use work.qTypes.all;
---use IEEE.fixed_pkg.ALL;
 use work.fixed_pkg.ALL;
 
 entity Newtons_Guess is
@@ -29,41 +26,58 @@ architecture Structural of Newtons_Guess is
         );
     end component;
 
-    -- Internal signals
+    constant SCALE_FACTOR : integer := 24;  -- Must be <=24 for Q13.50 format
+    constant SCALE_MUL    : sfixed(13 downto -50) := 
+        to_sfixed(2.0**SCALE_FACTOR, 13, -50);
+    constant EPSILON : fixedHigh := b"0000000000000000000000000000000000000000000000000000010001100110";
+
     signal AT : cmatrixHigh;
-    signal infinity_norm_A, one_norm_A : cfixedHigh;
-    signal norm_product : sfixed(fixedHigh'high*2+1 downto fixedHigh'low*2);
+    signal infinity_norm, one_norm : cfixedHigh;
+    signal scaled_norm_product, reciprocal_product : sfixed(13 downto -50);
     
 begin
-    -- Stage 1: Transpose the matrix
     TRANSPOSE: Matrix_Transpose
-    port map(
-        input_matrix => A,
-        output_matrix => AT
+    port map(A, AT);
+
+    INF: Calculate_Norm_And_Compare port map(A, open, infinity_norm);
+    ONE: Calculate_Norm_And_Compare port map(AT, open, one_norm);
+
+    -- Stage 1: Scale and multiply norms (keeps within 64 bits)
+    scaled_norm_product <= resize(
+        (infinity_norm.re / SCALE_MUL) * (one_norm.re / SCALE_MUL),
+        scaled_norm_product'high,
+        scaled_norm_product'low
     );
 
-    -- Stage 2: Calculate norms
-    INF_NORM_A: Calculate_Norm_And_Compare
-    port map(
-        A => A,
-        InfinityNormOut => infinity_norm_A
-    );
+    -- Stage 2: Calculate reciprocal with overflow protection
+    reciprocal_process: process(scaled_norm_product)
+    begin
+        if scaled_norm_product < EPSILON then
+            reciprocal_product <= (others => '0');
+        else
+            reciprocal_product <= resize(
+                reciprocal(scaled_norm_product),
+                13,
+                -50
+            );
+        end if;
+    end process;
 
-    ONE_NORM: Calculate_Norm_And_Compare
-    port map(
-        A => AT,  -- Infinity norm of transpose = 1-norm of original
-        InfinityNormOut => one_norm_A
-    );
-
-    -- Stage 3: Calculate product of norms
-    norm_product <= infinity_norm_A.re * one_norm_A.re;
-
-    -- Stage 4: Scale transposed matrix
+    -- Stage 3: Apply scaling with exact mathematical equivalence
     gen_scaling: for i in 0 to numBasisStates-1 generate
         gen_scaling_row: for j in 0 to numBasisStates-1 generate
-            scaled_AT(i)(j).re <= resize(AT(i)(j).re / norm_product, fixedHigh'high, fixedHigh'low);
-            scaled_AT(i)(j).im <= resize(AT(i)(j).im / norm_product, fixedHigh'high, fixedHigh'low);
-        end generate gen_scaling_row;
-    end generate gen_scaling;
-
+            -- Original formula: AT/(N1*N2) 
+            -- New equivalent: (AT * reciprocal_product) / (SCALE_MUL^2)
+            scaled_AT(i)(j).re <= resize(
+                (AT(i)(j).re * reciprocal_product) / SCALE_MUL / SCALE_MUL,
+                fixedHigh'high,
+                fixedHigh'low
+            );
+            scaled_AT(i)(j).im <= resize(
+                (AT(i)(j).im * reciprocal_product) / SCALE_MUL / SCALE_MUL,
+                fixedHigh'high,
+                fixedHigh'low
+            );
+        end generate;
+    end generate;
 end Structural;
