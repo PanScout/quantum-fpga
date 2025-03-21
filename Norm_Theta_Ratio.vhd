@@ -1,9 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
 use work.fixed_pkg.ALL;
 use work.qTypes.all;
---use IEEE.fixed_pkg.ALL;
 
 entity Norm_Theta_Ratio is
     Port (
@@ -13,10 +11,23 @@ entity Norm_Theta_Ratio is
 end Norm_Theta_Ratio;
 
 architecture behav of Norm_Theta_Ratio is
-    -- Example: divide by 4.0 (modify this constant as needed)
     constant DIVISOR : fixedHigh := 
         "0000000000000000000011110101000010010110001111111111101100000000";
+    
+    constant reciprocal_DIVISOR : fixedHigh := 
+        resize(
+            reciprocal(DIVISOR), 
+            fixedHigh'high, 
+            fixedHigh'low,
+            fixed_overflow_style,  -- Lowercase enumeration
+            fixed_round_style       -- Lowercase enumeration
+        );
 begin
-    -- Concurrent division with proper resizing
-    output <= resize(input / DIVISOR, fixedHigh'high, fixedHigh'low);
+    output <= resize(
+        input * reciprocal_DIVISOR,
+        fixedHigh'high,
+        fixedHigh'low,
+        fixed_overflow_style,
+        fixed_round_style
+    );
 end behav;
