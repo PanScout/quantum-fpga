@@ -19,15 +19,19 @@
 !*.prj
 
 # Unignore image files (PNGs and JPEGs)
-!*.png
-!*.jpg
-!*.jpeg
+#!*.png
+#!*.jpg
+#!*.jpeg
 
 # Unignore text files
 !*.txt
 
 # Unignore MP4 files
-!*.mp4
+#!*.mp4
 
 # Unignore Jupyter Notebook files
 !*.ipynb
+
+# Ignore the 'db' folder
+db/
+
