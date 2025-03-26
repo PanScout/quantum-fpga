@@ -34,15 +34,15 @@ architecture Behavioral of padeDenominator is
 
     -- Horner's method coefficients for (((B-12)*B+60)*B-120)
     constant COEFF1 : cfixedHigh := (  -- -12
-        re => "1111111111010000000000000000000000000000000000000000000000000000",  -- Adjust binary representation
+        re => "1111111111110100000000000000000000000000000000000000000000000000",  -- Adjust binary representation
         im => (others => '0')                                                     -- based on your fixed-point format
     );
     constant COEFF2 : cfixedHigh := (  -- +60
-        re => "0000000011110000000000000000000000000000000000000000000000000000",
+        re => "0000000000111100000000000000000000000000000000000000000000000000",
         im => (others => '0')
     );
     constant COEFF3 : cfixedHigh := (  -- -120
-        re => "1111111000100000000000000000000000000000000000000000000000000000",
+        re => "1111111110001000000000000000000000000000000000000000000000000000",
         im => (others => '0')
     );
 
