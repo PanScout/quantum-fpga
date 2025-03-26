@@ -29,7 +29,7 @@ architecture structural of Calculate_Norm_And_Compare is
     -- 2) Define the constant THETA
     ----------------------------------------------------------------------------
     -- Adjust these bounds (40 downto -64) as needed to match 'fixedHigh'
-    constant THETA : fixedHigh := b"0000000000000000000011110101000010010110001111111111101100000000";
+    constant THETA : fixedHigh := b"0000000000000000000000111101010000100101100011111111111011000000";
 
     ----------------------------------------------------------------------------
     -- 3) Component declarations

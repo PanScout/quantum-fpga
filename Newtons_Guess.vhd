@@ -70,15 +70,11 @@ begin
     end process;
 
     -- Instantiate Newton-Raphson (20 iterations)
-    NR_INST: NewtonRaphsonReciprocal
-    port map (
-        clk    => clk,
-        reset  => reset,
-        start  => recip_start,
-        X      => norm_product,
-        Y      => reciprocal_norm,
-        done   => recip_done
-    );
+	 reciprocal_inst : entity work.ReciprocalEstimation
+		port map (
+			x => norm_product, -- Input is the normalized value
+			y => reciprocal_norm -- Output is the reciprocal estimation
+		);
 
     -- Stage 3: Compute A^T / (N1*N2)
     gen_scaling: for i in 0 to numBasisStates-1 generate

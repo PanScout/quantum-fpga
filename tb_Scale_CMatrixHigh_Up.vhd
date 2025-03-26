@@ -45,17 +45,17 @@ architecture Behavioral of tb_Scale_CMatrixHigh_Up is
     end function;
 
     -- Procedure to print matrix values
-    procedure print_cmatrixHigh(matrix : cmatrixHigh; name : string) is
-    begin
-        report "Matrix: " & name;
-        for i in matrix'range loop
-            for j in matrix(i)'range loop
-                report "(" & integer'image(i) & "," & integer'image(j) & "): " &
-                    "re = " & to_string(matrix(i)(j).re) &
-                    ", im = " & to_string(matrix(i)(j).im);
-            end loop;
-        end loop;
-    end procedure;
+    --procedure print_cmatrixHigh(matrix : cmatrixHigh; name : string) is
+    --begin
+      --  report "Matrix: " & name;
+        --for i in matrix'range loop
+          --  for j in matrix(i)'range loop
+            --    report "(" & integer'image(i) & "," & integer'image(j) & "): " &
+              --      "re = " & to_string(matrix(i)(j).re) &
+                --    ", im = " & to_string(matrix(i)(j).im);
+         --   end loop;
+       -- end loop;
+    --end procedure;
 
 begin
     uut: Scale_CMatrixHigh_Up
