@@ -4,16 +4,16 @@ use IEEE.NUMERIC_STD.ALL;
 use work.fixed_pkg.ALL;
 use work.qTypes.all;
 
-entity One_to_Two_Demux_CMatrixHigh is
+entity One_to_Two_Demux_CMatrix is
     Port (
         data_in : in  cmatrix;
         sel     : in  std_logic;
         out0    : out cmatrix;
         out1    : out cmatrix
     );
-end One_to_Two_Demux_CMatrixHigh;
+end One_to_Two_Demux_CMatrix;
 
-architecture Behavioral of One_to_Two_Demux_CMatrixHigh is
+architecture Behavioral of One_to_Two_Demux_CMatrix is
     -- Define a constant zero matrix (all elements zero)
     constant Z_MATRIX : cmatrix := (
         others => (others => (

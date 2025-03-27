@@ -4,11 +4,11 @@ use IEEE.NUMERIC_STD.ALL;
 use work.fixed64.ALL;
 use work.qTypes.ALL;
 
-entity TB_Matrix_By_Matrix_Multiplication_High is
+entity tb_Matrix_By_Matrix_Multiplication is
     -- Testbench has no ports.
-end TB_Matrix_By_Matrix_Multiplication_High;
+end tb_Matrix_By_Matrix_Multiplication;
 
-architecture Behavioral of TB_Matrix_By_Matrix_Multiplication_High is
+architecture Behavioral of tb_Matrix_By_Matrix_Multiplication is
 
     ----------------------------------------------------------------------------
     -- Signal Declarations
