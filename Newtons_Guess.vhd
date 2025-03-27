@@ -7,30 +7,30 @@ entity Newtons_Guess is
     Port (
         clk      : in  std_logic;
         reset    : in  std_logic;
-        A        : in  cmatrixHigh;
-        scaled_AT : out cmatrixHigh
+        A        : in  cmatrix;
+        scaled_AT : out cmatrix
     );
 end Newtons_Guess;
 
 architecture Structural of Newtons_Guess is
     component Matrix_Transpose is
         Port (
-            input_matrix  : in  cmatrixHigh;
-            output_matrix : out cmatrixHigh
+            input_matrix  : in  cmatrix;
+            output_matrix : out cmatrix
         );
     end component;
 
     component Calculate_Norm_And_Compare is
         port (
-            A              : in  cmatrixHigh;
-            InfinityNormOut : out cfixedHigh
+            A              : in  cmatrix;
+            InfinityNormOut : out cfixed64
         );
     end component;
 
-    signal AT : cmatrixHigh;
-    signal infinity_norm, one_norm : cfixedHigh;
-    signal norm_product : fixedHigh;
-    signal reciprocal_norm : fixedHigh;
+    signal AT : cmatrix;
+    signal infinity_norm, one_norm : cfixed64;
+    signal norm_product : fixed64;
+    signal reciprocal_norm : fixed64;
 
 begin
     -- Stage 1: Transpose matrix and compute norms
@@ -43,8 +43,8 @@ begin
     -- Compute N1 * N2 directly
     norm_product <= resize(
         infinity_norm.re * one_norm.re,
-        fixedHigh'high,
-        fixedHigh'low,
+        fixed64'high,
+        fixed64'low,
         fixed_overflow_style,
         fixed_round_style
     );
@@ -57,20 +57,20 @@ begin
         );
 
     -- Stage 2: Compute A^T / (N1*N2) using registered reciprocal
-    gen_scaling: for i in 0 to numBasisStates-1 generate
-        gen_scaling_row: for j in 0 to numBasisStates-1 generate
+    gen_scaling: for i in 0 to dimension-1 generate
+        gen_scaling_row: for j in 0 to dimension-1 generate
             process(clk)
             begin
                 if rising_edge(clk) then
                     scaled_AT(i)(j).re <= resize(
                         AT(i)(j).re * reciprocal_norm,
-                        fixedHigh'high,
-                        fixedHigh'low
+                        fixed64'high,
+                        fixed64'low
                     );
                     scaled_AT(i)(j).im <= resize(
                         AT(i)(j).im * reciprocal_norm,
-                        fixedHigh'high,
-                        fixedHigh'low
+                        fixed64'high,
+                        fixed64'low
                     );
                 end if;
             end process;

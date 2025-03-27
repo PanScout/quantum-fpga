@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use work.fixed.ALL;
+use work.fixed64.ALL;
 use work.qTypes.all;
 
 entity tb_Newtons_Guess is
@@ -10,13 +10,13 @@ end tb_Newtons_Guess;
 architecture Behavioral of tb_Newtons_Guess is
     component Newtons_Guess is
         Port (
-            A          : in  cmatrixHigh;
-            scaled_AT  : out cmatrixHigh
+            A          : in  cmatrix;
+            scaled_AT  : out cmatrix
         );
     end component;
 
-    signal A : cmatrixHigh;
-    signal scaled_AT : cmatrixHigh;
+    signal A : cmatrix;
+    signal scaled_AT : cmatrix;
     
     -- Test matrix parameters
     constant TEST_VAL : real := 4.0;
@@ -34,22 +34,22 @@ begin
         variable expected_re, actual_re : real;
     begin
         -- Initialize test matrix (first row = 4.0, others = 0.0)
-        for i in 0 to numBasisStates-1 loop
-            for j in 0 to numBasisStates-1 loop
+        for i in 0 to dimension-1 loop
+            for j in 0 to dimension-1 loop
                 if i = 0 then
-                    A(i)(j).re <= to_sfixed(TEST_VAL, fixedHigh'high, fixedHigh'low);
+                    A(i)(j).re <= to_sfixed(TEST_VAL, fixed64'high, fixed64'low);
                 else
-                    A(i)(j).re <= to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+                    A(i)(j).re <= to_sfixed(0.0, fixed64'high, fixed64'low);
                 end if;
-                A(i)(j).im <= to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+                A(i)(j).im <= to_sfixed(0.0, fixed64'high, fixed64'low);
             end loop;
         end loop;
 
         wait for 1 ns;  -- Allow combinatorial logic to settle
 
         -- Verify results
-        for i in 0 to numBasisStates-1 loop
-            for j in 0 to numBasisStates-1 loop
+        for i in 0 to dimension-1 loop
+            for j in 0 to dimension-1 loop
                 actual_re := to_real(scaled_AT(i)(j).re);
                 
                 -- Expected value calculation

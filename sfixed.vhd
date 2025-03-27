@@ -4,13 +4,13 @@ use IEEE.NUMERIC_STD.all;
 
 ----------------------------------------------------------------------------
 -- Package: sfixed
--- A minimal fixed?point package that supports the four basic operators
+-- A minimal fixed64?point package that supports the four basic operators
 -- (+, -, *, /), a compatibility resize function, an absolute value
 -- function, and now the basic comparison operators.
 ----------------------------------------------------------------------------
 package sfixed is
 
-  -- Define our fixed?point type.
+  -- Define our fixed64?point type.
   type sfixed is array (integer range <>) of std_logic;
 
   -- Four basic arithmetic operators.

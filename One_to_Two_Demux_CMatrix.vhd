@@ -6,16 +6,16 @@ use work.qTypes.all;
 
 entity One_to_Two_Demux_CMatrixHigh is
     Port (
-        data_in : in  cmatrixHigh;
+        data_in : in  cmatrix;
         sel     : in  std_logic;
-        out0    : out cmatrixHigh;
-        out1    : out cmatrixHigh
+        out0    : out cmatrix;
+        out1    : out cmatrix
     );
 end One_to_Two_Demux_CMatrixHigh;
 
 architecture Behavioral of One_to_Two_Demux_CMatrixHigh is
     -- Define a constant zero matrix (all elements zero)
-    constant Z_MATRIX : cmatrixHigh := (
+    constant Z_MATRIX : cmatrix := (
         others => (others => (
             re => (others => 'Z'),  -- Set all bits of real part to 'Z'
             im => (others => 'Z')   -- Set all bits of imaginary part to 'Z'

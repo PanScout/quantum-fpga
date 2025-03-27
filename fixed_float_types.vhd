@@ -1,5 +1,5 @@
 -- --------------------------------------------------------------------
--- "fixed_float_types" package contains types used in the fixed and floating
+-- "fixed_float_types" package contains types used in the fixed64 and floating
 -- point packages..
 -- Please see the documentation for the floating point package.
 -- This package should be compiled into "ieee_proposed" and used as follows:

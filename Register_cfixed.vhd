@@ -10,13 +10,13 @@ entity Register_cfixed is
         clk   : in std_logic;
         reset : in std_logic;
         load  : in std_logic;
-        d     : in cfixed;
-        q     : out cfixed
+        d     : in cfixed64;
+        q     : out cfixed64
     );
 end Register_cfixed;
 
 architecture Behavioral of Register_cfixed is
-    signal q_reg : cfixed;
+    signal q_reg : cfixed64;
 begin
     process(clk, reset)
     begin

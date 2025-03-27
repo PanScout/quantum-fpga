@@ -11,15 +11,15 @@ architecture Behavioral of tb_Calculate_Norm_and_Compare is
 
     component Calculate_Norm_And_Compare is
         port (
-            A               : in  cmatrixHigh;
+            A               : in  cmatrix;
             isBelow         : out std_logic;
-            InfinityNormOut : out cfixedHigh
+            InfinityNormOut : out cfixed64
         );
     end component;
 
-    signal A : cmatrixHigh;
+    signal A : cmatrix;
     signal isBelow : std_logic;
-    signal InfinityNormOut : cfixedHigh;
+    signal InfinityNormOut : cfixed64;
 
 begin
 
@@ -31,8 +31,8 @@ begin
         );
 
     process
-        -- Helper function to convert fixed point to real
-        function to_real_fx(fx : cfixedHigh) return real is
+        -- Helper function to convert fixed64 point to real
+        function to_real_fx(fx : cfixed64) return real is
         begin
             return to_real(fx.re);
         end function;

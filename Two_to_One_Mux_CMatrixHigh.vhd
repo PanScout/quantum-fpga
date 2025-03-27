@@ -7,10 +7,10 @@ use work.qTypes.all;
 -- Two-input, one-output multiplexer for complex matrices
 entity Two_to_One_Mux_CMatrixHigh is
     Port (
-        in0      : in  cmatrixHigh;  -- Input 0
-        in1      : in  cmatrixHigh;  -- Input 1
+        in0      : in  cmatrix;  -- Input 0
+        in1      : in  cmatrix;  -- Input 1
         sel      : in  std_logic;    -- Selector
-        data_out : out cmatrixHigh   -- Output
+        data_out : out cmatrix   -- Output
     );
 end Two_to_One_Mux_CMatrixHigh;
 

@@ -1,41 +1,41 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 --use IEEE.NUMERIC_STD.ALL;
---use work.fixed.ALL;
+--use work.fixed64.ALL;
 use work.qTypes.ALL;
 --use IEEE.fixed_pkg.ALL;
 use work.fixed_pkg.ALL;
 
-entity Scale_CMatrixHigh_Up is
+entity Scale_cmatrix_Up is
     Port (
         clk    : in  std_logic;
         reset  : in  std_logic;
 	start : in std_logic;
-        B      : in  cmatrixHigh;
-        S      : in  cfixedHigh;
-        Result : out cmatrixHigh;
+        B      : in  cmatrix;
+        S      : in  cfixed64;
+        Result : out cmatrix;
         done   : out std_logic
     );
-end Scale_CMatrixHigh_Up;
+end Scale_cmatrix_Up;
 
-architecture Behavioral of Scale_CMatrixHigh_Up is
+architecture Behavioral of Scale_cmatrix_Up is
     type state_type is (IDLE, INIT, SQUARING, EOE);
     signal state : state_type := IDLE;
     
-    signal current_matrix : cmatrixHigh;
-    signal next_matrix    : cmatrixHigh;
+    signal current_matrix : cmatrix;
+    signal next_matrix    : cmatrix;
     signal counter        : natural := 0;
     
-    component Matrix_By_Matrix_Multiplication_High is
+    component Matrix_By_Matrix_Multiplication is
         Port (
-            A : in  cmatrixHigh;
-            B : in  cmatrixHigh;
-            C : out cmatrixHigh
+            A : in  cmatrix;
+            B : in  cmatrix;
+            C : out cmatrix
         );
     end component;
 
 begin
-    Matrix_Multiplier: Matrix_By_Matrix_Multiplication_High
+    Matrix_Multiplier: Matrix_By_Matrix_Multiplication
         port map (
             A => current_matrix,
             B => current_matrix,

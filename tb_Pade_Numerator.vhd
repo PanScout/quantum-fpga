@@ -14,8 +14,8 @@ architecture Behavioral of tb_padeNumerator is
             clk   : in  std_logic;
             reset : in  std_logic;
             start : in  std_logic;
-            B     : in  cmatrixHigh;
-            P     : out cmatrixHigh;
+            B     : in  cmatrix;
+            P     : out cmatrix;
             done  : out std_logic
         );
     end component;
@@ -25,26 +25,26 @@ architecture Behavioral of tb_padeNumerator is
     signal reset    : std_logic := '0';
     signal start    : std_logic := '0';
     signal done     : std_logic;
-    signal B, P     : cmatrixHigh;
+    signal B, P     : cmatrix;
 
     -- Clock period
     constant CLK_PERIOD : time := 10 ns;
 
-    -- Function to initialize a cmatrixHigh with a real scalar value
-    function init_cmatrixHigh_scalar(value_real : real) return cmatrixHigh is
-        variable matrix : cmatrixHigh;
+    -- Function to initialize a cmatrix with a real scalar value
+    function init_cmatrixHigh_scalar(value_real : real) return cmatrix is
+        variable matrix : cmatrix;
     begin
         for i in matrix'range loop
             for j in matrix(i)'range loop
-                matrix(i)(j).re := to_sfixed(value_real, fixedHigh'high, fixedHigh'low);
-                matrix(i)(j).im := to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+                matrix(i)(j).re := to_sfixed(value_real, fixed64'high, fixed64'low);
+                matrix(i)(j).im := to_sfixed(0.0, fixed64'high, fixed64'low);
             end loop;
         end loop;
         return matrix;
     end function;
 
-    -- Function to print cmatrixHigh (for debugging)
-    procedure print_cmatrixHigh(matrix : cmatrixHigh; name : string) is
+    -- Function to print cmatrix (for debugging)
+    procedure print_cmatrixHigh(matrix : cmatrix; name : string) is
     begin
         report "Matrix: " & name;
         for i in matrix'range loop

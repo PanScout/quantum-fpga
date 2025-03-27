@@ -10,34 +10,34 @@ use work.fixed_pkg.ALL;
 -------------------------------------------------------------------------------
 entity Absolute_Row_Summation is
   port (
-    A : in  cmatrixHigh;  -- 4�4 matrix when nQubits=2
+    A : in  cmatrix;  -- 4�4 matrix when nQubits=2
 
-    -- Output 1: The computed infinity norm in cfixedHigh (imag part = 0)
-    rowSums : out cvectorHigh
+    -- Output 1: The computed infinity norm in cfixed64 (imag part = 0)
+    rowSums : out cvector
   );
 end entity Absolute_Row_Summation;
 
 
 architecture Behavioral of Absolute_Row_Summation is
 
-  type partialSum_array is array (0 to numBasisStates-1, 0 to numBasisStates-1) of fixedHigh;
+  type partialSum_array is array (0 to dimension-1, 0 to dimension-1) of fixed64;
   signal partialSum : partialSum_array;
    signal my_fixed : sfixed(14 downto -10);
 
 begin
 
-  gen_rows: for i in 0 to numBasisStates-1 generate
+  gen_rows: for i in 0 to dimension-1 generate
   begin
 
-    gen_cols: for j in 0 to numBasisStates-1 generate
+    gen_cols: for j in 0 to dimension-1 generate
     begin
 
       -- Handle first column (j=0) separately to avoid j-1 = -1
       gen_j0: if j = 0 generate
         BS_j0: block
-          signal val : fixedHigh;
+          signal val : fixed64;
         begin
-          val <= resize(abs(A(i)(j).re) + abs(A(i)(j).im), fixedHigh'high, fixedHigh'low);
+          val <= resize(abs(A(i)(j).re) + abs(A(i)(j).im), fixed64'high, fixed64'low);
           partialSum(i, j) <= val;
         end block BS_j0;
       end generate gen_j0;
@@ -45,18 +45,18 @@ begin
       -- Handle columns j > 0
       gen_j_others: if j > 0 generate
         BS_j: block
-          signal val : fixedHigh;
+          signal val : fixed64;
         begin
-          val <= resize(abs(A(i)(j).re) + abs(A(i)(j).im), fixedHigh'high, fixedHigh'low);
-          partialSum(i, j) <= resize(partialSum(i, j-1) + val, fixedHigh'high, fixedHigh'low);
+          val <= resize(abs(A(i)(j).re) + abs(A(i)(j).im), fixed64'high, fixed64'low);
+          partialSum(i, j) <= resize(partialSum(i, j-1) + val, fixed64'high, fixed64'low);
         end block BS_j;
       end generate gen_j_others;
 
     end generate gen_cols;
 
-    rowSums(i).re <= partialSum(i, numBasisStates-1);
+    rowSums(i).re <= partialSum(i, dimension-1);
     --rowSums(i).im <= b"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-    rowSums(i).im <= to_sfixed(0, fixedHigh'high, fixedHigh'low);
+    rowSums(i).im <= to_sfixed(0, fixed64'high, fixed64'low);
 
   end generate gen_rows;
 
