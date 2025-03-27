@@ -8,54 +8,54 @@ entity padeDenominator is
         clk   : in  std_logic;
         reset : in  std_logic;
         start : in  std_logic;
-        B     : in  cmatrixHigh;
-        P     : out cmatrixHigh;
+        B     : in  cmatrix;
+        P     : out cmatrix;
         done  : out std_logic
     );
 end padeDenominator;
 
 architecture Behavioral of padeDenominator is
 
-    component Matrix_Plus_Scalar_High is
+    component Matrix_Plus_Scalar is
         port (
-            input_cMatrixH : in  cmatrixHigh;
-            scalar         : in  cfixedHigh;
-            output_cMatrixH: out cmatrixHigh
+            input_cMatrixH : in  cmatrix;
+            scalar         : in  cfixed64;
+            output_cMatrixH: out cmatrix
         );
     end component;
 
-    component Matrix_By_Matrix_Multiplication_High is
+    component Matrix_By_Matrix_Multiplication is
         port (
-            A : in  cmatrixHigh;
-            B : in  cmatrixHigh;
-            C : out cmatrixHigh
+            A : in  cmatrix;
+            B : in  cmatrix;
+            C : out cmatrix
         );
     end component;
 
     -- Horner's method coefficients for (((B-12)*B+60)*B-120)
-    constant COEFF1 : cfixedHigh := (  -- -12
+    constant COEFF1 : cfixed64 := (  -- -12
         re => "1111111111110100000000000000000000000000000000000000000000000000",  -- Adjust binary representation
-        im => (others => '0')                                                     -- based on your fixed-point format
+        im => (others => '0')                                                     -- based on your fixed64-point format
     );
-    constant COEFF2 : cfixedHigh := (  -- +60
+    constant COEFF2 : cfixed64 := (  -- +60
         re => "0000000000111100000000000000000000000000000000000000000000000000",
         im => (others => '0')
     );
-    constant COEFF3 : cfixedHigh := (  -- -120
+    constant COEFF3 : cfixed64 := (  -- -120
         re => "1111111110001000000000000000000000000000000000000000000000000000",
         im => (others => '0')
     );
 
     type state_type is (IDLE, COMPUTING);
     signal state : state_type := IDLE;
-    signal current_result, B_reg : cmatrixHigh;
+    signal current_result, B_reg : cmatrix;
     signal step_counter : integer range 0 to 5 := 0;  -- Reduced counter range
-    signal current_coeff : cfixedHigh;
-    signal adder_out, mult_out : cmatrixHigh;
+    signal current_coeff : cfixed64;
+    signal adder_out, mult_out : cmatrix;
     signal done_s : std_logic;
 
-    function init_cmatrixHigh_zero return cmatrixHigh is
-        variable matrix : cmatrixHigh;
+    function init_cmatrixHigh_zero return cmatrix is
+        variable matrix : cmatrix;
     begin
         for i in matrix'range loop
             for j in matrix(i)'range loop
@@ -70,14 +70,14 @@ architecture Behavioral of padeDenominator is
 
 begin
 
-    ADDER: Matrix_Plus_Scalar_High
+    ADDER: Matrix_Plus_Scalar
         port map (
             input_cMatrixH => current_result,
             scalar         => current_coeff,
             output_cMatrixH=> adder_out
         );
 
-    MULTIPLIER: Matrix_By_Matrix_Multiplication_High
+    MULTIPLIER: Matrix_By_Matrix_Multiplication
         port map (
             A => current_result,
             B => B_reg,

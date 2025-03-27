@@ -9,8 +9,8 @@ entity triStateBuffer_cMatrixHigh is
         clk          : in  std_logic;
         rst          : in  std_logic;
         delay_cycles : in  natural;  -- Number of clock cycles to wait
-        data_in      : in  cmatrixHigh;
-        data_out     : out cmatrixHigh
+        data_in      : in  cmatrix;
+        data_out     : out cmatrix
     );
 end triStateBuffer_cMatrixHigh;
 
@@ -19,7 +19,7 @@ architecture Behavioral of triStateBuffer_cMatrixHigh is
     signal output_valid: std_logic := '0';
     
     -- A default value used while the output is "disabled."
-    constant default_val : cmatrixHigh :=
+    constant default_val : cmatrix :=
       (others => (others => (
            re => "0000000000000000000000000000000000000000000000000000000000000000",
            im => "0000000000000000000000000000000000000000000000000000000000000000"

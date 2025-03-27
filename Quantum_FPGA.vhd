@@ -10,7 +10,7 @@ entity Quantum_FPGA is
         reset  : in std_logic;
 	H      : in cmatrix;
 	psi    : in cvector;
-        t      : in  cfixed;
+        t      : in  cfixed64;
 
 	loadTime, loadHamiltonian, loadPsi: in std_logic; -- load signals
 	tEnable : in std_logic; --tri state enable
@@ -26,7 +26,7 @@ component Pade_Top_Level
         clk    : in std_logic;
         reset  : in std_logic;
 	H      : in cmatrix;
-        t      : in  cfixed;
+        t      : in  cfixed64;
 	padeDone : out std_logic;
         output : out cmatrix
     );
@@ -57,8 +57,8 @@ component Register_cfixed
         clk   : in std_logic;
         reset : in std_logic;
         load  : in std_logic;
-        d     : in cfixed;
-        q     : out cfixed
+        d     : in cfixed64;
+        q     : out cfixed64
     );
 end component;
 
@@ -93,7 +93,7 @@ component Probability_Cvector
     );
 end component;
 
-signal timeOut : cfixed;
+signal timeOut : cfixed64;
 signal HamiltonianOut : cmatrix;
 signal psiOut, UxPsiOut, stateOut, probabilities : cvector;
 signal padeOutput, padeBuffOut : cmatrix;

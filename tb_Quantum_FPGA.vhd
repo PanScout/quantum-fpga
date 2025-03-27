@@ -17,7 +17,7 @@ architecture sim of tb_Quantum_FPGA is
     signal reset           : std_logic := '0';
     signal H               : cmatrix;
     signal psi             : cvector;
-    signal t               : cfixed;
+    signal t               : cfixed64;
     signal loadTime        : std_logic := '0';
     signal loadHamiltonian : std_logic := '0';
     signal loadPsi         : std_logic := '0';

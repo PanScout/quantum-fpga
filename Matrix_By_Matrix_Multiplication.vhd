@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
---use work.fixed.ALL;
+--use work.fixed64.ALL;
 use work.qTypes.ALL;
 use work.fixed_pkg.ALL;
 
@@ -23,16 +23,16 @@ architecture Concurrent of Matrix_By_Matrix_Multiplication is
     end component;
 
     -- Array to store B's columns as vectors
-    type column_array is array (0 to numBasisStates-1) of cvector;
+    type column_array is array (0 to dimension-1) of cvector;
 
 begin
     -- Generate a column processor for each column in matrix B
-    gen_column_processors : for col_idx in 0 to numBasisStates-1 generate
+    gen_column_processors : for col_idx in 0 to dimension-1 generate
         signal b_column : cvector;  -- Stores current column of B
         signal c_column : cvector;  -- Stores resulting column of C
     begin
         -- Extract column from B (B is row-major)
-        gen_column_extraction : for row_idx in 0 to numBasisStates-1 generate
+        gen_column_extraction : for row_idx in 0 to dimension-1 generate
         begin
             -- Convert row-major to column vector: B(row)(col) => b_column(row)
             b_column(row_idx) <= B(row_idx)(col_idx);
@@ -47,7 +47,7 @@ begin
             );
 
         -- Distribute result column to output matrix C
-        gen_column_distribution : for row_idx in 0 to numBasisStates-1 generate
+        gen_column_distribution : for row_idx in 0 to dimension-1 generate
         begin
             -- Assign to C's row-major format: C(row)(col) <= c_column(row)
             C(row_idx)(col_idx) <= c_column(row_idx);

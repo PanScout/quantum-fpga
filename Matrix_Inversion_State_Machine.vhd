@@ -8,19 +8,19 @@ entity Matrix_Inversion_State_Machine is
         clk             : in  std_logic;
         rst             : in  std_logic;
         start           : in  std_logic;
-        input_matrix    : in  cmatrixHigh;
-        input_guess     : in  cmatrixHigh;
-        output_matrix   : out cmatrixHigh;
+        input_matrix    : in  cmatrix;
+        input_guess     : in  cmatrix;
+        output_matrix   : out cmatrix;
         done            : out std_logic
     );
 end Matrix_Inversion_State_Machine;
 
 architecture Behavioral of Matrix_Inversion_State_Machine is
-    component Matrix_By_Matrix_Multiplication_High is
+    component Matrix_By_Matrix_Multiplication is
         Port (
-            A : in  cmatrixHigh;
-            B : in  cmatrixHigh;
-            C : out cmatrixHigh
+            A : in  cmatrix;
+            B : in  cmatrix;
+            C : out cmatrix
         );
     end component;
 
@@ -33,8 +33,8 @@ architecture Behavioral of Matrix_Inversion_State_Machine is
     signal state : state_type := IDLE;
     
     -- Matrix storage registers
-    signal Xk, Xnext, AX, twoI_minus_AX : cmatrixHigh;
-    signal matA, matB, matC : cmatrixHigh;
+    signal Xk, Xnext, AX, twoI_minus_AX : cmatrix;
+    signal matA, matB, matC : cmatrix;
     
     -- Control signals
     signal mult_start, mult_done : std_logic := '0';
@@ -43,7 +43,7 @@ architecture Behavioral of Matrix_Inversion_State_Machine is
 begin
 
     -- Instantiate matrix multiplier
-    MAT_MULT: Matrix_By_Matrix_Multiplication_High
+    MAT_MULT: Matrix_By_Matrix_Multiplication
     port map (
         A => matA,
         B => matB,
@@ -51,7 +51,7 @@ begin
     );
 
     process(clk)
-        variable identity : cmatrixHigh;
+        variable identity : cmatrix;
     begin
         if rising_edge(clk) then
             if rst = '1' then
@@ -87,11 +87,11 @@ begin
                         state <= LOAD_2I;
                         
                     when LOAD_2I =>
-                        for i in 0 to numBasisStates-1 loop
-                            for j in 0 to numBasisStates-1 loop
+                        for i in 0 to dimension-1 loop
+                            for j in 0 to dimension-1 loop
                                 if i = j then
                                     --identity(i)(j).re := "0000000000000100000000000000000000000000000000000000000000000000";
-                                    identity(i)(j).re := to_sfixed(2, fixedHigh'high, fixedHigh'low);
+                                    identity(i)(j).re := to_sfixed(2, fixed64'high, fixed64'low);
 				    identity(i)(j).im := "0000000000000000000000000000000000000000000000000000000000000000";
                                 else
                                     identity(i)(j).re := "0000000000000000000000000000000000000000000000000000000000000000";
@@ -104,15 +104,15 @@ begin
                         state <= SUB_2I;
                         
                     when SUB_2I =>
-                        for i in 0 to numBasisStates-1 loop
-                            for j in 0 to numBasisStates-1 loop
+                        for i in 0 to dimension-1 loop
+                            for j in 0 to dimension-1 loop
                                 twoI_minus_AX(i)(j).re <= resize(
                                     matA(i)(j).re - matB(i)(j).re,
-                                    fixedHigh'high, fixedHigh'low
+                                    fixed64'high, fixed64'low
                                 );
                                 twoI_minus_AX(i)(j).im <= resize(
                                     matA(i)(j).im - matB(i)(j).im,
-                                    fixedHigh'high, fixedHigh'low
+                                    fixed64'high, fixed64'low
                                 );
                             end loop;
                         end loop;

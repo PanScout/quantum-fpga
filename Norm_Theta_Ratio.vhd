@@ -5,28 +5,28 @@ use work.qTypes.all;
 
 entity Norm_Theta_Ratio is
     Port (
-        input  : in  fixedHigh;
-        output : out fixedHigh
+        input  : in  fixed64;
+        output : out fixed64
     );
 end Norm_Theta_Ratio;
 
 architecture behav of Norm_Theta_Ratio is
-    constant DIVISOR : fixedHigh := 
+    constant DIVISOR : fixed64 := 
         "0000000000000000000000111101010000100101100011111111111011000000";
     
-    constant reciprocal_DIVISOR : fixedHigh := 
+    constant reciprocal_DIVISOR : fixed64 := 
         resize(
             reciprocal(DIVISOR), 
-            fixedHigh'high, 
-            fixedHigh'low,
+            fixed64'high, 
+            fixed64'low,
             fixed_overflow_style,  -- Lowercase enumeration
             fixed_round_style       -- Lowercase enumeration
         );
 begin
     output <= resize(
         input * reciprocal_DIVISOR,
-        fixedHigh'high,
-        fixedHigh'low,
+        fixed64'high,
+        fixed64'low,
         fixed_overflow_style,
         fixed_round_style
     );

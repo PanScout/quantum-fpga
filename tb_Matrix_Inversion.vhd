@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use work.fixed_pkg.all;  -- Use only one fixed-point package
+use work.fixed_pkg.all;  -- Use only one fixed64-point package
 use work.qTypes.all;
 
 entity tb_Matrix_Inversion is
@@ -13,15 +13,15 @@ architecture Behavioral of tb_Matrix_Inversion is
             clk             : in  std_logic;
             rst             : in  std_logic;
             start           : in  std_logic;
-            input_matrix    : in  cmatrixHigh;
-            output_matrix   : out cmatrixHigh;
+            input_matrix    : in  cmatrix;
+            output_matrix   : out cmatrix;
             done            : out std_logic
         );
     end component;
 
     constant CLK_PERIOD : time := 10 ns;
     
-    -- Updated for 2x2 matrix (matches cmatrixHigh dimensions)
+    -- Updated for 2x2 matrix (matches cmatrix dimensions)
     type real_row is array (0 to 1) of real;
     type real_matrix is array (0 to 1) of real_row;
     
@@ -38,7 +38,7 @@ architecture Behavioral of tb_Matrix_Inversion is
     constant TOLERANCE : real := 1.0e-4;
 
     signal clk, rst, start, done : std_logic := '0';
-    signal input_matrix, output_matrix : cmatrixHigh;
+    signal input_matrix, output_matrix : cmatrix;
     
 begin
     uut: Matrix_Inversion port map (

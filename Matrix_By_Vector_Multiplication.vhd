@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
---use work.fixed.ALL;
+--use work.fixed64.ALL;
 use work.qTypes.ALL;
 use work.fixed_pkg.ALL;
 
@@ -19,24 +19,24 @@ architecture Concurrent of Matrix_By_Vector_Multiplication is
         Port (
             A      : in  cvector;
             B      : in  cvector;
-            C      : in  cfixed;
+            C      : in  cfixed64;
             Result : out cvector
         );
     end component;
 
     -- Array for intermediate accumulation results
-    type sum_array is array (0 to numBasisStates) of cvector;
+    type sum_array is array (0 to dimension) of cvector;
     signal sum : sum_array := (
         others => (others => (re => (others => '0'), im => (others => '0')))
     );
 
 begin
     -- Generate processing chain for each matrix column
-    gen_column_processing : for j in 0 to numBasisStates-1 generate
+    gen_column_processing : for j in 0 to dimension-1 generate
         signal column_vector : cvector;
     begin
         -- Extract j-th column from matrix
-        gen_column_extraction : for i in 0 to numBasisStates-1 generate
+        gen_column_extraction : for i in 0 to dimension-1 generate
             column_vector(i) <= A(i)(j);  -- A(row)(column)
         end generate gen_column_extraction;
 
@@ -51,5 +51,5 @@ begin
     end generate gen_column_processing;
 
     -- Connect final result
-    Result <= sum(numBasisStates);
+    Result <= sum(dimension);
 end architecture Concurrent;

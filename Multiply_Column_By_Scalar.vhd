@@ -5,33 +5,33 @@ use work.qTypes.ALL;
 
 entity Multiply_Column_By_Scalar is
     Port (
-        constComplex : in  cfixed;      -- ?? Input complex scalar
-        rowVector    : in  cvector;     -- ?? Input complex vector
-        outputVector : out cvector      -- ?? Output complex vector
+        constComplex : in  cfixed64;   -- ?? High-precision complex scalar
+        rowVector    : in  cvector;  -- ?? High-precision input vector
+        outputVector : out cvector   -- ?? High-precision output vector
     );
 end Multiply_Column_By_Scalar;
 
 architecture Behavioral of Multiply_Column_By_Scalar is
-    -- ?? Constants for range management
-    constant PROD_HIGH : integer := fixed'high + fixed'high + 1;  -- ?? Extra bit for safety
-    constant PROD_LOW  : integer := fixed'low + fixed'low;         -- ?? Maintain precision
+    -- ?? High-precision range constants
+    constant PROD_HIGH : integer := fixed64'high + fixed64'high + 1;  -- ?? Extra safety bit
+    constant PROD_LOW  : integer := fixed64'low + fixed64'low;         -- ?? Maintain precision
 begin
 
-    -- ?? Generate complex multiplications
-    gen_multiply: for i in 0 to numBasisStates - 1 generate
+    -- ?? Generate high-precision complex multiplications
+    gen_multiply: for i in 0 to dimension - 1 generate
     begin
         -- Real part: (a.re * b.re) - (a.im * b.im) ??
         outputVector(i).re <= resize(
             resize(constComplex.re * rowVector(i).re, PROD_HIGH, PROD_LOW) - 
             resize(constComplex.im * rowVector(i).im, PROD_HIGH, PROD_LOW),
-            fixed'high, fixed'low  -- ?? Final resize to output range
+            fixed64'high, fixed64'low  -- ?? Final resize to high-precision output
         );
         
         -- Imaginary part: (a.re * b.im) + (a.im * b.re) ??
         outputVector(i).im <= resize(
             resize(constComplex.re * rowVector(i).im, PROD_HIGH, PROD_LOW) + 
             resize(constComplex.im * rowVector(i).re, PROD_HIGH, PROD_LOW),
-            fixed'high, fixed'low  -- ?? Final resize to output range
+            fixed64'high, fixed64'low  -- ?? Final resize to high-precision output
         );
     end generate gen_multiply;
 
