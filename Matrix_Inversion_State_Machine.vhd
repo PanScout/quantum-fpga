@@ -92,10 +92,10 @@ begin
                                 if i = j then
                                     --identity(i)(j).re := "0000000000000100000000000000000000000000000000000000000000000000";
                                     identity(i)(j).re := to_sfixed(2, fixed64'high, fixed64'low);
-				    identity(i)(j).im := "0000000000000000000000000000000000000000000000000000000000000000";
+				    identity(i)(j).im := (others => '0');
                                 else
-                                    identity(i)(j).re := "0000000000000000000000000000000000000000000000000000000000000000";
-                                    identity(i)(j).im := "0000000000000000000000000000000000000000000000000000000000000000";
+                                    identity(i)(j).re := (others => '0');
+                                    identity(i)(j).im := (others => '0');
                                 end if;
                             end loop;
                         end loop;

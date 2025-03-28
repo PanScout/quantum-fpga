@@ -126,6 +126,6 @@ begin
          to_sfixed(1,  fixed64'high, fixed64'low) when scalar.re >= TH_1  else
          to_sfixed(0,  fixed64'high, fixed64'low);
     -- Imaginary component always zero
-    result.im <= "0000000000000000000000000000000000000000000000000000000000000000";
+    result.im <=(others => '0');
     --result.im <= to_sfixed(0.0, fixed64'high, fixed64'low);
 end Structural;

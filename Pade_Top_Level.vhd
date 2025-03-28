@@ -20,10 +20,12 @@ end Pade_Top_Level;
 architecture Behavioral of Pade_Top_Level is
 
     -- Declare a constant Hamiltonian of type cmatrix.
-    constant Hamiltonian : cmatrix := (
-        others => (others => ( re => "0000000000000000000000000000000000000000000000000000000000000000",
-                                im => "0000000000000000000000000000000000000000000000000000000000000000" ))
-    );
+constant Hamiltonian : cmatrix := (
+    others => (others => (
+        re => (others => '0'),
+        im => (others => '0')
+    ))
+);
 
     component Insert_Imaginary_Time_Into_CMatrix
     Port (
@@ -44,23 +46,23 @@ architecture Behavioral of Pade_Top_Level is
     );
     end component Calculate_Norm_And_Compare;
 
-    component One_to_Two_Demux_CMatrixHigh 
+    component One_to_Two_Demux_CMatrix 
     Port (
         data_in : in  cmatrix;
         sel     : in  std_logic;
         out0    : out cmatrix;
         out1    : out cmatrix
     );
-    end component One_to_Two_Demux_CMatrixHigh;
+    end component One_to_Two_Demux_CMatrix;
 
-    component Two_to_One_Mux_CMatrixHigh
+    component Two_to_One_Mux_CMatrix
     Port (
         in0      : in  cmatrix;  -- Input 0
         in1      : in  cmatrix;  -- Input 1
         sel      : in  std_logic;    -- Selector
         data_out : out cmatrix   -- Output
     );
-    end component Two_to_One_Mux_CMatrixHigh;
+    end component Two_to_One_Mux_CMatrix;
 
     component Generate_Scaling_Factor
     Port (
@@ -69,15 +71,15 @@ architecture Behavioral of Pade_Top_Level is
     );
     end component Generate_Scaling_Factor;
 
-    component Scale_CMatrixHigh_Down 
+    component Scale_CMatrix_Down 
     port (
         Input_Matrix  : in  cmatrix;
         Shift_Amount  : in  cfixed64; -- Interpreted as signed shift value
         Output_Matrix : out cmatrix
     );
-    end component Scale_CMatrixHigh_Down;
+    end component Scale_CMatrix_Down;
 
-    component Scale_CMatrixHigh_Up
+    component Scale_CMatrix_Up
     Port (
         clk    : in  std_logic;
         reset  : in  std_logic;
@@ -87,7 +89,7 @@ architecture Behavioral of Pade_Top_Level is
         Result : out cmatrix;
         done   : out std_logic
     );
-    end component Scale_CMatrixHigh_Up;
+    end component Scale_CMatrix_Up;
 
     component padeDenominator
     Port (
@@ -122,7 +124,7 @@ architecture Behavioral of Pade_Top_Level is
     );
     end component Matrix_Inversion;
 
-    component Register_cmatrixHigh
+    component Register_cmatrix
     Port (
         clk      : in  std_logic;
         rst      : in  std_logic;
@@ -150,7 +152,7 @@ architecture Behavioral of Pade_Top_Level is
     );
     end component;
 
-    component triStateBuffer_cMatrixHigh
+    component triStateBuffer_cMatrix
     Port (
         clk          : in  std_logic;
         rst          : in  std_logic;
@@ -199,7 +201,7 @@ begin
     Norm_And_Compare: Calculate_Norm_And_Compare port map(A => IHTtoNormAndCompareandD1, isBelow => TorF, infinityNormOut => InfNormOut);
     --D1: One_to_Two_Demux_CMatrixHigh port map(data_in => IHTtoNormAndCompareandD1, sel => TorF, out0 => IHTtoScalar, out1 => IHTdirect);
     Gen_Scaling_Factor: Generate_Scaling_Factor port map(input => InfNormOut, S => ScalingFactorOut);
-    Scale_Down: Scale_CMatrixHigh_Down port map(Input_Matrix => IHTtoNormAndCompareandD1, Shift_Amount => ScalingFactorOut, Output_Matrix => ScaleDownOut);
+    Scale_Down: Scale_CMatrix_Down port map(Input_Matrix => IHTtoNormAndCompareandD1, Shift_Amount => ScalingFactorOut, Output_Matrix => ScaleDownOut);
     --D2: Two_to_One_Mux_CMatrixHigh port map(in0 => IHTdirect, in1 => ScaleDownOut, sel => TorF, data_out => Mux2Out);
     --P_num: Pade_Numerator port map(B => ScaleDownOut, P => PNumeratorOut);
     --P_den: Pade_Denominator port map(B => ScaleDownOut, P => PDenominatorOut);
@@ -213,10 +215,10 @@ begin
     MULT: Matrix_By_Matrix_Multiplication port map(A => PNumeratorOut, B => InvOut, C => MatrixMultOut);
     reg3: Register_std_logic port map(clk => clk, reset => reset, load => '1', d => matrixInvDone, q => regStdLogicOut); 
     --D3: One_to_Two_Demux_CMatrixHigh port map(data_in => MatrixMultOut, sel => TorF, out0 => MatriPowIn, out1 => Mux4In);
-    Scale_Up: Scale_CMatrixHigh_Up port map(clk => clk, reset => reset, start => regStdLogicOut, B => MatrixMultOut, S => ScalingFactorOut, Result => ScaleUpOut, done => padeDone);
+    Scale_Up: Scale_CMatrix_Up port map(clk => clk, reset => reset, start => regStdLogicOut, B => MatrixMultOut, S => ScalingFactorOut, Result => ScaleUpOut, done => padeDone);
     --D4: Two_to_One_Mux_CMatrixHigh port map(in0 => Mux4In, in1 => ScaleUpOut, sel => TorF, data_out => Mux4Out);
     
-    output <= toCmatrix(ScaleUpOut);
+    output <= ScaleUpOut;
 
 
     

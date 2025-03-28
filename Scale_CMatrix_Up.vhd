@@ -1,16 +1,14 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
---use IEEE.NUMERIC_STD.ALL;
---use work.fixed64.ALL;
-use work.qTypes.ALL;
---use IEEE.fixed_pkg.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.qTypes.all;
 use work.fixed_pkg.ALL;
 
 entity Scale_cmatrix_Up is
     Port (
         clk    : in  std_logic;
         reset  : in  std_logic;
-	start : in std_logic;
+        start  : in  std_logic;
         B      : in  cmatrix;
         S      : in  cfixed64;
         Result : out cmatrix;
@@ -48,22 +46,22 @@ begin
         if reset = '1' then
             state <= IDLE;
             done <= '0';
-            -- Proper complex matrix initialization
+            -- Initialize Result using "others" to assign zeros
             Result <= (others => (others => (
-                re => "0000000000000000000000000000000000000000000000000000000000000000",
-                im => "0000000000000000000000000000000000000000000000000000000000000000"
+                re => (others => '0'),
+                im => (others => '0')
             )));
+            -- Initialize current_matrix using "others"
             current_matrix <= (others => (others => (
-                re => "0000000000000000000000000000000000000000000000000000000000000000",
-                im => "0000000000000000000000000000000000000000000000000000000000000000"
+                re => (others => '0'),
+                im => (others => '0')
             )));
             counter <= 0;
             
         elsif rising_edge(clk) then
             case state is
                 when IDLE =>
-                    --done <= '0';
-		    if start = '1' then
+                    if start = '1' then
                         state <= INIT;
                     end if;
                     
@@ -91,7 +89,7 @@ begin
                     end if;
                     
                 when EOE =>
-		    if start = '0' then
+                    if start = '0' then
                         state <= IDLE;
                     end if;
                                    

@@ -29,7 +29,7 @@ architecture structural of Calculate_Norm_And_Compare is
     -- 2) Define the constant THETA
     ----------------------------------------------------------------------------
     -- Adjust these bounds (40 downto -64) as needed to match 'fixed64'
-    constant THETA : fixed64 := b"0000000000000000000000111101010000100101100011111111111011000000";
+    constant THETA : fixed64 := b"000000000000000000000111101";
 
     ----------------------------------------------------------------------------
     -- 3) Component declarations
@@ -74,7 +74,7 @@ begin
     -- "If THETA > largestVal then output '1' else '0'"
     isBelow <= '1' when THETA > largestVal else '0';
     infinityNormOut.re <= largestVal;
-    infinityNormOut.im <= b"0000000000000000000000000000000000000000000000000000000000000000";
+    infinityNormOut.im <= (others => '0');
 
 end architecture structural;
 

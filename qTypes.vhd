@@ -46,7 +46,7 @@ package qTypes is
     constant dimension : integer := 2 ** numQubits;
     
     -- fixed64-point subtype with higher precision
-    subtype fixed64 is sfixed(15 downto -48); 
+    subtype fixed64 is sfixed(14 downto -12); 
     
     -- Complex fixed64-point record for lower precision
     type cfixed64 is record

@@ -17,11 +17,11 @@ begin
     gen_prob: for i in 0 to dimension - 1 generate
         -- Compute probability = (re^2) + (im^2) and store it in the real part;
         -- Set the imaginary part to zero.
-        prob_out(i).re <= resize(resize(cv_in(i).re * cv_in(i).re, fixed64'high, fixed64'low) + resize(cv_in(i).im * cv_in(i).im, fixed64'high, fixed64'low), fixed64'high, fixed64'low);
-	--prob_out(i).re <= resize(resize(cv_in(i).re * cv_in(i).re, 50,0) + resize(cv_in(i).im * cv_in(i).im, 50,0), 50,0);
-	--prob_out(i).re <= resize((cv_in(i).re * cv_in(i).re) + (cv_in(i).im * cv_in(i).im), fixed64'high, fixed64'low);
-                
-	prob_out(i).im <= "0000000000000000000000000";
+        prob_out(i).re <= resize(
+                             resize(cv_in(i).re * cv_in(i).re, fixed64'high, fixed64'low) + 
+                             resize(cv_in(i).im * cv_in(i).im, fixed64'high, fixed64'low),
+                             fixed64'high, fixed64'low);
+        
+        prob_out(i).im <= (others => '0');
     end generate;
 end Behavioral;
-
