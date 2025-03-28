@@ -21,8 +21,8 @@ begin
     process(clk, reset)
     begin
         if reset = '1' then
-            q_reg <= (re => "0000000000000000000000000",
-                      im => "0000000000000000000000000");
+            q_reg <= (re => (others => '0'),
+                      im => (others => '0'));
         elsif rising_edge(clk) then
             if load = '1' then
                 q_reg <= d;
@@ -32,4 +32,3 @@ begin
     
     q <= q_reg;
 end Behavioral;
-

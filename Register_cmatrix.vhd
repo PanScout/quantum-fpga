@@ -23,8 +23,8 @@ begin
     begin
         if rst = '1' then
             -- Reset: set every element in the matrix to zero.
-            register_value <= (others => (others => (re => "0000000000000000000000000",
-                                                      im => "0000000000000000000000000")));
+            register_value <= (others => (others => (re => (others => '0'),
+                                                      im => (others => '0'))));
         elsif rising_edge(clk) then
             if load = '1' then
                 register_value <= data_in;
@@ -35,4 +35,3 @@ begin
     data_out <= register_value;
 
 end Behavioral;
-

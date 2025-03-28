@@ -23,8 +23,8 @@ begin
     begin
         if rst = '1' then
             -- Reset: initialize each element to zero.
-            register_value <= (others => (re => "0000000000000000000000000",
-                                          im => "0000000000000000000000000"));
+            register_value <= (others => (re => (others => '0'),
+                                          im => (others => '0')));
         elsif rising_edge(clk) then
             if load = '1' then
                 register_value <= data_in;

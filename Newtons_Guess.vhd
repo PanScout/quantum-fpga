@@ -49,12 +49,6 @@ begin
         fixed_round_style
     );
 
-    -- Instantiate reciprocal estimation
-    reciprocal_inst : entity work.ReciprocalEstimation
-        port map (
-            x => norm_product,
-            y => reciprocal_norm
-        );
 
     -- Stage 2: Compute A^T / (N1*N2) using registered reciprocal
     gen_scaling: for i in 0 to dimension-1 generate
@@ -63,12 +57,12 @@ begin
             begin
                 if rising_edge(clk) then
                     scaled_AT(i)(j).re <= resize(
-                        AT(i)(j).re * reciprocal_norm,
+                        AT(i)(j).re / norm_product,
                         fixed64'high,
                         fixed64'low
                     );
                     scaled_AT(i)(j).im <= resize(
-                        AT(i)(j).im * reciprocal_norm,
+                        AT(i)(j).im / norm_product,
                         fixed64'high,
                         fixed64'low
                     );
