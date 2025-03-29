@@ -34,16 +34,16 @@ architecture Behavioral of padeNumerator is
 
     -- Horner's method coefficients for -(((B+12)B+60)B+120)
     constant COEFF1 : cfixed64 := (  -- +12
-        re => "000000000001100000000000000",
-        im => (others => '0')
+        re => "000000000001100000000000000000000000",
+        im => to_sfixed(0, fixed64'high, fixed64'low)
     );
     constant COEFF2 : cfixed64 := (  -- +60
-        re => "000000000111100000000000000",
-        im => (others => '0')
+        re => "000000000111100000000000000000000000",
+        im => to_sfixed(0, fixed64'high, fixed64'low)
     );
     constant COEFF3 : cfixed64 := (  -- +120
-        re => "000000001111000000000000000",
-        im => (others => '0')
+        re => "000000001111000000000000000000000000",
+        im => to_sfixed(0, fixed64'high, fixed64'low)
     );
 
     type state_type is (IDLE, COMPUTING);
@@ -60,8 +60,8 @@ architecture Behavioral of padeNumerator is
         for i in matrix'range loop
             for j in matrix(i)'range loop
                 matrix(i)(j) := (
-                    re => (others => '0'),
-                    im => (others => '0')
+                    re => to_sfixed(0, fixed64'high, fixed64'low),
+                    im => to_sfixed(0, fixed64'high, fixed64'low)
                 );
             end loop;
         end loop;
@@ -104,8 +104,8 @@ begin
             when 1 => current_coeff <= COEFF2;
             when 2 => current_coeff <= COEFF3;
             when others => current_coeff <= (
-                re => (others => '0'),
-                im => (others => '0')
+                re => to_sfixed(0, fixed64'high, fixed64'low),
+                im => to_sfixed(0, fixed64'high, fixed64'low)
             );
         end case;
     end process;
