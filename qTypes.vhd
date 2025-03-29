@@ -46,7 +46,9 @@ package qTypes is
     constant dimension : integer := 2 ** numQubits;
     
     -- fixed64-point subtype with higher precision
-    subtype fixed64 is sfixed(14 downto -12); 
+    subtype fixed64 is sfixed(14 downto -21); 
+
+    subtype fixed64_64 is sfixed(31 downto -32);
     
     -- Complex fixed64-point record for lower precision
     type cfixed64 is record
@@ -63,13 +65,27 @@ package qTypes is
     ----------------------------------------------------------------------------
     -- Conversion Function Declarations
     ----------------------------------------------------------------------------
-
+    -- Convert 27-bit fixed64 to 64-bit fixed64_64
+    function to_64bit(f : fixed64) return fixed64_64;
+    
+    -- Convert 64-bit fixed64_64 back to 27-bit fixed64
+    function from_64bit(f : fixed64_64) return fixed64;
     
 end package qTypes;
 
 -- Package Body
 package body qTypes is
-
+    -- Function to convert 27-bit fixed64 to 64-bit fixed64_64
+    function to_64bit(f : fixed64) return fixed64_64 is
+    begin
+        return resize(f, fixed64_64'high, fixed64_64'low);
+    end function to_64bit;
     
+    -- Function to convert 64-bit fixed64_64 back to 27-bit fixed64
+    function from_64bit(f : fixed64_64) return fixed64 is
+    begin
+        return resize(f, fixed64'high, fixed64'low);
+    end function from_64bit;
+
 end package body qTypes;
 

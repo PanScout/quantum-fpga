@@ -29,7 +29,7 @@ architecture structural of Calculate_Norm_And_Compare is
     -- 2) Define the constant THETA
     ----------------------------------------------------------------------------
     -- Adjust these bounds (40 downto -64) as needed to match 'fixed64'
-    constant THETA : fixed64 := b"000000000000000000000111101";
+    constant THETA : fixed64 := b"000000000000000000000111101010000101"; --1.495585217958292 * 10**-2
 
     ----------------------------------------------------------------------------
     -- 3) Component declarations

@@ -71,16 +71,16 @@ sim:/pade_top_level/tBuffOut \
 sim:/pade_top_level/Hamiltonian
 force -freeze sim:/pade_top_level/clk 1 0, 0 {50 ps} -r 100
 force -freeze sim:/pade_top_level/reset 1 0
-force -freeze sim:/pade_top_level/H(0)(0).re 0000000000000010000000000 0
-force -freeze sim:/pade_top_level/H(0)(0).im 0000000000000000000000000 0
-force -freeze sim:/pade_top_level/H(0)(1).re 0000000000000000000000000 0
-force -freeze sim:/pade_top_level/H(0)(1).im 0000000000000010000000000 0
-force -freeze sim:/pade_top_level/H(1)(0).re 0000000000000000000000000 0
-force -freeze sim:/pade_top_level/H(1)(0).im 0000000000000000000000000 0
-force -freeze sim:/pade_top_level/H(1)(1).re 0000000000000010000000000 0
-force -freeze sim:/pade_top_level/H(1)(1).im 0000000000000000000000000 0
-force -freeze sim:/pade_top_level/t.re 0000000000000001000000000 0
-force -freeze sim:/pade_top_level/t.im 0000000000000000000000000 0
+force -freeze sim:/pade_top_level/H(0)(0).re 000000000000001000000000000000000000 0
+force -freeze sim:/pade_top_level/H(0)(0).im 000000000000000000000000000000000000 0
+force -freeze sim:/pade_top_level/H(0)(1).re 000000000000000000000000000000000000 0
+force -freeze sim:/pade_top_level/H(0)(1).im 000000000000001000000000000000000000 0
+force -freeze sim:/pade_top_level/H(1)(0).re 000000000000000000000000000000000000 0
+force -freeze sim:/pade_top_level/H(1)(0).im 000000000000000000000000000000000000 0
+force -freeze sim:/pade_top_level/H(1)(1).re 000000000000001000000000000000000000 0
+force -freeze sim:/pade_top_level/H(1)(1).im 000000000000000000000000000000000000 0
+force -freeze sim:/pade_top_level/t.re 000000000000000100000000000000000000 0
+force -freeze sim:/pade_top_level/t.im 000000000000000000000000000000000000 0
 run
 noforce sim:/pade_top_level/reset
 force -freeze sim:/pade_top_level/reset 0 0

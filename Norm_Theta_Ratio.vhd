@@ -12,7 +12,7 @@ end Norm_Theta_Ratio;
 
 architecture behav of Norm_Theta_Ratio is
     constant DIVISOR : fixed64 := 
-        "000000000000000000000111101";
+        "000000000000000000000111101010000101";
     
     constant reciprocal_DIVISOR : fixed64 := 
         resize(

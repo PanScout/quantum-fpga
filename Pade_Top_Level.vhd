@@ -29,7 +29,7 @@ constant Hamiltonian : cmatrix := (
 
     component Insert_Imaginary_Time_Into_CMatrix
     Port (
-        t : in  cfixed64;       -- Input scalar for second multiplication
+        t : in cfixed64;       -- Input scalar for second multiplication
 	H : in cmatrix;
         C_out     : out cmatrix  
     ); 
