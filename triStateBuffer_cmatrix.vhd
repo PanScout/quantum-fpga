@@ -6,21 +6,18 @@ use work.fixed_pkg.ALL;
 
 entity TristateBuffer_cmatrix is
     Port (
-        data_in : in  cmatrix;
-        enable  : in  std_logic;
-        data_out: out cmatrix
+        data_in  : in  cmatrix;
+        enable   : in  std_logic;
+        data_out : out cmatrix
     );
 end TristateBuffer_cmatrix;
 
 architecture Behavioral of TristateBuffer_cmatrix is
-    -- Define a default value for the cmatrix using the "others" clause.
-    -- Each element's 're' and 'im' fields are set to all zeros.
-    constant default_cmatrix : cmatrix := 
-      (others => (others => (re => (others => '0'),
-                              im => (others => '0'))));
+    -- Define a default complex constant for type cfixed64.
+    constant default_complex : cfixed64 := (re => (others => '0'), im => (others => '0'));
+    -- Use the default complex to fill the entire cmatrix.
+    constant default_cmatrix : cmatrix := (others => (others => default_complex));
 begin
-
     -- Multiplexer: when enable = '1', pass through data_in; otherwise, drive zeros.
     data_out <= data_in when enable = '1' else default_cmatrix;
-
 end Behavioral;

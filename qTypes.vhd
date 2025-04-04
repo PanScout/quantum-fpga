@@ -40,7 +40,11 @@ use work.fixed_pkg.ALL;
 -- Package Specification
 package qTypes is 
     -- Number of qubits
-    constant numQubits : integer := 1;
+    constant numQubits : integer := 2;
+	 
+	 --yum
+	 constant numComplexNumbersInMatrix : integer  :=  2**numQubits * 2**numQubits;
+	 constant numComplexNumbersinVector : integer  :=  2**numQubits;
     
     -- Number of basis states = 2^nQubits
     constant dimension : integer := 2 ** numQubits;
@@ -61,6 +65,7 @@ package qTypes is
     
     -- Matrix of cvector, dimension dimension x dimension (lower precision)
     type cmatrix is array (0 to dimension - 1) of cvector;
+    type psi_matrix is array (0 to 29) of cvector;
     
     ----------------------------------------------------------------------------
     -- Conversion Function Declarations
