@@ -26,13 +26,13 @@ architecture Behavioral of tb_Matrix_Inversion is
     type real_matrix is array (0 to 1) of real_row;
     
     constant MATRIX_REAL : real_matrix := (
-        (-17635117961.8806, 0.0),    -- Row 0
-        (0.0, -17635117961.8806)     -- Row 1
+        (-120.0, -0.0292969),    -- Row 0
+        (0.0, -120.0)     -- Row 1
     );
     
     constant MATRIX_IMAG : real_matrix := (
-        (551276900.108857, 0.0),     -- Row 0
-        (0.0, 551276900.108857)      -- Row 1
+        (0.0292969, 0.00000572205),     -- Row 0
+        (0.0, 0.0292969)      -- Row 1
     );
 
     constant TOLERANCE : real := 1.0e-4;
@@ -118,3 +118,4 @@ begin
     end process;
 
 end Behavioral;
+

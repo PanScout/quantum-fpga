@@ -37,11 +37,7 @@ architecture structural of Calculate_Norm_And_Compare is
     component Absolute_Row_Summation is
         port (
             A       : in  cmatrix;
-<<<<<<< HEAD
-            rowSums : out cvectorHigh
-=======
             rowSums : out cvector
->>>>>>> 07485f945f4db556ba800a3064f0ced26dfa19ea
         );
     end component;
 

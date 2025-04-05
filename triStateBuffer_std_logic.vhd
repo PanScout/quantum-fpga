@@ -20,7 +20,7 @@ begin
             counter    <= 0;
             out_signal <= '0';
         elsif rising_edge(clk) then
-            if counter < 20 then
+            if counter < 50 then
                 counter    <= counter + 1;
                 out_signal <= '0';
             else
