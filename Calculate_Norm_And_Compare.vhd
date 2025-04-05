@@ -7,11 +7,11 @@ use work.qTypes.ALL;
 entity Calculate_Norm_And_Compare is
     port (
         -- Input matrix: dimension = numBasisStates × numBasisStates (from qTypes)
-        A       : in  cmatrixHigh;
+        A       : in  cmatrix;
         
         -- Output: '1' if THETA > infinityNorm(A), else '0'
         isBelow : out std_logic;
-	InfinityNormOut : out cfixedHigh
+	InfinityNormOut : out cfixed64
     );
 end entity Calculate_Norm_And_Compare;
 
@@ -34,7 +34,7 @@ architecture structural of Calculate_Norm_And_Compare is
     ----------------------------------------------------------------------------
     component Absolute_Row_Summation is
         port (
-            A       : in  cmatrixHigh;
+            A       : in  cmatrix;
             rowSums : out cvectorHigh
         );
     end component;
