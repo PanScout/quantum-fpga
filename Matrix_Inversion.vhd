@@ -1,16 +1,17 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use work.fixed64.ALL;
 use work.qTypes.all;
+use work.fixed_pkg.ALL;
 
 entity Matrix_Inversion is
     Port (
         clk             : in  std_logic;
         rst             : in  std_logic;
         start           : in  std_logic;
-        input_matrix    : in  cmatrixHigh;
-        output_matrix   : out cmatrixHigh;
+        input_matrix    : in  cmatrix;
+        output_matrix   : out cmatrix;
         done            : out std_logic
     );
 end Matrix_Inversion;
@@ -18,8 +19,10 @@ end Matrix_Inversion;
 architecture TopLevel of Matrix_Inversion is
     component Newtons_Guess is
         Port (
-            A          : in  cmatrixHigh;
-            scaled_AT  : out cmatrixHigh
+        clk      : in  std_logic;
+        reset    : in  std_logic;
+        A        : in  cmatrix;
+        scaled_AT : out cmatrix
         );
     end component;
 
@@ -28,21 +31,23 @@ architecture TopLevel of Matrix_Inversion is
             clk             : in  std_logic;
             rst             : in  std_logic;
             start           : in  std_logic;
-            input_matrix    : in  cmatrixHigh;
-            input_guess     : in  cmatrixHigh;
-            output_matrix   : out cmatrixHigh;
+            input_matrix    : in  cmatrix;
+            input_guess     : in  cmatrix;
+            output_matrix   : out cmatrix;
             done            : out std_logic
         );
     end component;
 
     -- Internal signals
-    signal initial_guess : cmatrixHigh;
+    signal initial_guess : cmatrix;
     signal inversion_done : std_logic;
 
 begin
     -- Generate initial guess using scaled transpose method
     GUESS_CALCULATOR: Newtons_Guess
     port map(
+        clk => clk,
+	reset => rst,
         A => input_matrix,
         scaled_AT => initial_guess
     );

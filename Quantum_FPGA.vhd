@@ -1,117 +1,79 @@
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
-use work.qTypes.all;
+use work.fixed_pkg.ALL; -- Assuming cfixed64, cmatrix, cvector are defined here
+use work.qTypes.all;    -- Or potentially definitions are split between these two
 
 entity Quantum_FPGA is
     Port (
-        clk    : in std_logic;
-        reset  : in std_logic;
-	H      : in cmatrix;
-	psi    : in cvector;
-        t      : in  cfixed;
-
-	loadTime, loadHamiltonian, loadPsi: std_logic; -- load signals
-	tEnable : std_logic; --tri state enable
-	done   : out std_logic;
-        output : out cvector
+        clk    : in std_logic;     -- Clock for sequential sub-components
+        reset  : in std_logic;     -- Reset for sequential sub-components
+        H      : in cmatrix;       -- Input Hamiltonian (passed directly)
+        psi    : in cvector;       -- Input state vector (passed directly)
+        t      : in cfixed64;      -- Input time value (passed directly)
+        done   : out std_logic;    -- Calculation completion signal (from Pade)
+        output : out cvector       -- Result of U(t) * psi
     );
 end Quantum_FPGA;
 
 architecture Behavioral of Quantum_FPGA is
 
-component Pade_Top_Level
-    Port (
-        clk    : in std_logic;
-        reset  : in std_logic;
-	H      : in cmatrix;
-        t      : in  cfixed;
-	padeDone : out std_logic;
-        output : out cmatrix
-    );
-end component;
+    -- Component: Pade Approximation Calculation
+    component Pade_Top_Level
+        Port (
+            clk    : in std_logic;
+            reset  : in std_logic;
+            H      : in cmatrix;
+            t      : in cfixed64;
+            padeDone : out std_logic; -- Signal indicating Pade calculation is finished
+            output : out cmatrix      -- Output of Pade approximation, U(t) = exp(-iHt)
+        );
+    end component;
 
-component Register_cmatrix
-    Port (
-        clk      : in std_logic;
-        rst      : in std_logic;
-        load     : in std_logic;
-        data_in  : in cmatrix;
-        data_out : out cmatrix
-    );
-end component;
+    -- Component: Matrix-Vector Multiplication
+    component Matrix_By_Vector_Multiplication
+        Port (
+            -- Note: This component might need clk/reset if it's pipelined internally
+            -- Assuming it's combinatorial or its clocking is handled internally
+            A      : in  cmatrix;    -- Input complex matrix (U(t))
+            V      : in  cvector;    -- Input complex vector (psi)
+            Result : out cvector     -- Output complex vector (A * V)
+        );
+    end component;
 
-component Register_cvector
-    Port (
-        clk      : in  std_logic;
-        rst      : in  std_logic;
-        load     : in  std_logic;
-        data_in  : in  cvector;
-        data_out : out cvector
-    );
-end component;
+    -- Internal signals to connect components
+    signal pade_output_matrix : cmatrix;   -- Output of the Pade component U(t)
+    signal pade_done_signal   : std_logic; -- Done signal from the Pade component
 
-component Register_cfixed
-    Port (
-        clk   : in std_logic;
-        reset : in std_logic;
-        load  : in std_logic;
-        d     : in cfixed;
-        q     : out cfixed
-    );
-end component;
-
-component triStateBuffer_cmatrix
-    Port (
-        data_in : in  cmatrix;
-        enable  : in  std_logic;
-        data_out: out cmatrix
-    );
-end component;
-
-component TristateBuffer_cvector
-    Port (
-        data_in : in  cvector;
-        enable  : in  std_logic;
-        data_out: out cvector
-    );
-end component;
-
-component Matrix_By_Vector_Multiplication 
-    Port (
-        A      : in  cmatrix;    -- Input complex matrix
-        V      : in  cvector;    -- Input complex vector
-        Result : out cvector     -- Output complex vector (A � V)
-    );
-end component;
-
-component Probability_Cvector 
-    Port (
-        cv_in   : in  cvector;  -- Input quantum state vector (complex amplitudes)
-        prob_out: out cvector   -- Output vector with probabilities in the real part
-    );
-end component;
-
-signal timeOut : cfixed;
-signal HamiltonianOut : cmatrix;
-signal psiOut, UxPsiOut, stateOut, probabilities : cvector;
-signal padeOutput, padeBuffOut : cmatrix;
-signal padeDone : std_logic;
+    -- No internal registers or buffers needed
 
 begin
 
-regt : Register_cfixed port map(clk => clk, reset => reset, load => loadTime, d => t, q => timeOut); 
-regHam : Register_cmatrix port map(clk => clk, rst => reset, load => loadHamiltonian, data_in => H, data_out => HamiltonianOut); 
-regPsi : Register_cvector port map(clk => clk, rst => reset, load => loadPsi, data_in => psi, data_out => psiOut); 
-pade: Pade_Top_Level port map(clk => clk, reset => reset, H => H, t => t, padeDone => padeDone, output => padeOutput);
-padeBuff: triStateBuffer_cmatrix port map(data_in => padeOutput, enable => tEnable, data_out => padeBuffOut);
-mult: Matrix_By_Vector_Multiplication port map(A => padeBuffOut, V => psiOut, Result => UxPsiOut);
-stateBuff: TristateBuffer_cvector port map(data_in => UxPsiOut, enable => padeDone, data_out => stateOut);
-prob: Probability_Cvector  port map(cv_in => stateOut, prob_out => probabilities);
+    -- Instantiate the Pade Approximation component
+    -- Inputs H and t are directly connected from the entity's ports.
+    pade_inst : Pade_Top_Level
+        port map (
+            clk      => clk,
+            reset    => reset,
+            H        => H,              -- Pass H directly
+            t        => t,              -- Pass t directly
+            padeDone => pade_done_signal, -- Capture the done signal
+            output   => pade_output_matrix -- Capture the resulting U(t) matrix
+        );
 
-done <= padeDone;
-output <= probabilities;
+    -- Instantiate the Matrix-Vector Multiplication component
+    -- Input A comes from the Pade output, input V comes directly from entity port psi.
+    mult_inst : Matrix_By_Vector_Multiplication
+        port map (
+            -- Pass clk/reset if the multiplier component requires them
+            A      => pade_output_matrix, -- Use the calculated U(t)
+            V      => psi,                -- Use the input psi directly
+            Result => output              -- Connect result directly to entity output
+        );
+
+    -- Connect the done signal from the Pade component to the entity's done output
+    done <= pade_done_signal;
+
+    -- The output port is directly driven by the Result of mult_inst.
 
 end Behavioral;

@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use work.fixed_pkg.ALL;
 
 entity TriStateBuffer_std_logic is
     Port(

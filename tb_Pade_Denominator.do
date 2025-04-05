@@ -11,13 +11,13 @@ vsim -gui work.tb_pade_denominator
 # Loading work.qtypes(body)
 # Loading work.tb_pade_denominator(behavioral)
 # Loading work.pade_denominator(structural)
-# Loading work.matrix_plus_scalar_high(structural)
-# Loading work.matrix_by_matrix_multiplication_high(concurrent)
-# Loading work.matrix_by_vector_multiplication_high(concurrent)
-# Loading work.multiply_by_scalar_then_add_high(concurrent)
-# Loading work.multiply_column_by_scalar_high(behavioral)
+# Loading work.Matrix_Plus_Scalar(structural)
+# Loading work.Matrix_By_Matrix_Multiplication(concurrent)
+# Loading work.Matrix_By_Vector_Multiplication(concurrent)
+# Loading work.Multiply_By_Scalar_Then_Add(concurrent)
+# Loading work.Multiply_Column_By_Scalar(behavioral)
 # Loading work.complex_alu_high(behavioral)
-# Loading work.add_vectors_element_wise_high(concurrent_arch)
+# Loading work.Add_Vectors_Element_Wise(concurrent_arch)
 # ** Warning: Design size of 13886 statements exceeds ModelSim-Intel FPGA Starter Edition recommended capacity.
 # Expect performance to be adversely affected.
 add wave -position insertpoint  \

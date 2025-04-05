@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+use work.fixed64.ALL;
 use work.qTypes.ALL;
 
 entity tb_Pade_Denominator is
@@ -10,8 +10,8 @@ end tb_Pade_Denominator;
 architecture test of tb_Pade_Denominator is
 
     -- Signals to drive the UUT
-    signal B : cmatrixHigh;
-    signal P : cmatrixHigh;
+    signal B : cmatrix;
+    signal P : cmatrix;
 
 begin
 
@@ -24,14 +24,14 @@ begin
 
     stimulus: process
         -- Declare a variable for building the test matrix.
-        variable temp : cmatrixHigh;
+        variable temp : cmatrix;
         variable i, j : integer;
     begin
         -- Initialize matrix B: set every element's real part to 1 and imaginary part to 0.
-        for i in 0 to numBasisStates - 1 loop
-            for j in 0 to numBasisStates - 1 loop
-                temp(i)(j).re := to_sfixed(1, fixedHigh'high, fixedHigh'low);
-                temp(i)(j).im := to_sfixed(0, fixedHigh'high, fixedHigh'low);
+        for i in 0 to dimension - 1 loop
+            for j in 0 to dimension - 1 loop
+                temp(i)(j).re := to_sfixed(1, fixed64'high, fixed64'low);
+                temp(i)(j).im := to_sfixed(0, fixed64'high, fixed64'low);
             end loop;
         end loop;
         B <= temp;

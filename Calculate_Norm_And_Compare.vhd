@@ -1,12 +1,14 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use work.fixed64.ALL;
 use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
 
 entity Calculate_Norm_And_Compare is
     port (
-        -- Input matrix: dimension = numBasisStates × numBasisStates (from qTypes)
+        -- Input matrix: dimension = dimension × dimension (from qTypes)
         A       : in  cmatrix;
         
         -- Output: '1' if THETA > infinityNorm(A), else '0'
@@ -20,14 +22,14 @@ architecture structural of Calculate_Norm_And_Compare is
     ----------------------------------------------------------------------------
     -- 1) Internal signals
     ----------------------------------------------------------------------------
-    signal rowSums    : cvectorHigh; -- from Absolute_Row_Summation
-    signal largestVal : fixedHigh;   -- from Max_Of_CVector
+    signal rowSums    : cvector; -- from Absolute_Row_Summation
+    signal largestVal : fixed64;   -- from Max_Of_CVector
 
     ----------------------------------------------------------------------------
     -- 2) Define the constant THETA
     ----------------------------------------------------------------------------
-    -- Adjust these bounds (40 downto -64) as needed to match 'fixedHigh'
-    constant THETA : fixedHigh := to_sfixed(2.1, fixedHigh'high, fixedHigh'low);
+    -- Adjust these bounds (40 downto -64) as needed to match 'fixed64'
+    constant THETA : fixed64 := b"000000000000000000000111101010000101"; --1.495585217958292 * 10**-2
 
     ----------------------------------------------------------------------------
     -- 3) Component declarations
@@ -35,14 +37,18 @@ architecture structural of Calculate_Norm_And_Compare is
     component Absolute_Row_Summation is
         port (
             A       : in  cmatrix;
+<<<<<<< HEAD
             rowSums : out cvectorHigh
+=======
+            rowSums : out cvector
+>>>>>>> 07485f945f4db556ba800a3064f0ced26dfa19ea
         );
     end component;
 
     component Max_Of_CVector is
         port (
-            inputVector  : in  cvectorHigh;
-            largestValue : out fixedHigh
+            inputVector  : in  cvector;
+            largestValue : out fixed64
         );
     end component;
 
@@ -72,7 +78,7 @@ begin
     -- "If THETA > largestVal then output '1' else '0'"
     isBelow <= '1' when THETA > largestVal else '0';
     infinityNormOut.re <= largestVal;
-    infinityNormOut.im <= to_sfixed(0.0, fixedHigh'high, fixedHigh'low);
+    infinityNormOut.im <= (others => '0');
 
 end architecture structural;
 

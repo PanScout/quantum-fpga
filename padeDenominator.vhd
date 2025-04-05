@@ -1,75 +1,67 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
 use work.qTypes.ALL;
+use work.fixed_pkg.ALL;
 
 entity padeDenominator is
     Port (
         clk   : in  std_logic;
         reset : in  std_logic;
         start : in  std_logic;
-        B     : in  cmatrixHigh;
-        P     : out cmatrixHigh;
+        B     : in  cmatrix;
+        P     : out cmatrix;
         done  : out std_logic
     );
 end padeDenominator;
 
 architecture Behavioral of padeDenominator is
 
-    component Matrix_Plus_Scalar_High is
+    component Matrix_Plus_Scalar is
         port (
-            input_cMatrixH : in  cmatrixHigh;
-            scalar         : in  cfixedHigh;
-            output_cMatrixH: out cmatrixHigh
+            input_cMatrixH : in  cmatrix;
+            scalar         : in  cfixed64;
+            output_cMatrixH: out cmatrix
         );
     end component;
 
-    component Matrix_By_Matrix_Multiplication_High is
+    component Matrix_By_Matrix_Multiplication is
         port (
-            A : in  cmatrixHigh;
-            B : in  cmatrixHigh;
-            C : out cmatrixHigh
+            A : in  cmatrix;
+            B : in  cmatrix;
+            C : out cmatrix
         );
     end component;
 
-    -- Coefficient constants
-    constant coeff1 : cfixedHigh := ( re => "1111111111111111111111111111111111111111111101001100000000000000000000000000000000000000000000000000000000000000000",
-                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-    constant coeff2 : cfixedHigh := ( re => "0000000000000000000000000000000000000001111011110000000000000000000000000000000000000000000000000000000000000000000",
-                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-    constant coeff3 : cfixedHigh := ( re => "1111111111111111111111111111111111001001110111000000000000000000000000000000000000000000000000000000000000000000000",
-                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-    constant coeff4 : cfixedHigh := ( re => "0000000000000000000000000000010000011111101111100000000000000000000000000000000000000000000000000000000000000000000",
-                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-    constant coeff5 : cfixedHigh := ( re => "1111111111111111111111111100011001000011100111000000000000000000000000000000000000000000000000000000000000000000000",
-                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-    constant coeff6 : cfixedHigh := ( re => "0000000000000000000000100100000101011011111010000000000000000000000000000000000000000000000000000000000000000000000",
-                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-    constant coeff7 : cfixedHigh := ( re => "1111111111111111111100001000100011110111100000000000000000000000000000000000000000000000000000000000000000000000000",
-                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-    constant coeff8 : cfixedHigh := ( re => "0000000000000000010000011011100111100100001000000000000000000000000000000000000000000000000000000000000000000000000",
-                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-    constant coeff9 : cfixedHigh := ( re => "1111111111111111011111001000110000110111110000000000000000000000000000000000000000000000000000000000000000000000000",
-                                      im => "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-    
+    -- Horner's method coefficients for (((B-12)*B+60)*B-120)
+    constant COEFF1 : cfixed64 := (  -- -12
+        re => "111111111110100000000000000000000000",  -- Adjust binary representation
+        im => (others => '0')                                                     -- based on your fixed64-point format
+    );
+    constant COEFF2 : cfixed64 := (  -- +60
+        re => "000000000111100000000000000000000000",
+        im => (others => '0')
+    );
+    constant COEFF3 : cfixed64 := (  -- -120
+        re => "111111110001000000000000000000000000",
+        im => (others => '0')
+    );
+
     type state_type is (IDLE, COMPUTING);
     signal state : state_type := IDLE;
-    signal current_result, B_reg : cmatrixHigh;
-    signal step_counter : integer range 0 to 17 := 0;
-    signal current_coeff : cfixedHigh;
-    signal adder_out, mult_out : cmatrixHigh;
-    signal done_s : std_logic;  -- Internal signal for done
+    signal current_result, B_reg : cmatrix;
+    signal step_counter : integer range 0 to 5 := 0;  -- Reduced counter range
+    signal current_coeff : cfixed64;
+    signal adder_out, mult_out : cmatrix;
+    signal done_s : std_logic;
 
-    -- Function to create a cmatrixHigh with all elements set to zero
-    function init_cmatrixHigh_zero return cmatrixHigh is
-        variable matrix : cmatrixHigh;
+    function init_cmatrixHigh_zero return cmatrix is
+        variable matrix : cmatrix;
     begin
         for i in matrix'range loop
             for j in matrix(i)'range loop
                 matrix(i)(j) := (
-                    re => to_sfixed(0, fixedHigh'high, fixedHigh'low),
-                    im => to_sfixed(0, fixedHigh'high, fixedHigh'low)
+                    re => (others => '0'),
+                    im => (others => '0')
                 );
             end loop;
         end loop;
@@ -78,14 +70,14 @@ architecture Behavioral of padeDenominator is
 
 begin
 
-    ADDER: Matrix_Plus_Scalar_High
+    ADDER: Matrix_Plus_Scalar
         port map (
             input_cMatrixH => current_result,
             scalar         => current_coeff,
             output_cMatrixH=> adder_out
         );
 
-    MULTIPLIER: Matrix_By_Matrix_Multiplication_High
+    MULTIPLIER: Matrix_By_Matrix_Multiplication
         port map (
             A => current_result,
             B => B_reg,
@@ -94,21 +86,14 @@ begin
 
     process(step_counter)
     begin
-        case step_counter/2 is
-            when 0 => current_coeff <= coeff1;
-            when 1 => current_coeff <= coeff2;
-            when 2 => current_coeff <= coeff3;
-            when 3 => current_coeff <= coeff4;
-            when 4 => current_coeff <= coeff5;
-            when 5 => current_coeff <= coeff6;
-            when 6 => current_coeff <= coeff7;
-            when 7 => current_coeff <= coeff8;
-            when 8 => current_coeff <= coeff9;
-            when others =>
-                current_coeff <= (
-                    re => to_sfixed(0, fixedHigh'high, fixedHigh'low),
-                    im => to_sfixed(0, fixedHigh'high, fixedHigh'low)
-                );
+        case step_counter/2 is  -- Coefficient selection logic
+            when 0 => current_coeff <= COEFF1;
+            when 1 => current_coeff <= COEFF2;
+            when 2 => current_coeff <= COEFF3;
+            when others => current_coeff <= (
+                re => (others => '0'),
+                im => (others => '0')
+            );
         end case;
     end process;
 
@@ -126,20 +111,20 @@ begin
                     done_s <= '0';
                     if start = '1' then
                         B_reg <= B;
-                        current_result <= B;
+                        current_result <= B;  -- Initial value = B
                         state <= COMPUTING;
                         step_counter <= 0;
                     end if;
+                
                 when COMPUTING =>
-                    if step_counter < 17 then
-                        if step_counter mod 2 = 0 then
+                    if step_counter < 5 then
+                        if step_counter mod 2 = 0 then  -- Even steps: addition
                             current_result <= adder_out;
-                        else
+                        else                          -- Odd steps: multiplication
                             current_result <= mult_out;
                         end if;
                         step_counter <= step_counter + 1;
                     else
-                        state <= IDLE;
                         done_s <= '1';
                     end if;
             end case;
@@ -147,8 +132,6 @@ begin
     end process;
 
     done <= done_s;
-
-    P <= current_result when (state = IDLE and done_s = '1') else
-         init_cmatrixHigh_zero;
+    P <= current_result;
 
 end Behavioral;

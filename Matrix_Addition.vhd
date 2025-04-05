@@ -1,8 +1,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
 use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
 
 entity Matrix_Addition is
     Port (
