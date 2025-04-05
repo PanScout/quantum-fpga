@@ -33,6 +33,6 @@ begin
     -- Step 2: Add b to a*x and maintain 64-bit format with final resize
     --y <= resize(mult_result + b, fixed64'high, fixed64'low);
 
-    y <= from_64bit(resize(result_64 + b, fixed64_64'high, fixed64_64'low));
+    y <= from_64bit(resize(result_64, fixed64_64'high, fixed64_64'low));
     
 end Behavioral;
