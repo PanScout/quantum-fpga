@@ -1,27 +1,28 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-use IEEE.fixed_pkg.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use IEEE.fixed_pkg.ALL;
 use work.qTypes.all;
+use work.fixed_pkg.ALL;
 
 entity Register_cfixed is
     Port (
         clk   : in std_logic;
         reset : in std_logic;
         load  : in std_logic;
-        d     : in cfixed;
-        q     : out cfixed
+        d     : in cfixed64;
+        q     : out cfixed64
     );
 end Register_cfixed;
 
 architecture Behavioral of Register_cfixed is
-    signal q_reg : cfixed;
+    signal q_reg : cfixed64;
 begin
     process(clk, reset)
     begin
         if reset = '1' then
-            q_reg <= (re => to_sfixed(0, fixed'high, fixed'low),
-                      im => to_sfixed(0, fixed'high, fixed'low));
+            q_reg <= (re => (others => '0'),
+                      im => (others => '0'));
         elsif rising_edge(clk) then
             if load = '1' then
                 q_reg <= d;
@@ -31,4 +32,3 @@ begin
     
     q <= q_reg;
 end Behavioral;
-

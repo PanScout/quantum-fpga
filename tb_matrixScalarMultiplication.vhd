@@ -1,6 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.fixed_pkg.ALL;
+use work.fixed64.ALL;
 use work.qTypes.ALL;
 
 entity tb_matrixScalarMultiplication is
@@ -10,13 +10,13 @@ architecture Behavioral of tb_matrixScalarMultiplication is
     component matrixScalarMultiplication is
         Port (
             A      : in  cmatrix;
-            scalar : in  cfixed;
+            scalar : in  cfixed64;
             C      : out cmatrix
         );
     end component;
 
     signal A, C : cmatrix;
-    signal scalar : cfixed;
+    signal scalar : cfixed64;
     constant epsilon : real := 0.001;
 
 begin
@@ -30,8 +30,8 @@ begin
         variable error_count : integer := 0;
     begin
         -- Initialize matrix and scalar
-        for i in 0 to numBasisStates-1 loop
-            for j in 0 to numBasisStates-1 loop
+        for i in 0 to dimension-1 loop
+            for j in 0 to dimension-1 loop
                 -- Input matrix: 3.0 + j4.0 for all elements
                 A(i)(j).re <= to_sfixed(3.0, A(i)(j).re);
                 A(i)(j).im <= to_sfixed(4.0, A(i)(j).im);
@@ -45,8 +45,8 @@ begin
         wait for 10 ns;  -- Allow signals to propagate
 
         -- Verify complex multiplication results for all elements
-        for i in 0 to numBasisStates-1 loop
-            for j in 0 to numBasisStates-1 loop
+        for i in 0 to dimension-1 loop
+            for j in 0 to dimension-1 loop
                 -- Expected result: (3*2 - 4*1) + j(3*1 + 4*2) = 2.0 + j11.0
                 
                 -- Check real part

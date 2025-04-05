@@ -1,0 +1,102 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+entity Scale_cmatrix_Up is
+    Port (
+        clk    : in  std_logic;
+        reset  : in  std_logic;
+        start  : in  std_logic;
+        B      : in  cmatrix;
+        S      : in  cfixed64;
+        Result : out cmatrix;
+        done   : out std_logic
+    );
+end Scale_cmatrix_Up;
+
+architecture Behavioral of Scale_cmatrix_Up is
+    type state_type is (IDLE, INIT, SQUARING, EOE);
+    signal state : state_type := IDLE;
+    
+    signal current_matrix : cmatrix;
+    signal next_matrix    : cmatrix;
+    signal counter        : natural := 0;
+    
+    component Matrix_By_Matrix_Multiplication is
+        Port (
+            A : in  cmatrix;
+            B : in  cmatrix;
+            C : out cmatrix
+        );
+    end component;
+
+begin
+    Matrix_Multiplier: Matrix_By_Matrix_Multiplication
+        port map (
+            A => current_matrix,
+            B => current_matrix,
+            C => next_matrix
+        );
+
+    process(clk, reset)
+        variable s_val : natural;
+    begin
+        if reset = '1' then
+            state <= IDLE;
+            done <= '0';
+            -- Initialize Result using "others" to assign zeros
+            Result <= (others => (others => (
+                re => (others => '0'),
+                im => (others => '0')
+            )));
+            -- Initialize current_matrix using "others"
+            current_matrix <= (others => (others => (
+                re => (others => '0'),
+                im => (others => '0')
+            )));
+            counter <= 0;
+            
+        elsif rising_edge(clk) then
+            case state is
+                when IDLE =>
+                    if start = '1' then
+                        state <= INIT;
+                    end if;
+                    
+                when INIT =>
+                    s_val := to_integer(S.re);
+                    
+                    if s_val = 0 then
+                        Result <= B;
+                        done <= '1';
+                        state <= EOE;
+                    else
+                        current_matrix <= B;
+                        counter <= s_val - 1;  -- Adjust for first squaring
+                        state <= SQUARING;
+                    end if;
+                    
+                when SQUARING =>
+                    if counter > 0 then
+                        current_matrix <= next_matrix;
+                        counter <= counter - 1;
+                    else
+                        Result <= next_matrix;  -- Capture final result
+                        done <= '1';
+                        state <= EOE;
+                    end if;
+                    
+                when EOE =>
+                    if start = '0' then
+                        state <= IDLE;
+                    end if;
+                                   
+                when others =>
+                    state <= IDLE;
+            end case;
+        end if;
+    end process;
+
+end Behavioral;

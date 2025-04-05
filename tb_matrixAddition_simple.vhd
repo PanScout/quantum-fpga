@@ -1,6 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.fixed_pkg.ALL;
+use work.fixed64.ALL;
 use work.qTypes.ALL;
 
 entity tb_matrixAddition_simple is
@@ -26,8 +26,8 @@ begin
         variable error_count : integer := 0;
     begin
         -- Initialize matrices with distinct real/imaginary values
-        for i in 0 to numBasisStates-1 loop
-            for j in 0 to numBasisStates-1 loop
+        for i in 0 to dimension-1 loop
+            for j in 0 to dimension-1 loop
                 -- Matrix A: real = 1.0, imaginary = 2.0
                 A(i)(j).re <= to_sfixed(1.0, A(i)(j).re);
                 A(i)(j).im <= to_sfixed(12.0, A(i)(j).im);
@@ -40,8 +40,8 @@ begin
         wait for 10 ns;  -- Allow signals to propagate
 
         -- Check results for all elements
-        for i in 0 to numBasisStates-1 loop
-            for j in 0 to numBasisStates-1 loop
+        for i in 0 to dimension-1 loop
+            for j in 0 to dimension-1 loop
                 -- Expected result: real = 4.0, imaginary = 6.0
                 if abs(to_real(C(i)(j).re) - 4.0) > epsilon then
                     report "Real part error at (" & integer'image(i) & "," & integer'image(j) & 
