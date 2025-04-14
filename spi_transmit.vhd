@@ -117,7 +117,7 @@ begin
     end process;
 
     -- Drive outputs
-    MISO      <= miso_reg;
+	 MISO <= miso_reg;
     spi_valid <= valid_reg;
 
 end Behavioral;
