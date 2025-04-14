@@ -10,7 +10,7 @@ entity Pade_Top_Level is
     Port (
         clk    : in std_logic;
         reset  : in std_logic;
-	H      : in cmatrix;
+		  H      : in cmatrix;
         t      : in  cfixed64;
 	padeDone : out std_logic;
         output : out cmatrix
@@ -30,7 +30,7 @@ constant Hamiltonian : cmatrix := (
     component Insert_Imaginary_Time_Into_CMatrix
     Port (
         t : in cfixed64;       -- Input scalar for second multiplication
-	H : in cmatrix;
+		  H : in cmatrix;
         C_out     : out cmatrix  
     ); 
     end component Insert_Imaginary_Time_Into_CMatrix;
