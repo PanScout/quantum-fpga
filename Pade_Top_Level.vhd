@@ -37,7 +37,7 @@ constant Hamiltonian : cmatrix := (
 
     component Calculate_Norm_And_Compare 
     port (
-        -- Input matrix: dimension = dimension � dimension (from qTypes)
+        -- Input matrix: dimension = dimension   dimension (from qTypes)
         A       : in  cmatrix;
         
         -- Output: '1' if THETA > infinityNorm(A), else '0'
@@ -45,24 +45,6 @@ constant Hamiltonian : cmatrix := (
 	InfinityNormOut : out cfixed64
     );
     end component Calculate_Norm_And_Compare;
-
-    component One_to_Two_Demux_CMatrix 
-    Port (
-        data_in : in  cmatrix;
-        sel     : in  std_logic;
-        out0    : out cmatrix;
-        out1    : out cmatrix
-    );
-    end component One_to_Two_Demux_CMatrix;
-
-    component Two_to_One_Mux_CMatrix
-    Port (
-        in0      : in  cmatrix;  -- Input 0
-        in1      : in  cmatrix;  -- Input 1
-        sel      : in  std_logic;    -- Selector
-        data_out : out cmatrix   -- Output
-    );
-    end component Two_to_One_Mux_CMatrix;
 
     component Generate_Scaling_Factor
     Port (
@@ -124,16 +106,6 @@ constant Hamiltonian : cmatrix := (
     );
     end component Matrix_Inversion;
 
-    component Register_cmatrix
-    Port (
-        clk      : in  std_logic;
-        rst      : in  std_logic;
-        load     : in  std_logic;
-        data_in  : in  cmatrix;
-        data_out : out cmatrix
-    );
-    end component;
-
     component Matrix_By_Matrix_Multiplication 
     Port (
         A : in  cmatrix;    -- First input matrix (M x N)
@@ -149,16 +121,6 @@ constant Hamiltonian : cmatrix := (
 	load  : in std_logic;
         d     : in  std_logic;
         q     : out std_logic
-    );
-    end component;
-
-    component triStateBuffer_cMatrix
-    Port (
-        clk          : in  std_logic;
-        rst          : in  std_logic;
-        delay_cycles : in  natural;  -- Number of clock cycles to wait
-        data_in      : in  cmatrix;
-        data_out     : out cmatrix
     );
     end component;
 
@@ -199,24 +161,16 @@ constant Hamiltonian : cmatrix := (
 begin
     IHT: Insert_Imaginary_Time_Into_CMatrix port map(t=> t, H => H, C_out => IHTtoNormAndCompareandD1);
     Norm_And_Compare: Calculate_Norm_And_Compare port map(A => IHTtoNormAndCompareandD1, isBelow => TorF, infinityNormOut => InfNormOut);
-    --D1: One_to_Two_Demux_CMatrixHigh port map(data_in => IHTtoNormAndCompareandD1, sel => TorF, out0 => IHTtoScalar, out1 => IHTdirect);
     Gen_Scaling_Factor: Generate_Scaling_Factor port map(input => InfNormOut, S => ScalingFactorOut);
     Scale_Down: Scale_CMatrix_Down port map(Input_Matrix => IHTtoNormAndCompareandD1, Shift_Amount => ScalingFactorOut, Output_Matrix => ScaleDownOut);
-    --D2: Two_to_One_Mux_CMatrixHigh port map(in0 => IHTdirect, in1 => ScaleDownOut, sel => TorF, data_out => Mux2Out);
-    --P_num: Pade_Numerator port map(B => ScaleDownOut, P => PNumeratorOut);
-    --P_den: Pade_Denominator port map(B => ScaleDownOut, P => PDenominatorOut);
     P_num: padeNumerator port map(clk => clk, reset => reset, start => tBuffStart, B => ScaleDownOut, P => PNumeratorOut, done => PNumDone);
     P_den: padeDenominator port map(clk => clk, reset => reset, start => tBuffStart, B => ScaleDownOut, P => PDenominatorOut, done => PDenDone);
-    --reg1: Register_cmatrixHigh port map(clk => clk, rst => reset, load => '1', data_in => PDenominatorOut, data_out => reg1Out);
-    --reg2: Register_cmatrixHigh port map(clk => clk, rst => reset, load => '1', data_in => reg1Out, data_out => reg2Out);
-    --tBuff: triStateBuffer_cMatrixHigh port map(clk => clk, rst => reset, delay_cycles => 10, data_in => PDenominatorOut, data_out => tBuffOut);
     tBuffS: triStateBuffer_std_logic port map(clk => clk, rst => reset, out_signal => tBuffStart);
     Invert: Matrix_Inversion port map(clk => clk, rst => reset, start => PDenDone ,input_matrix => PDenominatorOut, output_matrix => InvOut, done => matrixInvDone);
     MULT: Matrix_By_Matrix_Multiplication port map(A => PNumeratorOut, B => InvOut, C => MatrixMultOut);
     reg3: Register_std_logic port map(clk => clk, reset => reset, load => '1', d => matrixInvDone, q => regStdLogicOut); 
-    --D3: One_to_Two_Demux_CMatrixHigh port map(data_in => MatrixMultOut, sel => TorF, out0 => MatriPowIn, out1 => Mux4In);
     Scale_Up: Scale_CMatrix_Up port map(clk => clk, reset => reset, start => regStdLogicOut, B => MatrixMultOut, S => ScalingFactorOut, Result => ScaleUpOut, done => padeDone);
-    --D4: Two_to_One_Mux_CMatrixHigh port map(in0 => Mux4In, in1 => ScaleUpOut, sel => TorF, data_out => Mux4Out);
+
     
     output <= ScaleUpOut;
 

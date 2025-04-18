@@ -1,0 +1,146 @@
+#==============================================================================
+# ModelSim DO Script for QPU Simulation
+#
+# Assumes:
+# - All VHDL files are in the current directory or paths are updated.
+# - A testbench entity named 'qpu_tb' exists in 'qpu_tb.vhd'.
+# - The testbench instantiates the QPU entity with the instance name 'qpu'.
+# - 'fixed_pkg.vhd' provides the necessary fixed-point package.
+#   (Compile 'fixed_pkg_c.vhd' first if it exists).
+#==============================================================================
+
+
+# Clean up old work library
+if {[file exists work]} {
+  vdel -all
+}
+vlib work
+
+#==============================================================================
+# Compile VHDL Files
+#==============================================================================
+# IMPORTANT: Update file names and paths as necessary!
+# Compile packages first
+
+# Compile fixed-point package (compile fixed_pkg_c.vhd first if applicable)
+# vcom path/to/fixed_pkg_c.vhd
+vcom fixed_pkg.vhd
+vcom qTypes.vhd
+
+# Compile individual component entities
+vcom Absolute_Row_Summation.vhd
+vcom Add_Vectors_Element_Wise.vhd
+vcom assemble_matrix.vhd
+vcom assemble_psi_matrix.vhd
+vcom assemble_vector.vhd
+vcom Calculate_Norm_And_Compare.vhd
+vcom Ceiling_Of_Log2.vhd
+vcom disassemble_matrix.vhd
+vcom disassemble_psi_matrix.vhd
+vcom Generate_Scaling_Factor.vhd
+vcom hex_to_7seg.vhd
+vcom Insert_Imaginary_Time_Into_CMatrix.vhd
+vcom Matrix_Addition.vhd
+vcom Matrix_By_Matrix_Multiplication.vhd # Make sure dependencies compiled first if strict
+vcom Matrix_By_Scalar_Multiplication.vhd
+vcom Matrix_By_Vector_Multiplication.vhd # Make sure dependencies compiled first if strict
+vcom Matrix_Inversion.vhd                # Depends on Newtons_Guess, Matrix_Inversion_State_Machine
+vcom Matrix_Inversion_State_Machine.vhd  # Depends on Matrix_By_Matrix_Multiplication
+vcom Matrix_Plus_Scalar.vhd
+vcom Matrix_Transpose.vhd
+vcom Max_Of_CVector.vhd
+vcom Multiply_By_Scalar_Then_Add.vhd # Depends on Multiply_Column_By_Scalar, Add_Vectors_Element_Wise
+vcom Multiply_Column_By_Scalar.vhd
+vcom Newtons_Guess.vhd           # Depends on Matrix_Transpose, Calculate_Norm_And_Compare, ReciprocalEstimation
+vcom Norm_Theta_Ratio.vhd
+vcom padeDenominator.vhd         # Depends on Matrix_Plus_Scalar, Matrix_By_Matrix_Multiplication
+vcom padeNumerator.vhd           # Depends on Matrix_Plus_Scalar, Matrix_By_Matrix_Multiplication
+vcom Pade_Top_Level.vhd          # Depends on many components
+vcom Quantum_FPGA.vhd            # Depends on Pade_Top_Level, Matrix_By_Vector_Multiplication
+vcom Quantum_Time_Evolution.vhd  # Depends on Quantum_FPGA
+vcom ReciprocalEstimation.vhd
+vcom Register_cfixed.vhd
+vcom Register_cmatrix.vhd
+vcom Register_cvector.vhd
+vcom Register_std_logic.vhd
+vcom Scale_cmatrix_Down.vhd
+vcom Scale_cmatrix_Up.vhd        # Depends on Matrix_By_Matrix_Multiplication
+vcom spi_receive.vhd
+vcom spi_transmit.vhd
+vcom TristateBuffer_cmatrix.vhd
+vcom TristateBuffer_cvector.vhd
+vcom TriStateBuffer_std_logic.vhd # This is the delay component
+
+# Compile the top-level QPU entity
+vcom QPU.vhd
+
+# Compile the Testbench (CRITICAL STEP!)
+# Ensure you have a testbench file (e.g., qpu_tb.vhd)
+vcom qpu_tb.vhd
+
+#==============================================================================
+# Start Simulation
+#==============================================================================
+# Simulate the testbench entity (replace 'qpu_tb' if needed)
+# Use -novopt for easier debugging if required
+vsim work.qpu
+
+#==============================================================================
+# Add Waveforms
+#==============================================================================
+# Add the signals provided by the user
+# Assumes the QPU instance in the testbench is named 'qpu'
+add wave -position insertpoint  \
+sim:/qpu_tb/qpu/clk \
+sim:/qpu_tb/qpu/reset \
+sim:/qpu_tb/qpu/enable \
+sim:/qpu_tb/qpu/rx_matrix_SCLK \
+sim:/qpu_tb/qpu/rx_matrix_SS \
+sim:/qpu_tb/qpu/rx_matrix_MOSI \
+sim:/qpu_tb/qpu/rx_matrix_NUM \
+sim:/qpu_tb/qpu/rx_matrix_spi_valid \
+sim:/qpu_tb/qpu/rx_vector_SCLK \
+sim:/qpu_tb/qpu/rx_vector_SS \
+sim:/qpu_tb/qpu/rx_vector_MOSI \
+sim:/qpu_tb/qpu/rx_vector_NUM \
+sim:/qpu_tb/qpu/rx_vector_spi_valid \
+sim:/qpu_tb/qpu/tx_SCLK \
+sim:/qpu_tb/qpu/tx_SS \
+sim:/qpu_tb/qpu/MISO \
+sim:/qpu_tb/qpu/tx_spi_valid \
+sim:/qpu_tb/qpu/psi_matrix_assemble_done \
+sim:/qpu_tb/qpu/receive_mode_active \
+sim:/qpu_tb/qpu/transmit_mode_active \
+sim:/qpu_tb/qpu/spi_matrix_data \
+sim:/qpu_tb/qpu/internal_matrix_valid \
+sim:/qpu_tb/qpu/spi_vector_data \
+sim:/qpu_tb/qpu/internal_vector_valid \
+sim:/qpu_tb/qpu/assembled_matrix \
+sim:/qpu_tb/qpu/matrix_done \
+sim:/qpu_tb/qpu/assembled_vector \
+sim:/qpu_tb/qpu/vector_done \
+sim:/qpu_tb/qpu/start_evolution \
+sim:/qpu_tb/qpu/qte_output_state \
+sim:/qpu_tb/qpu/qte_output_valid \
+sim:/qpu_tb/qpu/qte_t_index \
+sim:/qpu_tb/qpu/qte_evolution_complete \
+sim:/qpu_tb/qpu/assembled_psi_matrix \
+sim:/qpu_tb/qpu/internal_psi_asm_done \
+sim:/qpu_tb/qpu/start_disassembly \
+sim:/qpu_tb/qpu/disassembled_data \
+sim:/qpu_tb/qpu/disassemble_valid_out \
+sim:/qpu_tb/qpu/disassemble_done \
+sim:/qpu_tb/qpu/internal_tx_spi_valid
+
+# Optional: Configure wave window properties
+# wave zoom full
+
+#==============================================================================
+# Run Simulation
+#==============================================================================
+# Run for a specific time (e.g., 2000 ns) or until the testbench finishes ('run -all')
+# Adjust the time as needed for your testbench stimulus
+run 5000 ps
+# run -all
+
+echo "Simulation complete. Check wave window and transcript."

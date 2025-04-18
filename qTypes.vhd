@@ -43,8 +43,8 @@ package qTypes is
     constant numQubits : integer := 1;
 	 
 	 --yum
-	 constant numComplexNumbersInMatrix : integer  :=  2**numQubits * 2**numQubits;
-	 constant numComplexNumbersinVector : integer  :=  2**numQubits;
+    constant numComplexNumbersInMatrix : integer  :=  2**numQubits * 2**numQubits;
+    constant numComplexNumbersinVector : integer  :=  2**numQubits;
     
     -- Number of basis states = 2^nQubits
     constant dimension : integer := 2 ** numQubits;
