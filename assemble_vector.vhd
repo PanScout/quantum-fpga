@@ -7,45 +7,50 @@ use work.qTypes.ALL;
 entity assemble_vector is
     port (
         -- Clock and Reset
-        clk       : in  std_logic;
-        reset     : in  std_logic;  -- Active high synchronous reset
+        clk        : in  std_logic;
+        reset      : in  std_logic;  -- Active high synchronous reset
 
         -- Input Data Interface
-        data_in   : in  std_logic_vector((2 * fixed64'length) - 1 downto 0);  -- 72 bits: [RE(35 downto 0) | IM(35 downto 0)]
-        valid_in  : in  std_logic;  -- Indicates that data_in is valid
+        data_in    : in  std_logic_vector((2 * fixed64'length) - 1 downto 0);  -- [RE | IM]
+        valid_in   : in  std_logic;  -- Indicates that data_in is valid
 
         -- Output Data Interface
-        vector_out : out cvector;   -- Assembled vector
-        done_out   : out std_logic  -- High when vector is fully assembled (latched until reset)
+        vector_out : out cvector;     -- Assembled vector
+        done_out   : out std_logic    -- High when vector is fully assembled
     );
 end entity assemble_vector;
 
 architecture rtl of assemble_vector is
 
-    -- Define state machine states
+    -- State machine
     type state_t is (IDLE, RECEIVING, DONE);
     signal current_state, next_state : state_t;
 
-    -- Constant definitions for data slicing and zero values
-    constant F_LEN      : integer := fixed64'length; -- 36
-    constant RE_HIGH    : integer := (2 * F_LEN) - 1;  -- 71
-    constant RE_LOW     : integer := F_LEN;            -- 36
-    constant IM_HIGH    : integer := F_LEN - 1;        -- 35
-    constant IM_LOW     : integer := 0;                -- 0
-
-    constant ZERO_fixed64  : fixed64 := to_sfixed(0.0, fixed64'high, fixed64'low);
+    -- Zero constants
+    constant ZERO_fixed64  : fixed64  := to_sfixed(0.0, fixed64'high, fixed64'low);
     constant ZERO_cfixed64 : cfixed64 := (re => ZERO_fixed64, im => ZERO_fixed64);
 
-    -- Internal storage for the vector, defaulting all elements to zero.
+    -- Internal vector storage
     signal internal_vector : cvector := (others => ZERO_cfixed64);
 
-    -- Single index counter for the vector elements
-    signal index_cnt : natural range 0 to dimension - 1;
+    -- Index counter
+    signal index_cnt : natural range 0 to dimension - 1 := 0;
+
+    -- Data‐slice constants
+    constant F_LEN   : integer := fixed64'length;   -- 36
+    constant RE_HIGH : integer := (2 * F_LEN) - 1;   -- 71
+    constant RE_LOW  : integer := F_LEN;             -- 36
+    constant IM_HIGH : integer := F_LEN - 1;         -- 35
+    constant IM_LOW  : integer := 0;                 -- 0
+
+    -- valid_in edge detection
+    signal valid_in_d1          : std_logic := '0';
+    signal valid_in_rising_edge : std_logic;
 
 begin
 
     ----------------------------------------------------------------------------
-    -- State Register Process (Synchronous)
+    -- State Register (synchronous)
     ----------------------------------------------------------------------------
     process(clk)
     begin
@@ -59,7 +64,28 @@ begin
     end process;
 
     ----------------------------------------------------------------------------
-    -- Index Counter and Internal Vector Update Process (Synchronous)
+    -- valid_in Delay Register (for edge detection)
+    ----------------------------------------------------------------------------
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' then
+                valid_in_d1 <= '0';
+            else
+                valid_in_d1 <= valid_in;
+            end if;
+        end if;
+    end process;
+
+    ----------------------------------------------------------------------------
+    -- Combinatorial Edge Detector
+    ----------------------------------------------------------------------------
+    valid_in_rising_edge <= '1'
+        when (valid_in = '1' and valid_in_d1 = '0')
+        else '0';
+
+    ----------------------------------------------------------------------------
+    -- Data Capture & Index Counter (only in RECEIVING, and during IDLE->RECEIVING first)
     ----------------------------------------------------------------------------
     process(clk)
         variable temp_cfixed64 : cfixed64;
@@ -70,65 +96,51 @@ begin
             if reset = '1' then
                 index_cnt       <= 0;
                 internal_vector <= (others => ZERO_cfixed64);
-            else
-                if current_state = RECEIVING and valid_in = '1' then
-                    -- Slice input data into real and imaginary parts
-                    temp_re_slv := data_in(RE_HIGH downto RE_LOW);
-                    temp_im_slv := data_in(IM_HIGH downto IM_LOW);
+            elsif current_state /= DONE and valid_in_rising_edge = '1' then
+                -- Slice real & imag
+                temp_re_slv := data_in(RE_HIGH downto RE_LOW);
+                temp_im_slv := data_in(IM_HIGH downto IM_LOW);
 
-                    -- Convert the slices to fixed-point numbers and form a complex value
-                    temp_cfixed64.re := to_sfixed(signed(temp_re_slv), fixed64'high, fixed64'low);
-                    temp_cfixed64.im := to_sfixed(signed(temp_im_slv), fixed64'high, fixed64'low);
+                -- Convert to fixed-point
+                temp_cfixed64.re := sfixed(temp_re_slv);
+                temp_cfixed64.im := sfixed(temp_im_slv);
 
-                    -- Store the converted value in the current element of the vector
-                    internal_vector(index_cnt) <= temp_cfixed64;
+                -- Store into vector
+                internal_vector(index_cnt) <= temp_cfixed64;
 
-                    -- Update index counter unless the current element is the last one
-                    if index_cnt < dimension - 1 then
-                        index_cnt <= index_cnt + 1;
-                    end if;
+                -- Bump index until last element
+                if index_cnt < dimension - 1 then
+                    index_cnt <= index_cnt + 1;
                 end if;
             end if;
         end if;
     end process;
 
     ----------------------------------------------------------------------------
-    -- Next State and Output Logic Process (Combinatorial)
+    -- Next State & Output Logic (combinatorial)
     ----------------------------------------------------------------------------
-    process(current_state, valid_in, index_cnt)
+    process(current_state, valid_in_rising_edge, index_cnt, internal_vector)
     begin
-        -- Default assignments
-        next_state  <= current_state;
-        done_out    <= '0';
-        vector_out  <= internal_vector;
+        -- Defaults
+        next_state <= current_state;
+        done_out   <= '0';
+        vector_out <= internal_vector;
 
         case current_state is
             when IDLE =>
-                if valid_in = '1' then
-                    if dimension = 0 then
-                        next_state <= IDLE;  -- Nothing to do for a zero-dimension vector
-                    elsif dimension = 1 then  -- Special case: only one element to capture
-                        next_state <= DONE;
-                    else
-                        next_state <= RECEIVING;
-                    end if;
-                else
-                    next_state <= IDLE;
+                if valid_in_rising_edge = '1' then
+                    next_state <= RECEIVING;
                 end if;
 
             when RECEIVING =>
-                if valid_in = '1' then
-                    if index_cnt = dimension - 1 then
-                        next_state <= DONE;
-                    else
-                        next_state <= RECEIVING;
-                    end if;
+                if valid_in_rising_edge = '1' and index_cnt = dimension - 1 then
+                    next_state <= DONE;
                 else
                     next_state <= RECEIVING;
                 end if;
 
             when DONE =>
-                done_out   <= '1';  -- Signal that the vector is fully assembled
+                done_out   <= '1';
                 next_state <= DONE;
 
             when others =>
@@ -137,4 +149,3 @@ begin
     end process;
 
 end architecture rtl;
-

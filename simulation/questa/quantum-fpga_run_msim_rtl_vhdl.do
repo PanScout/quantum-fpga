@@ -1,43 +1,54 @@
 transcript on
-if ![file isdirectory verilog_libs] {
-	file mkdir verilog_libs
+if ![file isdirectory vhdl_libs] {
+	file mkdir vhdl_libs
 }
 
-vlib verilog_libs/altera_ver
-vmap altera_ver ./verilog_libs/altera_ver
-vlog -vlog01compat -work altera_ver {c:/intelfpga_lite/19.1/quartus/eda/sim_lib/altera_primitives.v}
+vlib vhdl_libs/altera
+vmap altera ./vhdl_libs/altera
+vcom -93 -work altera {c:/arria10/quartus/eda/sim_lib/altera_syn_attributes.vhd}
+vcom -93 -work altera {c:/arria10/quartus/eda/sim_lib/altera_standard_functions.vhd}
+vcom -93 -work altera {c:/arria10/quartus/eda/sim_lib/alt_dspbuilder_package.vhd}
+vcom -93 -work altera {c:/arria10/quartus/eda/sim_lib/altera_europa_support_lib.vhd}
+vcom -93 -work altera {c:/arria10/quartus/eda/sim_lib/altera_primitives_components.vhd}
+vcom -93 -work altera {c:/arria10/quartus/eda/sim_lib/altera_primitives.vhd}
 
-vlib verilog_libs/lpm_ver
-vmap lpm_ver ./verilog_libs/lpm_ver
-vlog -vlog01compat -work lpm_ver {c:/intelfpga_lite/19.1/quartus/eda/sim_lib/220model.v}
+vlib vhdl_libs/lpm
+vmap lpm ./vhdl_libs/lpm
+vcom -93 -work lpm {c:/arria10/quartus/eda/sim_lib/220pack.vhd}
+vcom -93 -work lpm {c:/arria10/quartus/eda/sim_lib/220model.vhd}
 
-vlib verilog_libs/sgate_ver
-vmap sgate_ver ./verilog_libs/sgate_ver
-vlog -vlog01compat -work sgate_ver {c:/intelfpga_lite/19.1/quartus/eda/sim_lib/sgate.v}
+vlib vhdl_libs/sgate
+vmap sgate ./vhdl_libs/sgate
+vcom -93 -work sgate {c:/arria10/quartus/eda/sim_lib/sgate_pack.vhd}
+vcom -93 -work sgate {c:/arria10/quartus/eda/sim_lib/sgate.vhd}
 
-vlib verilog_libs/altera_mf_ver
-vmap altera_mf_ver ./verilog_libs/altera_mf_ver
-vlog -vlog01compat -work altera_mf_ver {c:/intelfpga_lite/19.1/quartus/eda/sim_lib/altera_mf.v}
+vlib vhdl_libs/altera_mf
+vmap altera_mf ./vhdl_libs/altera_mf
+vcom -93 -work altera_mf {c:/arria10/quartus/eda/sim_lib/altera_mf_components.vhd}
+vcom -93 -work altera_mf {c:/arria10/quartus/eda/sim_lib/altera_mf.vhd}
 
-vlib verilog_libs/altera_lnsim_ver
-vmap altera_lnsim_ver ./verilog_libs/altera_lnsim_ver
-vlog -sv -work altera_lnsim_ver {c:/intelfpga_lite/19.1/quartus/eda/sim_lib/altera_lnsim.sv}
+vlib vhdl_libs/altera_lnsim
+vmap altera_lnsim ./vhdl_libs/altera_lnsim
+vlog -sv -work altera_lnsim {c:/arria10/quartus/eda/sim_lib/mentor/altera_lnsim_for_vhdl.sv}
+vcom -93 -work altera_lnsim {c:/arria10/quartus/eda/sim_lib/altera_lnsim_components.vhd}
 
-vlib verilog_libs/cyclonev_ver
-vmap cyclonev_ver ./verilog_libs/cyclonev_ver
-vlog -vlog01compat -work cyclonev_ver {c:/intelfpga_lite/19.1/quartus/eda/sim_lib/mentor/cyclonev_atoms_ncrypt.v}
-vlog -vlog01compat -work cyclonev_ver {c:/intelfpga_lite/19.1/quartus/eda/sim_lib/mentor/cyclonev_hmi_atoms_ncrypt.v}
-vlog -vlog01compat -work cyclonev_ver {c:/intelfpga_lite/19.1/quartus/eda/sim_lib/cyclonev_atoms.v}
+vlib vhdl_libs/twentynm
+vmap twentynm ./vhdl_libs/twentynm
+vlog -vlog01compat -work twentynm {c:/arria10/quartus/eda/sim_lib/mentor/twentynm_atoms_ncrypt.v}
+vcom -93 -work twentynm {c:/arria10/quartus/eda/sim_lib/twentynm_atoms.vhd}
+vcom -93 -work twentynm {c:/arria10/quartus/eda/sim_lib/twentynm_components.vhd}
 
-vlib verilog_libs/cyclonev_hssi_ver
-vmap cyclonev_hssi_ver ./verilog_libs/cyclonev_hssi_ver
-vlog -vlog01compat -work cyclonev_hssi_ver {c:/intelfpga_lite/19.1/quartus/eda/sim_lib/mentor/cyclonev_hssi_atoms_ncrypt.v}
-vlog -vlog01compat -work cyclonev_hssi_ver {c:/intelfpga_lite/19.1/quartus/eda/sim_lib/cyclonev_hssi_atoms.v}
+vlib vhdl_libs/twentynm_hssi
+vmap twentynm_hssi ./vhdl_libs/twentynm_hssi
+vlog -vlog01compat -work twentynm_hssi {c:/arria10/quartus/eda/sim_lib/mentor/twentynm_hssi_atoms_ncrypt.v}
+vcom -93 -work twentynm_hssi {c:/arria10/quartus/eda/sim_lib/twentynm_hssi_components.vhd}
+vcom -93 -work twentynm_hssi {c:/arria10/quartus/eda/sim_lib/twentynm_hssi_atoms.vhd}
 
-vlib verilog_libs/cyclonev_pcie_hip_ver
-vmap cyclonev_pcie_hip_ver ./verilog_libs/cyclonev_pcie_hip_ver
-vlog -vlog01compat -work cyclonev_pcie_hip_ver {c:/intelfpga_lite/19.1/quartus/eda/sim_lib/mentor/cyclonev_pcie_hip_atoms_ncrypt.v}
-vlog -vlog01compat -work cyclonev_pcie_hip_ver {c:/intelfpga_lite/19.1/quartus/eda/sim_lib/cyclonev_pcie_hip_atoms.v}
+vlib vhdl_libs/twentynm_hip
+vmap twentynm_hip ./vhdl_libs/twentynm_hip
+vlog -vlog01compat -work twentynm_hip {c:/arria10/quartus/eda/sim_lib/mentor/twentynm_hip_atoms_ncrypt.v}
+vcom -93 -work twentynm_hip {c:/arria10/quartus/eda/sim_lib/twentynm_hip_components.vhd}
+vcom -93 -work twentynm_hip {c:/arria10/quartus/eda/sim_lib/twentynm_hip_atoms.vhd}
 
 if {[file exists rtl_work]} {
 	vdel -lib rtl_work -all
@@ -45,12 +56,6 @@ if {[file exists rtl_work]} {
 vlib rtl_work
 vmap work rtl_work
 
-vlog -vlog01compat -work work +incdir+C:/Users/mail/OneDrive/Desktop/quantum-fpga/db {C:/Users/mail/OneDrive/Desktop/quantum-fpga/db/mult_ol01.v}
-vlog -vlog01compat -work work +incdir+C:/Users/mail/OneDrive/Desktop/quantum-fpga/db {C:/Users/mail/OneDrive/Desktop/quantum-fpga/db/mult_ne01.v}
-vlog -vlog01compat -work work +incdir+C:/Users/mail/OneDrive/Desktop/quantum-fpga/db {C:/Users/mail/OneDrive/Desktop/quantum-fpga/db/mult_pe01.v}
-vlog -vlog01compat -work work +incdir+C:/Users/mail/OneDrive/Desktop/quantum-fpga/db {C:/Users/mail/OneDrive/Desktop/quantum-fpga/db/mult_oe01.v}
-vlog -vlog01compat -work work +incdir+C:/Users/mail/OneDrive/Desktop/quantum-fpga/db {C:/Users/mail/OneDrive/Desktop/quantum-fpga/db/mult_vc01.v}
-vlog -vlog01compat -work work +incdir+C:/Users/mail/OneDrive/Desktop/quantum-fpga/db {C:/Users/mail/OneDrive/Desktop/quantum-fpga/db/mult_0k01.v}
 vcom -93 -work work {C:/Users/mail/OneDrive/Desktop/quantum-fpga/spi_receive.vhd}
 vcom -93 -work work {C:/Users/mail/OneDrive/Desktop/quantum-fpga/spi_transmit.vhd}
 vcom -93 -work work {C:/Users/mail/OneDrive/Desktop/quantum-fpga/Register_std_logic.vhd}

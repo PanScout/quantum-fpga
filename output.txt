@@ -1,0 +1,3792 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.qTypes.ALL;
+use work.fixed_pkg.ALL;
+
+-------------------------------------------------------------------------------
+-- Entity
+-------------------------------------------------------------------------------
+entity Absolute_Row_Summation is
+  port (
+    A : in  cmatrix;  -- 4�4 matrix when nQubits=2
+
+    -- Output 1: The computed infinity norm in cfixed64 (imag part = 0)
+    rowSums : out cvector
+  );
+end entity Absolute_Row_Summation;
+
+
+architecture Behavioral of Absolute_Row_Summation is
+
+  type partialSum_array is array (0 to dimension-1, 0 to dimension-1) of fixed64;
+  signal partialSum : partialSum_array;
+   signal my_fixed : sfixed(14 downto -10);
+
+begin
+
+  gen_rows: for i in 0 to dimension-1 generate
+  begin
+
+    gen_cols: for j in 0 to dimension-1 generate
+    begin
+
+      -- Handle first column (j=0) separately to avoid j-1 = -1
+      gen_j0: if j = 0 generate
+        BS_j0: block
+          signal val : fixed64;
+        begin
+          val <= resize(abs(A(i)(j).re) + abs(A(i)(j).im), fixed64'high, fixed64'low);
+          partialSum(i, j) <= val;
+        end block BS_j0;
+      end generate gen_j0;
+
+      -- Handle columns j > 0
+      gen_j_others: if j > 0 generate
+        BS_j: block
+          signal val : fixed64;
+        begin
+          val <= resize(abs(A(i)(j).re) + abs(A(i)(j).im), fixed64'high, fixed64'low);
+          partialSum(i, j) <= resize(partialSum(i, j-1) + val, fixed64'high, fixed64'low);
+        end block BS_j;
+      end generate gen_j_others;
+
+    end generate gen_cols;
+
+    rowSums(i).re <= partialSum(i, dimension-1);
+    --rowSums(i).im <= b"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    rowSums(i).im <= to_sfixed(0, fixed64'high, fixed64'low);
+
+  end generate gen_rows;
+
+end architecture Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.qTypes.all;  -- Use your custom package
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
+
+entity Add_Vectors_Element_Wise is
+    port(
+        a : in  cvector;  -- Input complex vector 1
+        b : in  cvector;  -- Input complex vector 2
+        c : out cvector   -- Output complex vector (a + b)
+    );
+end entity;
+
+architecture concurrent_arch of Add_Vectors_Element_Wise is
+begin
+    -- Generate adders for each element in the cvector
+    gen_adders_High : for i in 0 to dimension-1 generate
+        -- Real part addition
+        c(i).re <= resize (a(i).re + b(i).re, fixed64'high, fixed64'low);
+        -- Imaginary part addition
+        c(i).im <= resize (a(i).im + b(i).im, fixed64'high, fixed64'low);
+    end generate gen_adders_High;
+end architecture;
+	library IEEE;
+	use IEEE.STD_LOGIC_1164.ALL;
+	use IEEE.NUMERIC_STD.ALL;
+	-- Assuming 'dimension', 'fixed64', 'cfixed64', 'cmatrix' are defined here
+	use work.fixed_pkg.ALL;
+	use work.qTypes.ALL;
+
+	entity assemble_matrix is
+		 port (
+			  -- Clock and Reset
+			  clk      : in  std_logic;
+			  reset    : in  std_logic;  -- Active high synchronous reset
+
+			  -- Input Data Interface
+			  data_in  : in  std_logic_vector( (2 * fixed64'length) - 1 downto 0); -- e.g., 72 bits: [RE(35 downto 0) | IM(35 downto 0)]
+			  valid_in : in  std_logic;  -- Indicates data_in is valid
+
+			  -- Output Data Interface
+			  matrix_out : out cmatrix;      -- Assembled matrix
+			  done_out   : out std_logic     -- High when matrix is assembled (latched until reset)
+		 );
+	end entity assemble_matrix;
+
+	architecture rtl of assemble_matrix is
+
+		 -- State machine definition
+		 type state_t is (IDLE, RECEIVING, DONE);
+		 signal current_state, next_state : state_t;
+
+		 -- Constant for complex zero value (0.0 + j0.0)
+		 constant ZERO_fixed64  : fixed64 := to_sfixed(0.0, fixed64'high, fixed64'low);
+		 constant ZERO_cfixed64 : cfixed64 := (re => ZERO_fixed64, im => ZERO_fixed64);
+
+		 -- Internal storage for the matrix being assembled, with default initialization to zero.
+		 signal internal_matrix : cmatrix := (others => (others => ZERO_cfixed64));
+
+		 -- Counters for matrix indices
+		 signal row_index_cnt : natural range 0 to dimension - 1; -- Range exactly matches index
+		 signal col_index_cnt : natural range 0 to dimension - 1; -- Range exactly matches index
+
+		 -- Constants for data slicing
+		 constant F_LEN       : integer := fixed64'length; -- e.g., 36
+		 constant RE_HIGH     : integer := (2*F_LEN) - 1;  -- e.g., 71
+		 constant RE_LOW      : integer := F_LEN;         -- e.g., 36
+		 constant IM_HIGH     : integer := F_LEN - 1;     -- e.g., 35
+		 constant IM_LOW      : integer := 0;             -- e.g., 0
+
+		 -- Signals for valid_in edge detection
+		 signal valid_in_d1          : std_logic := '0'; -- Previous cycle's valid_in
+		 signal valid_in_rising_edge : std_logic;      -- High for one cycle on valid_in 0->1
+
+	begin
+
+		 -- State Register Process (Synchronous)
+		 process(clk)
+		 begin
+			  if rising_edge(clk) then
+					if reset = '1' then
+						 current_state <= IDLE;
+					else
+						 current_state <= next_state;
+					end if;
+			  end if;
+		 end process;
+
+		 -- Process to register valid_in for edge detection
+		 process(clk)
+		 begin
+			  if rising_edge(clk) then
+					if reset = '1' then
+						 valid_in_d1 <= '0';
+					else
+						 valid_in_d1 <= valid_in; -- Store current valid_in for next cycle
+					end if;
+			  end if;
+		 end process;
+
+		 -- Combinatorial logic for edge detection
+		 valid_in_rising_edge <= '1' when (valid_in = '1' and valid_in_d1 = '0') else '0';
+
+
+		 -- Index Counters and Internal Matrix Register Process (Synchronous)
+		 process(clk)
+			  variable temp_cfixed64 : cfixed64;
+			  variable temp_re_slv   : std_logic_vector(F_LEN - 1 downto 0);
+			  variable temp_im_slv   : std_logic_vector(F_LEN - 1 downto 0);
+		 begin
+			  if rising_edge(clk) then
+					if reset = '1' then
+						 row_index_cnt <= 0;
+						 col_index_cnt <= 0;
+						 -- Reset the internal matrix to zero
+						 internal_matrix <= (others => (others => ZERO_cfixed64));
+					else
+						 -- *** MODIFIED: Capture data whenever a rising edge is detected,
+						 -- *** as long as the state machine is not already DONE.
+						 -- *** This captures the first element during the IDLE -> RECEIVING transition.
+						 -- if current_state = RECEIVING and valid_in_rising_edge = '1' then -- OLD condition
+						 if current_state /= DONE and valid_in_rising_edge = '1' then  -- *** NEW Condition ***
+							  -- Slice input data
+							  temp_re_slv := data_in(RE_HIGH downto RE_LOW);
+							  temp_im_slv := data_in(IM_HIGH downto IM_LOW);
+
+							  -- Convert std_logic_vector slices to sfixed
+							  -- Ensure the conversion uses the correct bounds from fixed64 type
+							  temp_cfixed64.re := sfixed(temp_re_slv);
+							  temp_cfixed64.im := sfixed(temp_im_slv);
+
+							  -- Store the converted value in the internal matrix at the current indices
+							  internal_matrix(row_index_cnt)(col_index_cnt) <= temp_cfixed64;
+
+							  -- Update indices for the *next* element, *unless* we just wrote the last one
+							  -- This check is important so indices don't increment after the last element is stored
+							  if not (row_index_cnt = dimension - 1 and col_index_cnt = dimension - 1) then
+									if col_index_cnt = dimension - 1 then -- End of a row
+										 col_index_cnt <= 0;
+										 row_index_cnt <= row_index_cnt + 1;
+									else
+										 -- Move to next column in the same row
+										 col_index_cnt <= col_index_cnt + 1;
+									end if;
+							  end if;
+						 end if; -- End of data capture logic based on valid_in_rising_edge
+					end if; -- End of reset check
+			  end if; -- End of rising_edge check
+		 end process; -- End of synchronous process
+
+		 -- Next State Logic and Output Logic Process (Combinatorial)
+		 -- Sensitivity list includes edge signal for correct transitions
+		 process(current_state, valid_in_rising_edge, row_index_cnt, col_index_cnt, internal_matrix)
+		 begin
+			  -- Default assignments
+			  next_state  <= current_state;
+			  done_out    <= '0'; -- Default done to low
+			  matrix_out  <= internal_matrix; -- Output continuously reflects internal state
+
+			  case current_state is
+					when IDLE =>
+						 -- If a rising edge is detected, start receiving (or go straight to DONE if 1x1)
+						 if valid_in_rising_edge = '1' then
+								if dimension = 0 then -- Handle 0-dim case gracefully if needed
+									 next_state <= IDLE; -- Or perhaps DONE? Depends on requirement.
+								elsif dimension = 1 then -- Special case: matrix is 1x1
+									 -- The first valid data completes the 1x1 matrix
+									 next_state <= DONE;
+								else
+									 -- Start receiving subsequent elements
+									 next_state <= RECEIVING;
+								end if;
+						 else
+							  -- Stay idle if no valid data starts the process
+							  next_state <= IDLE;
+						 end if;
+
+					when RECEIVING =>
+						 done_out <= '0'; -- Explicitly not done yet while receiving
+						 -- Check if the element *just processed* (in the clocked process) was the last one.
+						 -- This decision is based on the state *before* the clock edge.
+						 if valid_in_rising_edge = '1' then
+							  if (row_index_cnt = dimension - 1) and (col_index_cnt = dimension - 1) then
+									-- The data captured on this rising edge was the last element.
+									next_state <= DONE;
+							  else
+									-- More elements are expected. Stay in RECEIVING state.
+									next_state <= RECEIVING;
+							  end if;
+						 else
+							  -- If no new data arrived, just stay in RECEIVING, waiting.
+							  next_state <= RECEIVING;
+						 end if;
+
+					when DONE =>
+						 done_out <= '1';    -- Assembly finished, assert done
+						 next_state <= DONE; -- Latch in DONE state until reset
+
+					when others => -- Should not happen, but good practice
+						 next_state <= IDLE;
+			  end case;
+		 end process; -- End of combinatorial process
+
+	end architecture rtl;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+-- Importing fixed point and custom quantum types
+use work.fixed_pkg.ALL;
+use work.qTypes.ALL;
+
+entity assemble_psi_matrix is
+    port (
+         clk           : in  std_logic;
+         reset         : in  std_logic;     -- Active high synchronous reset
+         vector_in     : in  cvector;       -- Input: one entire column (cvector)
+         valid_in      : in  std_logic;     -- Indicates vector_in is valid
+         psi_matrix_out: out psi_matrix;    -- Output: assembled psi_matrix (30 columns)
+         done_out      : out std_logic      -- High when psi matrix is fully assembled
+    );
+end entity assemble_psi_matrix;
+
+architecture rtl of assemble_psi_matrix is
+
+    -- State machine definition
+    type state_t is (IDLE, RECEIVING, DONE);
+    signal current_state, next_state : state_t;
+
+    -- Constants for zero initialization (0.0 + j0.0)
+    constant ZERO_fixed64  : fixed64 := to_sfixed(0.0, fixed64'high, fixed64'low);
+    constant ZERO_cfixed64 : cfixed64 := (re => ZERO_fixed64, im => ZERO_fixed64);
+
+    -- Internal storage for the psi matrix being assembled (30 columns)
+    signal internal_psi : psi_matrix := (others => (others => ZERO_cfixed64));
+
+    -- Column counter for indexing into the psi matrix
+    constant NUM_COLUMNS : integer := 30;
+    signal col_index_cnt : natural range 0 to NUM_COLUMNS - 1 := 0;
+
+    -- Signals for valid_in edge detection
+    signal valid_in_d1          : std_logic := '0';
+    signal valid_in_rising_edge : std_logic;
+    
+begin
+
+    ------------------------------------------------------------------------------
+    -- State Register Process (Synchronous)
+    ------------------------------------------------------------------------------
+    process(clk)
+    begin
+         if rising_edge(clk) then
+              if reset = '1' then
+                   current_state <= IDLE;
+              else
+                   current_state <= next_state;
+              end if;
+         end if;
+    end process;
+
+    ------------------------------------------------------------------------------
+    -- Process to Register valid_in for Edge Detection
+    ------------------------------------------------------------------------------
+    process(clk)
+    begin
+         if rising_edge(clk) then
+              if reset = '1' then
+                   valid_in_d1 <= '0';
+              else
+                   valid_in_d1 <= valid_in;
+              end if;
+         end if;
+    end process;
+    
+    -- Generate a pulse on the rising edge of valid_in
+    valid_in_rising_edge <= '1' when (valid_in = '1' and valid_in_d1 = '0') else '0';
+    
+    ------------------------------------------------------------------------------
+    -- Synchronous Process: Capture Input cvectors into the psi matrix
+    ------------------------------------------------------------------------------
+    process(clk)
+    begin
+         if rising_edge(clk) then
+              if reset = '1' then
+                   col_index_cnt <= 0;
+                   internal_psi <= (others => (others => ZERO_cfixed64));
+              else
+                   -- Capture the column (cvector) only when not in DONE state
+                   if (current_state /= DONE) and (valid_in_rising_edge = '1') then
+                        -- Store the incoming cvector into the current column
+                        internal_psi(col_index_cnt) <= vector_in;
+                        
+                        -- Update column counter if this is not the last column
+                        if col_index_cnt < NUM_COLUMNS - 1 then
+                             col_index_cnt <= col_index_cnt + 1;
+                        end if;
+                   end if;
+              end if;
+         end if;
+    end process;
+    
+    ------------------------------------------------------------------------------
+    -- Combinatorial Process: Next-State and Output Logic
+    ------------------------------------------------------------------------------
+    process(current_state, valid_in_rising_edge, col_index_cnt, internal_psi)
+    begin
+         -- Default assignments
+         next_state   <= current_state;
+         done_out     <= '0';
+         psi_matrix_out <= internal_psi;  -- Output reflects the internal psi matrix
+         
+         case current_state is
+              when IDLE =>
+                   -- On first valid input capture, move to RECEIVING state
+                   if valid_in_rising_edge = '1' then
+                        next_state <= RECEIVING;
+                   else
+                        next_state <= IDLE;
+                   end if;
+              
+              when RECEIVING =>
+                   -- When a valid column is captured, check for completion:
+                   if valid_in_rising_edge = '1' then
+                        -- If the current column index is at the last column, move to DONE
+                        if col_index_cnt = NUM_COLUMNS - 1 then
+                             next_state <= DONE;
+                        else
+                             next_state <= RECEIVING;
+                        end if;
+                   else
+                        next_state <= RECEIVING;
+                   end if;
+              
+              when DONE =>
+                   -- Latch in DONE state and assert done_out
+                   done_out <= '1';
+                   next_state <= DONE;
+              
+              when others =>
+                   next_state <= IDLE;
+         end case;
+    end process;
+
+end architecture rtl;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.fixed_pkg.ALL;
+use work.qTypes.ALL;
+
+entity assemble_vector is
+    port (
+        -- Clock and Reset
+        clk       : in  std_logic;
+        reset     : in  std_logic;  -- Active high synchronous reset
+
+        -- Input Data Interface
+        data_in   : in  std_logic_vector((2 * fixed64'length) - 1 downto 0);  -- 72 bits: [RE(35 downto 0) | IM(35 downto 0)]
+        valid_in  : in  std_logic;  -- Indicates that data_in is valid
+
+        -- Output Data Interface
+        vector_out : out cvector;   -- Assembled vector
+        done_out   : out std_logic  -- High when vector is fully assembled (latched until reset)
+    );
+end entity assemble_vector;
+
+architecture rtl of assemble_vector is
+
+    -- Define state machine states
+    type state_t is (IDLE, RECEIVING, DONE);
+    signal current_state, next_state : state_t;
+
+    -- Constant definitions for data slicing and zero values
+    constant F_LEN      : integer := fixed64'length; -- 36
+    constant RE_HIGH    : integer := (2 * F_LEN) - 1;  -- 71
+    constant RE_LOW     : integer := F_LEN;            -- 36
+    constant IM_HIGH    : integer := F_LEN - 1;        -- 35
+    constant IM_LOW     : integer := 0;                -- 0
+
+    constant ZERO_fixed64  : fixed64 := to_sfixed(0.0, fixed64'high, fixed64'low);
+    constant ZERO_cfixed64 : cfixed64 := (re => ZERO_fixed64, im => ZERO_fixed64);
+
+    -- Internal storage for the vector, defaulting all elements to zero.
+    signal internal_vector : cvector := (others => ZERO_cfixed64);
+
+    -- Single index counter for the vector elements
+    signal index_cnt : natural range 0 to dimension - 1;
+
+begin
+
+    ----------------------------------------------------------------------------
+    -- State Register Process (Synchronous)
+    ----------------------------------------------------------------------------
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' then
+                current_state <= IDLE;
+            else
+                current_state <= next_state;
+            end if;
+        end if;
+    end process;
+
+    ----------------------------------------------------------------------------
+    -- Index Counter and Internal Vector Update Process (Synchronous)
+    ----------------------------------------------------------------------------
+    process(clk)
+        variable temp_cfixed64 : cfixed64;
+        variable temp_re_slv   : std_logic_vector(F_LEN - 1 downto 0);
+        variable temp_im_slv   : std_logic_vector(F_LEN - 1 downto 0);
+    begin
+        if rising_edge(clk) then
+            if reset = '1' then
+                index_cnt       <= 0;
+                internal_vector <= (others => ZERO_cfixed64);
+            else
+                if current_state = RECEIVING and valid_in = '1' then
+                    -- Slice input data into real and imaginary parts
+                    temp_re_slv := data_in(RE_HIGH downto RE_LOW);
+                    temp_im_slv := data_in(IM_HIGH downto IM_LOW);
+
+                    -- Convert the slices to fixed-point numbers and form a complex value
+                    temp_cfixed64.re := to_sfixed(signed(temp_re_slv), fixed64'high, fixed64'low);
+                    temp_cfixed64.im := to_sfixed(signed(temp_im_slv), fixed64'high, fixed64'low);
+
+                    -- Store the converted value in the current element of the vector
+                    internal_vector(index_cnt) <= temp_cfixed64;
+
+                    -- Update index counter unless the current element is the last one
+                    if index_cnt < dimension - 1 then
+                        index_cnt <= index_cnt + 1;
+                    end if;
+                end if;
+            end if;
+        end if;
+    end process;
+
+    ----------------------------------------------------------------------------
+    -- Next State and Output Logic Process (Combinatorial)
+    ----------------------------------------------------------------------------
+    process(current_state, valid_in, index_cnt)
+    begin
+        -- Default assignments
+        next_state  <= current_state;
+        done_out    <= '0';
+        vector_out  <= internal_vector;
+
+        case current_state is
+            when IDLE =>
+                if valid_in = '1' then
+                    if dimension = 0 then
+                        next_state <= IDLE;  -- Nothing to do for a zero-dimension vector
+                    elsif dimension = 1 then  -- Special case: only one element to capture
+                        next_state <= DONE;
+                    else
+                        next_state <= RECEIVING;
+                    end if;
+                else
+                    next_state <= IDLE;
+                end if;
+
+            when RECEIVING =>
+                if valid_in = '1' then
+                    if index_cnt = dimension - 1 then
+                        next_state <= DONE;
+                    else
+                        next_state <= RECEIVING;
+                    end if;
+                else
+                    next_state <= RECEIVING;
+                end if;
+
+            when DONE =>
+                done_out   <= '1';  -- Signal that the vector is fully assembled
+                next_state <= DONE;
+
+            when others =>
+                next_state <= IDLE;
+        end case;
+    end process;
+
+end architecture rtl;
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
+
+entity Calculate_Norm_And_Compare is
+    port (
+        -- Input matrix: dimension = dimension × dimension (from qTypes)
+        A       : in  cmatrix;
+        
+        -- Output: '1' if THETA > infinityNorm(A), else '0'
+        isBelow : out std_logic;
+	InfinityNormOut : out cfixed64
+    );
+end entity Calculate_Norm_And_Compare;
+
+architecture structural of Calculate_Norm_And_Compare is
+
+    ----------------------------------------------------------------------------
+    -- 1) Internal signals
+    ----------------------------------------------------------------------------
+    signal rowSums    : cvector; -- from Absolute_Row_Summation
+    signal largestVal : fixed64;   -- from Max_Of_CVector
+
+    ----------------------------------------------------------------------------
+    -- 2) Define the constant THETA
+    ----------------------------------------------------------------------------
+    -- Adjust these bounds (40 downto -64) as needed to match 'fixed64'
+    constant THETA : fixed64 := b"000000000000000000000111101010000101"; --1.495585217958292 * 10**-2
+
+    ----------------------------------------------------------------------------
+    -- 3) Component declarations
+    ----------------------------------------------------------------------------
+    component Absolute_Row_Summation is
+        port (
+            A       : in  cmatrix;
+            rowSums : out cvector
+        );
+    end component;
+
+    component Max_Of_CVector is
+        port (
+            inputVector  : in  cvector;
+            largestValue : out fixed64
+        );
+    end component;
+
+begin
+
+    ----------------------------------------------------------------------------
+    -- 4) Instantiate Absolute_Row_Summation
+    ----------------------------------------------------------------------------
+    sum_inst: Absolute_Row_Summation
+        port map (
+            A       => A,
+            rowSums => rowSums
+        );
+
+    ----------------------------------------------------------------------------
+    -- 5) Instantiate Max_Of_CVector
+    ----------------------------------------------------------------------------
+    norm_inst: Max_Of_CVector
+        port map (
+            inputVector  => rowSums,
+            largestValue => largestVal
+        );
+
+    ----------------------------------------------------------------------------
+    -- 6) Compare the resulting infinity norm with THETA
+    ----------------------------------------------------------------------------
+    -- "If THETA > largestVal then output '1' else '0'"
+    isBelow <= '1' when THETA > largestVal else '0';
+    infinityNormOut.re <= largestVal;
+    infinityNormOut.im <= (others => '0');
+
+end architecture structural;
+
+
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
+
+use work.qTypes.all;
+
+entity Ceiling_Of_Log2 is
+    port (
+        scalar : in cfixed64;
+        result : out cfixed64
+    );
+end Ceiling_Of_Log2;
+
+architecture Structural of Ceiling_Of_Log2 is
+    -- Threshold constants for 2^(n-1) where n is output value
+--constant TH_25 : fixed64 := "0000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_24 : fixed64 := "0000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_23 : fixed64 := "0000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_22 : fixed64 := "0000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_21 : fixed64 := "0000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_20 : fixed64 := "0000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_19 : fixed64 := "0000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_18 : fixed64 := "0000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_17 : fixed64 := "0000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_16 : fixed64 := "0000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_15 : fixed64 := "0000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_14 : fixed64 := "0000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_13 : fixed64 := "0000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_12 : fixed64 := "0000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_11 : fixed64 := "0000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_10 : fixed64 := "0000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_9 : fixed64 := "0000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_8 : fixed64 := "0000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_7 : fixed64 := "0000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_6 : fixed64 := "0000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_5 : fixed64 := "0000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_4 : fixed64 := "0000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_3 : fixed64 := "0000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_2 : fixed64 := "0000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_1 : fixed64 := "0000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000";
+--constant TH_0 : fixed64 := "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";	      
+
+     constant TH_25 : fixed64 := to_sfixed(2**24, fixed64'high, fixed64'low);
+     constant TH_24 : fixed64 := to_sfixed(2**23, fixed64'high, fixed64'low);
+     constant TH_23 : fixed64 := to_sfixed(2**22, fixed64'high, fixed64'low);
+     constant TH_22 : fixed64 := to_sfixed(2**21, fixed64'high, fixed64'low);
+     constant TH_21 : fixed64 := to_sfixed(2**20, fixed64'high, fixed64'low);
+     constant TH_20 : fixed64 := to_sfixed(2**19, fixed64'high, fixed64'low);
+     constant TH_19 : fixed64 := to_sfixed(2**18, fixed64'high, fixed64'low);
+     constant TH_18 : fixed64 := to_sfixed(2**17, fixed64'high, fixed64'low);
+     constant TH_17 : fixed64 := to_sfixed(2**16, fixed64'high, fixed64'low);
+     constant TH_16 : fixed64 := to_sfixed(2**15, fixed64'high, fixed64'low);
+     constant TH_15 : fixed64 := to_sfixed(2**14, fixed64'high, fixed64'low);
+     constant TH_14 : fixed64 := to_sfixed(2**13, fixed64'high, fixed64'low);
+     constant TH_13 : fixed64 := to_sfixed(2**12, fixed64'high, fixed64'low);
+     constant TH_12 : fixed64 := to_sfixed(2**11, fixed64'high, fixed64'low);
+     constant TH_11 : fixed64 := to_sfixed(2**10, fixed64'high, fixed64'low);
+     constant TH_10 : fixed64 := to_sfixed(2**9,  fixed64'high, fixed64'low);
+     constant TH_9  : fixed64 := to_sfixed(2**8,  fixed64'high, fixed64'low);
+     constant TH_8  : fixed64 := to_sfixed(2**7,  fixed64'high, fixed64'low);
+     constant TH_7  : fixed64 := to_sfixed(2**6,  fixed64'high, fixed64'low);
+     constant TH_6  : fixed64 := to_sfixed(2**5,  fixed64'high, fixed64'low);
+     constant TH_5  : fixed64 := to_sfixed(2**4,  fixed64'high, fixed64'low);
+     constant TH_4  : fixed64 := to_sfixed(2**3,  fixed64'high, fixed64'low);
+     constant TH_3  : fixed64 := to_sfixed(2**2,  fixed64'high, fixed64'low);
+     constant TH_2  : fixed64 := to_sfixed(2**1,  fixed64'high, fixed64'low);
+     constant TH_1  : fixed64 := to_sfixed(2**0,  fixed64'high, fixed64'low);
+
+begin
+    -- Ceiling log2 calculation using priority-encoded thresholds
+    result.re <= 
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011001" when scalar.re >= TH_25 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011000" when scalar.re >= TH_24 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010111" when scalar.re >= TH_23 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010110" when scalar.re >= TH_22 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010101" when scalar.re >= TH_21 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010100" when scalar.re >= TH_20 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010011" when scalar.re >= TH_19 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010010" when scalar.re >= TH_18 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010001" when scalar.re >= TH_17 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000" when scalar.re >= TH_16 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001111" when scalar.re >= TH_15 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001110" when scalar.re >= TH_14 else
+----"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001101" when scalar.re >= TH_13 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001100" when scalar.re >= TH_12 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001011" when scalar.re >= TH_11 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001010" when scalar.re >= TH_10 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001001" when scalar.re >= TH_9 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000" when scalar.re >= TH_8 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000111" when scalar.re >= TH_7 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000110" when scalar.re >= TH_6 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101" when scalar.re >= TH_5 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100" when scalar.re >= TH_4 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011" when scalar.re >= TH_3 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010" when scalar.re >= TH_2 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001" when scalar.re >= TH_1 else
+--"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+
+         to_sfixed(25, fixed64'high, fixed64'low) when scalar.re >= TH_25 else
+         to_sfixed(24, fixed64'high, fixed64'low) when scalar.re >= TH_24 else
+         to_sfixed(23, fixed64'high, fixed64'low) when scalar.re >= TH_23 else
+         to_sfixed(22, fixed64'high, fixed64'low) when scalar.re >= TH_22 else
+         to_sfixed(21, fixed64'high, fixed64'low) when scalar.re >= TH_21 else
+         to_sfixed(20, fixed64'high, fixed64'low) when scalar.re >= TH_20 else
+         to_sfixed(19, fixed64'high, fixed64'low) when scalar.re >= TH_19 else
+         to_sfixed(18, fixed64'high, fixed64'low) when scalar.re >= TH_18 else
+         to_sfixed(17, fixed64'high, fixed64'low) when scalar.re >= TH_17 else
+         to_sfixed(16, fixed64'high, fixed64'low) when scalar.re >= TH_16 else
+         to_sfixed(15, fixed64'high, fixed64'low) when scalar.re >= TH_15 else
+         to_sfixed(14, fixed64'high, fixed64'low) when scalar.re >= TH_14 else
+         to_sfixed(13, fixed64'high, fixed64'low) when scalar.re >= TH_13 else
+         to_sfixed(12, fixed64'high, fixed64'low) when scalar.re >= TH_12 else
+         to_sfixed(11, fixed64'high, fixed64'low) when scalar.re >= TH_11 else
+         to_sfixed(10, fixed64'high, fixed64'low) when scalar.re >= TH_10 else
+         to_sfixed(9,  fixed64'high, fixed64'low) when scalar.re >= TH_9  else
+         to_sfixed(8,  fixed64'high, fixed64'low) when scalar.re >= TH_8  else
+         to_sfixed(7,  fixed64'high, fixed64'low) when scalar.re >= TH_7  else
+         to_sfixed(6,  fixed64'high, fixed64'low) when scalar.re >= TH_6  else
+         to_sfixed(5,  fixed64'high, fixed64'low) when scalar.re >= TH_5  else
+         to_sfixed(4,  fixed64'high, fixed64'low) when scalar.re >= TH_4  else
+         to_sfixed(3,  fixed64'high, fixed64'low) when scalar.re >= TH_3  else
+         to_sfixed(2,  fixed64'high, fixed64'low) when scalar.re >= TH_2  else
+         to_sfixed(1,  fixed64'high, fixed64'low) when scalar.re >= TH_1  else
+         to_sfixed(0,  fixed64'high, fixed64'low);
+    -- Imaginary component always zero
+    result.im <=(others => '0');
+    --result.im <= to_sfixed(0.0, fixed64'high, fixed64'low);
+end Structural;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.fixed_pkg.ALL;
+use work.qTypes.ALL;
+
+entity disassemble_matrix is
+    port (
+        clk              : in  std_logic;
+        reset            : in  std_logic;  -- Active high synchronous reset
+        start            : in  std_logic;  -- Start the disassembly process
+
+        matrix_in        : in  cmatrix;    -- Input assembled matrix
+
+        -- Handshake Signal Input
+        tx_done_pulse_in : in std_logic;   -- Pulse indicating SPI transmitter is ready for next word
+
+        -- Output Data Interface
+        data_out         : out std_logic_vector((2 * fixed64'length) - 1 downto 0);
+                                            -- 72 bits: [RE(..)|IM(..)] -- Adjusted comment based on previous findings
+        valid_out        : out std_logic;  -- High when data_out is valid AND module is ready to send
+        done_out         : out std_logic   -- High when matrix disassembly is complete and last word acknowledged
+    );
+end entity disassemble_matrix;
+
+architecture rtl of disassemble_matrix is
+
+    -- State machine definition
+    -- IDLE: Waiting for start
+    -- SENDING_WAIT: Outputting current word, waiting for transmitter acknowledge (tx_done_pulse_in)
+    -- SENDING_ADVANCE: Acknowledge received, prepare to advance counters on next clock edge
+    -- DONE: All elements sent and acknowledged
+    type state_t is (IDLE, SENDING_WAIT, SENDING_ADVANCE, DONE);
+    signal current_state, next_state : state_t := IDLE;
+
+    -- Constant for data slicing length (e.g., 36 bits for fixed64)
+    constant F_LEN : integer := fixed64'length;
+
+    -- Counters for matrix indices (assumes "dimension" is defined in qTypes)
+    signal row_index_cnt : natural range 0 to dimension - 1 := 0;
+    signal col_index_cnt : natural range 0 to dimension - 1 := 0;
+
+    -- Internal signal to control counter updates
+    signal advance_counters : std_logic := '0';
+
+begin
+
+    -- State Register Process (Synchronous)
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' then
+                current_state <= IDLE;
+            else
+                current_state <= next_state;
+            end if;
+        end if;
+    end process;
+
+    -- Index Counters Process (Synchronous)
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' then
+                row_index_cnt <= 0;
+                col_index_cnt <= 0;
+            elsif advance_counters = '1' then -- Only advance when triggered
+                 -- Check if we were processing the last element (before advancing)
+                if (row_index_cnt = dimension - 1) and (col_index_cnt = dimension - 1) then
+                    -- Should not advance if already at the end, FSM handles this transition
+                    -- Reset counters if needed, or hold. Let's reset for clarity if we exit SENDING state.
+                     -- Handled by IDLE state entry / Reset more reliably. Keep state here.
+                     null; -- No change needed here if FSM handles DONE transition correctly
+                elsif col_index_cnt = dimension - 1 then
+                    -- End of row: reset column counter and move to next row.
+                    col_index_cnt <= 0;
+                    row_index_cnt <= row_index_cnt + 1;
+                else
+                    -- Move to next column in the same row.
+                    col_index_cnt <= col_index_cnt + 1;
+                end if;
+            elsif next_state = IDLE and current_state /= IDLE then -- Reset counters when returning to IDLE
+                 row_index_cnt <= 0;
+                 col_index_cnt <= 0;
+            end if;
+        end if;
+    end process;
+
+    -- Next State Logic and Output Conversion Process (Combinatorial)
+    process(current_state, start, tx_done_pulse_in, row_index_cnt, col_index_cnt, matrix_in)
+        variable is_last_element : boolean;
+    begin
+        -- Default assignments
+        next_state      <= current_state;
+        valid_out       <= '0';
+
+
+
+        done_out        <= '0';
+        data_out        <= (others => '0');
+        advance_counters <= '0'; -- Default: do not advance counters
+
+        -- Determine if the current indices point to the last element
+        is_last_element := (row_index_cnt = dimension - 1) and (col_index_cnt = dimension - 1);
+
+        case current_state is
+            when IDLE =>
+                valid_out <= '0';
+                done_out  <= '0';
+                if start = '1' then
+                    if dimension > 0 then -- Don't start if matrix is empty
+                       next_state <= SENDING_WAIT;
+                    else
+                       next_state <= DONE; -- Empty matrix is instantly done? Or stay IDLE? Let's go DONE.
+                    end if;
+                else
+                    next_state <= IDLE;
+                end if;
+
+            when SENDING_WAIT =>
+                -- Output the current matrix element
+                data_out  <= to_slv(matrix_in(row_index_cnt)(col_index_cnt).re) &
+                             to_slv(matrix_in(row_index_cnt)(col_index_cnt).im);
+                valid_out <= '1'; -- Data is valid, waiting for TX ready
+                done_out  <= '0';
+
+                -- Wait for the transmitter to signal it's done with this word
+                if tx_done_pulse_in = '1' then
+                    next_state <= SENDING_ADVANCE; -- Go to intermediate state to trigger counter advance
+                else
+                    next_state <= SENDING_WAIT; -- Stay here, keep outputting same data
+                end if;
+
+             when SENDING_ADVANCE =>
+                 -- This state is primarily to signal the counter process.
+                 -- We were in SENDING_WAIT, tx_done_pulse_in arrived.
+                 -- Keep outputs same as SENDING_WAIT for this one cycle.
+                 data_out  <= to_slv(matrix_in(row_index_cnt)(col_index_cnt).re) &
+                              to_slv(matrix_in(row_index_cnt)(col_index_cnt).im);
+                 valid_out <= '1'; -- Still valid as we transition
+                 done_out  <= '0';
+                 advance_counters <= '1'; -- Trigger counter update on next clock edge
+
+                 -- Decide where to go next based on whether the *acknowledged* element was the last one
+                 if is_last_element then
+                     next_state <= DONE;
+                 else
+                     next_state <= SENDING_WAIT; -- Go back to wait for next acknowledgement
+                 end if;
+
+            when DONE =>
+                valid_out <= '0';
+                done_out  <= '1'; -- Signal completion
+                -- Stay in DONE until reset or top-level FSM deasserts start (which causes reset via top FSM)
+                next_state <= DONE;
+                 -- Optional: Reset counters immediately on entering DONE?
+                 -- Counter reset is handled by reset signal or transition back to IDLE
+
+            when others =>
+                next_state <= IDLE;
+        end case;
+
+        -- Ensure start = '0' forces back to IDLE unless already DONE
+        -- Let top-level handle reset via enable/reset. Start only initiates.
+        -- if start = '0' and current_state /= DONE then
+        --    next_state <= IDLE;
+        -- end if;
+
+    end process;
+
+end architecture rtl;library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.fixed_pkg.ALL;
+use work.qTypes.ALL;
+
+entity disassemble_psi_matrix is
+    port (
+         clk              : in  std_logic;
+         reset            : in  std_logic;  -- Active high synchronous reset
+         start            : in  std_logic;  -- Start the disassembly process
+
+         psi_matrix_in    : in  psi_matrix; -- Input assembled psi_matrix (30 columns)
+
+         -- Handshake Signal Input:
+         tx_done_pulse_in : in  std_logic;   -- Pulse indicating SPI transmitter is ready for next word
+
+         -- Output Data Interface:
+         data_out         : out std_logic_vector((2 * fixed64'length) - 1 downto 0);
+                                         -- 72 bits: [RE(..) | IM(..)]
+         valid_out        : out std_logic;  -- High when data_out is valid
+         done_out         : out std_logic   -- High when disassembly is complete and last word acknowledged
+    );
+end entity disassemble_psi_matrix;
+
+architecture rtl of disassemble_psi_matrix is
+
+    -- State machine definition:
+    -- IDLE:         Waiting for start
+    -- SENDING_WAIT: Output current word and wait for acknowledgement (tx_done_pulse_in)
+    -- SENDING_ADVANCE: Acknowledge receipt and advance counters (i.e. move to the next element)
+    -- DONE:         All elements sent and acknowledged
+    type state_t is (IDLE, SENDING_WAIT, SENDING_ADVANCE, DONE);
+    signal current_state, next_state : state_t := IDLE;
+
+    -- Constant for fixed64 slicing length (e.g., 36 bits for fixed64)
+    constant F_LEN : integer := fixed64'length;
+
+    -- psi_matrix has 30 columns (each column is a cvector of length "dimension")
+    constant NUM_COLUMNS : integer := 30;
+
+    -- Two counters:
+    -- col_index_cnt: which column (0 to NUM_COLUMNS-1)
+    -- row_index_cnt: which element of the column (0 to dimension-1)
+    signal col_index_cnt : natural range 0 to NUM_COLUMNS - 1 := 0;
+    signal row_index_cnt : natural range 0 to dimension - 1 := 0;
+
+    -- Signal to trigger the counters' advancement in the next clock cycle
+    signal advance_counters : std_logic := '0';
+
+begin
+
+    ------------------------------------------------------------------------------
+    -- State Register Process (Synchronous)
+    ------------------------------------------------------------------------------
+    process(clk)
+    begin
+         if rising_edge(clk) then
+              if reset = '1' then
+                   current_state <= IDLE;
+              else
+                   current_state <= next_state;
+              end if;
+         end if;
+    end process;
+
+    ------------------------------------------------------------------------------
+    -- Counters Process (Synchronous)
+    -- Iterates over each psi_matrix element (each element is a cfixed64 within a cvector).
+    ------------------------------------------------------------------------------
+    process(clk)
+    begin
+         if rising_edge(clk) then
+              if reset = '1' then
+                   col_index_cnt <= 0;
+                   row_index_cnt <= 0;
+              elsif advance_counters = '1' then
+                   if row_index_cnt = dimension - 1 then
+                        -- End of current column: reset row counter and advance column counter
+                        row_index_cnt <= 0;
+                        if col_index_cnt < NUM_COLUMNS - 1 then
+                             col_index_cnt <= col_index_cnt + 1;
+                        end if;
+                   else
+                        -- Advance within the current column
+                        row_index_cnt <= row_index_cnt + 1;
+                   end if;
+              elsif next_state = IDLE and current_state /= IDLE then
+                   -- Reset counters when returning to IDLE (if needed)
+                   col_index_cnt <= 0;
+                   row_index_cnt <= 0;
+              end if;
+         end if;
+    end process;
+
+    ------------------------------------------------------------------------------
+    -- Next-State and Output Logic Process (Combinatorial)
+    ------------------------------------------------------------------------------
+    process(current_state, start, tx_done_pulse_in, col_index_cnt, row_index_cnt, psi_matrix_in)
+        variable is_last_element : boolean;
+    begin
+         -- Default assignments
+         next_state      <= current_state;
+         valid_out       <= '0';
+         done_out        <= '0';
+         data_out        <= (others => '0');
+         advance_counters <= '0';  -- Default: do not advance counters
+
+         -- Determine if the current element is the last element in the psi_matrix
+         is_last_element := (col_index_cnt = NUM_COLUMNS - 1) and (row_index_cnt = dimension - 1);
+
+         case current_state is
+              when IDLE =>
+                   if start = '1' then
+                        if NUM_COLUMNS > 0 then
+                             next_state <= SENDING_WAIT;
+                        else
+                             next_state <= DONE;  -- In the unusual case of an empty psi_matrix
+                        end if;
+                   else
+                        next_state <= IDLE;
+                   end if;
+
+              when SENDING_WAIT =>
+                   -- Output the current psi_matrix element:
+                   data_out <= to_slv(psi_matrix_in(col_index_cnt)(row_index_cnt).re) &
+                               to_slv(psi_matrix_in(col_index_cnt)(row_index_cnt).im);
+                   valid_out <= '1';
+                   if tx_done_pulse_in = '1' then
+                        next_state <= SENDING_ADVANCE;
+                   else
+                        next_state <= SENDING_WAIT;
+                   end if;
+
+              when SENDING_ADVANCE =>
+                   -- Maintain outputs while advancing counters
+                   data_out <= to_slv(psi_matrix_in(col_index_cnt)(row_index_cnt).re) &
+                               to_slv(psi_matrix_in(col_index_cnt)(row_index_cnt).im);
+                   valid_out <= '1';
+                   advance_counters <= '1';  -- Trigger the counter update in the next clock edge
+                   if is_last_element then
+                        next_state <= DONE;
+                   else
+                        next_state <= SENDING_WAIT;
+                   end if;
+
+              when DONE =>
+                   valid_out <= '0';
+                   done_out  <= '1';
+                   next_state <= DONE;
+
+              when others =>
+                   next_state <= IDLE;
+         end case;
+    end process;
+
+end architecture rtl;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+entity Generate_Scaling_Factor is
+    Port (
+        input  : in  cfixed64;
+        S      : out cfixed64
+    );
+end Generate_Scaling_Factor;
+
+architecture Structural of Generate_Scaling_Factor is
+
+    -- Intermediate signals
+    signal norm_in  : fixed64;    -- Real value to be processed by Norm_Theta_Ratio
+    signal norm_out : fixed64;    -- Output from Norm_Theta_Ratio
+    signal ceil_in  : cfixed64;   -- Input to Ceiling_Of_Log2 (constructed from norm_out)
+    signal ceil_out : cfixed64;   -- Output from Ceiling_Of_Log2
+
+    -- Component declaration for Norm_Theta_Ratio (operates on fixed64)
+    component Norm_Theta_Ratio is
+        Port (
+            input  : in  fixed64;
+            output : out fixed64
+        );
+    end component;
+
+    -- Component declaration for Ceiling_Of_Log2 (operates on cfixed64)
+    component Ceiling_Of_Log2 is
+        port (
+            scalar : in  cfixed64;
+            result : out cfixed64
+        );
+    end component;
+
+begin
+
+    -- Extract the real part from the input cfixed64 to feed Norm_Theta_Ratio
+    norm_in <= input.re;
+
+    -- Instantiate Norm_Theta_Ratio
+    NormThetaRatio_inst: Norm_Theta_Ratio
+        port map (
+            input  => norm_in,
+            output => norm_out
+        );
+
+    -- Reassemble norm_out into a cfixed64 signal (with imaginary part zero)
+    ceil_in.re <= norm_out;
+    --ceil_in.im <= "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    ceil_in.im <= to_sfixed(0.0, fixed64'high, fixed64'low);
+    -- Instantiate Ceiling_Of_Log2
+    CeilingOfLog2_inst: Ceiling_Of_Log2
+        port map (
+            scalar => ceil_in,
+            result => ceil_out
+        );
+
+    -- The final result is assigned to S
+    --S <= ( re => resize(ceil_out.re + "0000000000000000000000000000000000000000000000000110000000000000000000000000000000000000000000000000000000000000000", fixed64'high, fixed64'low), im => ceil_out.im );
+    S <= ( re => resize(ceil_out.re + to_sfixed(3.0, fixed64'high, fixed64'low), fixed64'high, fixed64'low), im => ceil_out.im );
+
+
+
+end Structural;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity hex_to_7seg is
+    port (
+        hex_in  : in  std_logic_vector(3 downto 0);
+        seg_out : out std_logic_vector(6 downto 0)
+          -- seg_out mapping:
+          -- Bit 6: segment a
+          -- Bit 5: segment b
+          -- Bit 4: segment c
+          -- Bit 3: segment d
+          -- Bit 2: segment e
+          -- Bit 1: segment f
+          -- Bit 0: segment g
+    );
+end hex_to_7seg;
+
+architecture Behavioral of hex_to_7seg is
+begin
+    process(hex_in)
+    begin
+        case hex_in is
+            when "0000" => seg_out <= "1000000"; -- 0
+            when "0001" => seg_out <= "1111001"; -- 1
+            when "0010" => seg_out <= "0100100"; -- 2
+            when "0011" => seg_out <= "0110000"; -- 3
+            when "0100" => seg_out <= "0011001"; -- 4
+            when "0101" => seg_out <= "0010010"; -- 5
+            when "0110" => seg_out <= "0000010"; -- 6
+            when "0111" => seg_out <= "1111000"; -- 7
+            when "1000" => seg_out <= "0000000"; -- 8
+            when "1001" => seg_out <= "0011000"; -- 9
+            when "1010" => seg_out <= "0001000"; -- A
+            when "1011" => seg_out <= "0000011"; -- B
+            when "1100" => seg_out <= "1000110"; -- C
+            when "1101" => seg_out <= "0100001"; -- D
+            when "1110" => seg_out <= "0000110"; -- E
+            when "1111" => seg_out <= "0001110"; -- F
+            when others => seg_out <= "0000000"; -- Default (all segments off)
+        end case;
+    end process;
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+--use work.fixed64.ALL;
+use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
+
+entity Insert_Imaginary_Time_Into_CMatrix is -- H and i are hardcoded while time is an input
+    Port (
+        t      : in  cfixed64;       -- Input scalar for second multiplication
+        H      : in  cmatrix;
+        C_out  : out cmatrix         -- Final output matrix in high precision
+    );
+end Insert_Imaginary_Time_Into_CMatrix;
+
+architecture Structural of Insert_Imaginary_Time_Into_CMatrix is
+    signal final_low : cmatrix;   -- Result from the multiplication (low precision)
+    signal t_imag    : cfixed64;
+
+    component Matrix_By_Scalar_Multiplication is
+        Port (
+            A      : in  cmatrix;
+            scalar : in  cfixed64;
+            C      : out cmatrix
+        );
+    end component;
+
+begin
+
+    t_imag <= (re => (others => '0'), im => t.re);
+
+    -- First multiplication: Multiply fixed64 matrix by fixed64 scalar
+    Mult1: Matrix_By_Scalar_Multiplication
+        port map (
+            A      => H,
+            scalar => t_imag,
+            C      => final_low
+        );
+
+    -- Final output assignment
+    C_out <= final_low;
+
+end architecture Structural;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
+
+entity Matrix_Addition is
+    Port (
+        A : in  cmatrix;    -- First input matrix
+        B : in  cmatrix;    -- Second input matrix
+        C : out cmatrix     -- Output matrix (A + B)
+    );
+end Matrix_Addition;
+
+architecture Concurrent of Matrix_Addition is
+begin
+    -- Generate adders for each matrix element
+    gen_row_adders : for row_idx in 0 to dimension-1 generate
+        gen_col_adders : for col_idx in 0 to dimension-1 generate
+        begin
+            -- Add real components
+            C(row_idx)(col_idx).re <= resize(A(row_idx)(col_idx).re + B(row_idx)(col_idx).re, fixed64'high, fixed64'low);
+            
+            -- Add imaginary components
+            C(row_idx)(col_idx).im <= resize(A(row_idx)(col_idx).im + B(row_idx)(col_idx).im, fixed64'high, fixed64'low);
+        end generate gen_col_adders;
+    end generate gen_row_adders;
+end architecture Concurrent;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+use work.qTypes.ALL;
+use work.fixed_pkg.ALL;
+
+entity Matrix_By_Matrix_Multiplication is
+    Port (
+        A : in  cmatrix;    -- First input matrix (M x N)
+        B : in  cmatrix;    -- Second input matrix (N x P)
+        C : out cmatrix     -- Output matrix (M x P)
+    );
+end Matrix_By_Matrix_Multiplication;
+
+architecture Concurrent of Matrix_By_Matrix_Multiplication is
+    component Matrix_By_Vector_Multiplication is
+        Port (
+            A      : in  cmatrix;
+            V      : in  cvector;
+            Result : out cvector
+        );
+    end component;
+
+    -- Array to store B's columns as vectors
+    type column_array is array (0 to dimension-1) of cvector;
+
+begin
+    -- Generate a column processor for each column in matrix B
+    gen_column_processors : for col_idx in 0 to dimension-1 generate
+        signal b_column : cvector;  -- Stores current column of B
+        signal c_column : cvector;  -- Stores resulting column of C
+    begin
+        -- Extract column from B (B is row-major)
+        gen_column_extraction : for row_idx in 0 to dimension-1 generate
+        begin
+            -- Convert row-major to column vector: B(row)(col) => b_column(row)
+            b_column(row_idx) <= B(row_idx)(col_idx);
+        end generate gen_column_extraction;
+
+        -- Multiply matrix A with current column of B
+        VectorMult : Matrix_By_Vector_Multiplication
+            port map (
+                A      => A,
+                V      => b_column,
+                Result => c_column
+            );
+
+        -- Distribute result column to output matrix C
+        gen_column_distribution : for row_idx in 0 to dimension-1 generate
+        begin
+            -- Assign to C's row-major format: C(row)(col) <= c_column(row)
+            C(row_idx)(col_idx) <= c_column(row_idx);
+        end generate gen_column_distribution;
+    end generate gen_column_processors;
+
+end architecture Concurrent;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
+
+entity Matrix_By_Scalar_Multiplication is
+    Port (
+        A      : in  cmatrix;    -- Input matrix
+        scalar : in  cfixed64;     -- Scalar to multiply
+        C      : out cmatrix     -- Output matrix (A * scalar)
+    );
+end Matrix_By_Scalar_Multiplication;
+
+architecture Concurrent of Matrix_By_Scalar_Multiplication is
+begin
+    -- Generate multipliers for each matrix element
+    gen_row_mult : for row_idx in 0 to dimension-1 generate
+        gen_col_mult : for col_idx in 0 to dimension-1 generate
+        begin
+            -- Complex multiplication implementation
+            -- Real part: (A.re * scalar.re) - (A.im * scalar.im)
+            C(row_idx)(col_idx).re <= resize(
+                A(row_idx)(col_idx).re * scalar.re - 
+                A(row_idx)(col_idx).im * scalar.im, fixed64'high, fixed64'low
+            );
+            
+            -- Imaginary part: (A.re * scalar.im) + (A.im * scalar.re)
+            C(row_idx)(col_idx).im <= resize(
+                A(row_idx)(col_idx).re * scalar.im + 
+                A(row_idx)(col_idx).im * scalar.re, fixed64'high, fixed64'low
+            );
+        end generate gen_col_mult;
+    end generate gen_row_mult;
+end architecture Concurrent;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+use work.qTypes.ALL;
+use work.fixed_pkg.ALL;
+
+entity Matrix_By_Vector_Multiplication is
+    Port (
+        A      : in  cmatrix;    -- Input complex matrix
+        V      : in  cvector;    -- Input complex vector
+        Result : out cvector     -- Output complex vector (A � V)
+    );
+end Matrix_By_Vector_Multiplication;
+
+architecture Concurrent of Matrix_By_Vector_Multiplication is
+    -- Declare component for vector scaling and addition
+    component Multiply_By_Scalar_Then_Add is
+        Port (
+            A      : in  cvector;
+            B      : in  cvector;
+            C      : in  cfixed64;
+            Result : out cvector
+        );
+    end component;
+
+    -- Array for intermediate accumulation results
+    type sum_array is array (0 to dimension) of cvector;
+    signal sum : sum_array := (
+        others => (others => (re => (others => '0'), im => (others => '0')))
+    );
+
+begin
+    -- Generate processing chain for each matrix column
+    gen_column_processing : for j in 0 to dimension-1 generate
+        signal column_vector : cvector;
+    begin
+        -- Extract j-th column from matrix
+        gen_column_extraction : for i in 0 to dimension-1 generate
+            column_vector(i) <= A(i)(j);  -- A(row)(column)
+        end generate gen_column_extraction;
+
+        -- Multiply column by vector element and accumulate
+        MTA_stage : Multiply_By_Scalar_Then_Add
+            port map (
+                A      => column_vector,  -- Current matrix column
+                B      => sum(j),         -- Previous accumulation
+                C      => V(j),           -- Vector element
+                Result => sum(j+1)        -- New accumulation
+            );
+    end generate gen_column_processing;
+
+    -- Connect final result
+    Result <= sum(dimension);
+end architecture Concurrent;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+entity Matrix_Inversion is
+    Port (
+        clk             : in  std_logic;
+        rst             : in  std_logic;
+        start           : in  std_logic;
+        input_matrix    : in  cmatrix;
+        output_matrix   : out cmatrix;
+        done            : out std_logic
+    );
+end Matrix_Inversion;
+
+architecture TopLevel of Matrix_Inversion is
+    component Newtons_Guess is
+        Port (
+        clk      : in  std_logic;
+        reset    : in  std_logic;
+        A        : in  cmatrix;
+        scaled_AT : out cmatrix
+        );
+    end component;
+
+    component Matrix_Inversion_State_Machine is
+        Port (
+            clk             : in  std_logic;
+            rst             : in  std_logic;
+            start           : in  std_logic;
+            input_matrix    : in  cmatrix;
+            input_guess     : in  cmatrix;
+            output_matrix   : out cmatrix;
+            done            : out std_logic
+        );
+    end component;
+
+    -- Internal signals
+    signal initial_guess : cmatrix;
+    signal inversion_done : std_logic;
+
+begin
+    -- Generate initial guess using scaled transpose method
+    GUESS_CALCULATOR: Newtons_Guess
+    port map(
+        clk => clk,
+	reset => rst,
+        A => input_matrix,
+        scaled_AT => initial_guess
+    );
+
+    -- State machine-based Newton iteration core
+    INVERSION_CORE: Matrix_Inversion_State_Machine
+    port map(
+        clk => clk,
+        rst => rst,
+        start => start,
+        input_matrix => input_matrix,
+        input_guess => initial_guess,
+        output_matrix => output_matrix,
+        done => inversion_done
+    );
+
+    -- Output control
+    done <= inversion_done;
+
+end TopLevel;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+entity Matrix_Inversion_State_Machine is
+    Port (
+        clk             : in  std_logic;
+        rst             : in  std_logic;
+        start           : in  std_logic;
+        input_matrix    : in  cmatrix;
+        input_guess     : in  cmatrix;
+        output_matrix   : out cmatrix;
+        done            : out std_logic
+    );
+end Matrix_Inversion_State_Machine;
+
+architecture Behavioral of Matrix_Inversion_State_Machine is
+    component Matrix_By_Matrix_Multiplication is
+        Port (
+            A : in  cmatrix;
+            B : in  cmatrix;
+            C : out cmatrix
+        );
+    end component;
+
+    type state_type is (
+        IDLE, INIT, LOAD_AX, CALC_AX, 
+        LOAD_2I, SUB_2I, LOAD_XNEXT, 
+        CALC_XNEXT, UPDATE_X, CHECK_CONV, FINISH
+    );
+
+    signal state : state_type := IDLE;
+    
+    -- Matrix storage registers
+    signal Xk, Xnext, AX, twoI_minus_AX : cmatrix;
+    signal matA, matB, matC : cmatrix;
+    
+    -- Control signals
+    signal mult_start, mult_done : std_logic := '0';
+    signal iteration : natural range 0 to 150 := 0;
+    
+begin
+
+    -- Instantiate matrix multiplier
+    MAT_MULT: Matrix_By_Matrix_Multiplication
+    port map (
+        A => matA,
+        B => matB,
+        C => matC
+    );
+
+    process(clk)
+        variable identity : cmatrix;
+    begin
+        if rising_edge(clk) then
+            if rst = '1' then
+                state <= IDLE;
+                done <= '0';
+                Xk <= (others => (others => (
+                    re => (others => '0'),
+                    im => (others => '0'))));
+                iteration <= 0;
+                mult_start <= '0';
+            else
+                case state is
+                    when IDLE =>
+                        done <= '0';
+                        if start = '1' then
+                            Xk <= input_guess;
+                            iteration <= 0;
+                            state <= INIT;
+                        end if;
+                        
+                    when INIT =>
+                        matA <= input_matrix;
+                        matB <= Xk;
+                        mult_start <= '1';
+                        state <= LOAD_AX;
+                        
+                    when LOAD_AX =>
+                        mult_start <= '0';
+                        state <= CALC_AX;
+                        
+                    when CALC_AX =>
+                        AX <= matC;
+                        state <= LOAD_2I;
+                        
+                    when LOAD_2I =>
+                        for i in 0 to dimension-1 loop
+                            for j in 0 to dimension-1 loop
+                                if i = j then
+                                    --identity(i)(j).re := "0000000000000100000000000000000000000000000000000000000000000000";
+                                    identity(i)(j).re := to_sfixed(2, fixed64'high, fixed64'low);
+				    identity(i)(j).im := (others => '0');
+                                else
+                                    identity(i)(j).re := (others => '0');
+                                    identity(i)(j).im := (others => '0');
+                                end if;
+                            end loop;
+                        end loop;
+                        matA <= identity;
+                        matB <= AX;
+                        state <= SUB_2I;
+                        
+                    when SUB_2I =>
+                        for i in 0 to dimension-1 loop
+                            for j in 0 to dimension-1 loop
+                                twoI_minus_AX(i)(j).re <= resize(
+                                    matA(i)(j).re - matB(i)(j).re,
+                                    fixed64'high, fixed64'low
+                                );
+                                twoI_minus_AX(i)(j).im <= resize(
+                                    matA(i)(j).im - matB(i)(j).im,
+                                    fixed64'high, fixed64'low
+                                );
+                            end loop;
+                        end loop;
+                        state <= LOAD_XNEXT;
+                        
+                    when LOAD_XNEXT =>
+                        matA <= Xk;
+                        matB <= twoI_minus_AX;
+                        mult_start <= '1';
+                        state <= CALC_XNEXT;
+                        
+                    when CALC_XNEXT =>
+                        mult_start <= '0';
+                        Xnext <= matC;
+                        state <= UPDATE_X;
+                        
+                    when UPDATE_X =>
+                        Xk <= Xnext;
+                        iteration <= iteration + 1;
+                        state <= CHECK_CONV;
+                        
+                    when CHECK_CONV =>
+                        -- Check iteration count
+                        report "Iteration: " & integer'image(iteration) severity note;
+                        if iteration < 40 then
+                            state <= INIT;
+                        else
+                            state <= FINISH;
+                        end if;
+                        
+                    when FINISH =>
+                        output_matrix <= Xk;
+                        done <= '1';
+                        state <= IDLE;
+                        
+                end case;
+            end if;
+        end if;
+    end process;
+
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
+
+use work.qTypes.all;
+
+entity Matrix_Plus_Scalar is
+    port (
+        input_cMatrixH : in cmatrix;
+        scalar         : in cfixed64;
+        output_cMatrixH : out cmatrix
+    );
+end Matrix_Plus_Scalar;
+
+architecture Structural of Matrix_Plus_Scalar is
+
+begin
+    -- Generate matrix elements using nested generate statements
+    gen_rows: for i in 0 to dimension-1 generate
+        gen_cols: for j in 0 to dimension-1 generate
+            -- Diagonal elements: input + scalar
+            -- Off-diagonal elements: pass through input
+            output_cMatrixH(i)(j).re <= 
+                resize(input_cMatrixH(i)(j).re + scalar.re, fixed64'high, fixed64'low) 
+                when (i = j) else 
+                input_cMatrixH(i)(j).re;
+            
+            output_cMatrixH(i)(j).im <= 
+                resize(input_cMatrixH(i)(j).im + scalar.im, fixed64'high, fixed64'low) 
+                when (i = j) else 
+                input_cMatrixH(i)(j).im;
+        end generate gen_cols;
+    end generate gen_rows;
+
+end Structural;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.qTypes.all;
+--use work.fixed64.ALL;
+use work.fixed_pkg.ALL;
+
+entity Matrix_Transpose is
+    Port (
+        input_matrix  : in  cmatrix;
+        output_matrix : out cmatrix
+    );
+end Matrix_Transpose;
+
+architecture Concurrent of Matrix_Transpose is
+begin
+    -- Generate statement creates parallel transpose connections
+    gen_transpose: for i in 0 to dimension-1 generate
+        gen_row: for j in 0 to dimension-1 generate
+            -- Direct connection with swapped indices
+            output_matrix(i)(j).re <= input_matrix(j)(i).re;
+            output_matrix(i)(j).im <= input_matrix(j)(i).im;
+        end generate gen_row;
+    end generate gen_transpose;
+end architecture Concurrent;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+--use IEEE.fixed_pkg.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
+
+-- Import your custom types (cfixed64, cvector, fixed64, etc.)
+use work.qTypes.all;
+
+entity Max_Of_CVector is
+    port (
+        -- Input vector of complex values (high precision)
+        -- We'll only look at the 're' field.
+        inputVector  : in  cvector;
+        
+        -- Output: the largest real value found in 'inputVector'.
+        largestValue : out fixed64
+    );
+end entity Max_Of_CVector;
+
+architecture gen of Max_Of_CVector is
+
+    -- A local array to hold the "running max" at each position
+    type fixedHighVector is array(inputVector'range) of fixed64;
+    signal chainMax : fixedHighVector;
+    
+begin
+
+    ----------------------------------------------------------------------------
+    -- 1) Initialize for the first element in the vector
+    ----------------------------------------------------------------------------
+    init_chain: chainMax(inputVector'left) <= inputVector(inputVector'left).re;
+
+    ----------------------------------------------------------------------------
+    -- 2) Generate comparators in a linear chain
+    ----------------------------------------------------------------------------
+    cmp_gen: for i in (inputVector'left+1) to inputVector'right generate
+        with inputVector(i).re > chainMax(i-1) select
+            chainMax(i) <= inputVector(i).re when true,
+                          chainMax(i-1)      when false;
+    end generate cmp_gen;
+
+    ----------------------------------------------------------------------------
+    -- 3) Output the final maximum value
+    ----------------------------------------------------------------------------
+    largestValue <= chainMax(inputVector'right);
+
+end architecture gen;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+use work.qTypes.ALL;
+use IEEE.fixed_pkg.ALL;
+
+entity Multiply_By_Scalar_Then_Add is
+    Port (
+        A : in  cvector;   -- Input complex vector 1
+        B : in  cvector;   -- Input complex vector 2
+        C : in  cfixed64;    -- Complex scalar multiplier
+        Result : out cvector  -- Output complex vector (C*A + B)
+    );
+end Multiply_By_Scalar_Then_Add;
+
+architecture Concurrent of Multiply_By_Scalar_Then_Add is
+    -- Declare components
+    component Multiply_Column_By_Scalar is
+        Port (
+            constComplex : in  cfixed64;
+            rowVector    : in  cvector;
+            outputVector : out cvector
+        );
+    end component;
+
+    component Add_Vectors_Element_Wise is
+        Port (
+            a : in  cvector;
+            b : in  cvector;
+            c : out cvector
+        );
+    end component;
+
+    -- Internal signal for intermediate result
+    signal c_times_A : cvector;
+
+begin
+    -- Stage 1: Multiply C * A
+    Multiply_Stage_High: Multiply_Column_By_Scalar
+        port map (
+            constComplex => C,
+            rowVector    => A,
+            outputVector => c_times_A
+        );
+
+    -- Stage 2: Add (C*A) + B
+    Add_Stage_High: Add_Vectors_Element_Wise
+        port map (
+            a => c_times_A,
+            b => B,
+            c => Result
+        );
+
+end architecture Concurrent;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use work.fixed_pkg.ALL;
+use work.qTypes.ALL;
+
+entity Multiply_Column_By_Scalar is
+    Port (
+        constComplex : in  cfixed64;   -- ?? High-precision complex scalar
+        rowVector    : in  cvector;  -- ?? High-precision input vector
+        outputVector : out cvector   -- ?? High-precision output vector
+    );
+end Multiply_Column_By_Scalar;
+
+architecture Behavioral of Multiply_Column_By_Scalar is
+    -- ?? High-precision range constants
+    constant PROD_HIGH : integer := fixed64'high + fixed64'high + 1;  -- ?? Extra safety bit
+    constant PROD_LOW  : integer := fixed64'low + fixed64'low;         -- ?? Maintain precision
+begin
+
+    -- ?? Generate high-precision complex multiplications
+    gen_multiply: for i in 0 to dimension - 1 generate
+    begin
+        -- Real part: (a.re * b.re) - (a.im * b.im) ??
+        outputVector(i).re <= resize(
+            resize(constComplex.re * rowVector(i).re, PROD_HIGH, PROD_LOW) - 
+            resize(constComplex.im * rowVector(i).im, PROD_HIGH, PROD_LOW),
+            fixed64'high, fixed64'low  -- ?? Final resize to high-precision output
+        );
+        
+        -- Imaginary part: (a.re * b.im) + (a.im * b.re) ??
+        outputVector(i).im <= resize(
+            resize(constComplex.re * rowVector(i).im, PROD_HIGH, PROD_LOW) + 
+            resize(constComplex.im * rowVector(i).re, PROD_HIGH, PROD_LOW),
+            fixed64'high, fixed64'low  -- ?? Final resize to high-precision output
+        );
+    end generate gen_multiply;
+
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+entity Newtons_Guess is
+    Port (
+        clk      : in  std_logic;
+        reset    : in  std_logic;
+        A        : in  cmatrix;
+        scaled_AT : out cmatrix
+    );
+end Newtons_Guess;
+
+architecture Structural of Newtons_Guess is
+    component Matrix_Transpose is
+        Port (
+            input_matrix  : in  cmatrix;
+            output_matrix : out cmatrix
+        );
+    end component;
+    
+    component Calculate_Norm_And_Compare is
+        port (
+            A              : in  cmatrix;
+            InfinityNormOut : out cfixed64
+        );
+    end component;
+    
+    component ReciprocalEstimation is
+        Port ( 
+            x : in fixed64;   -- Input signal (64-bit)
+            y : out fixed64   -- Output signal (64-bit)
+        );
+    end component;
+    
+    signal AT : cmatrix;
+    signal infinity_norm, one_norm : cfixed64;
+    signal norm_product : fixed64;
+    signal reciprocal_norm : fixed64;
+begin
+    -- Stage 1: Transpose matrix and compute norms
+    TRANSPOSE: Matrix_Transpose
+    port map(A, AT);
+    
+    INF: Calculate_Norm_And_Compare port map(A, infinity_norm);
+    ONE: Calculate_Norm_And_Compare port map(AT, one_norm);
+    
+    -- Compute N1 * N2 directly
+    norm_product <= resize(
+        infinity_norm.re * one_norm.re,
+        fixed64'high,
+        fixed64'low,
+        fixed_overflow_style,
+        fixed_round_style
+    );
+    
+    -- Calculate reciprocal of norm_product using ReciprocalEstimation
+    RECIPROCAL: ReciprocalEstimation
+    port map(
+        x => norm_product,
+        y => reciprocal_norm
+    );
+    
+    -- Stage 2: Compute A^T * (1/(N1*N2)) using registered reciprocal
+    gen_scaling: for i in 0 to dimension-1 generate
+        gen_scaling_row: for j in 0 to dimension-1 generate
+            process(clk)
+            begin
+                if rising_edge(clk) then
+                    scaled_AT(i)(j).re <= resize(
+                        AT(i)(j).re * reciprocal_norm,
+                        fixed64'high,
+                        fixed64'low
+                    );
+                    scaled_AT(i)(j).im <= resize(
+                        AT(i)(j).im * reciprocal_norm,
+                        fixed64'high,
+                        fixed64'low
+                    );
+                end if;
+            end process;
+        end generate;
+    end generate;
+end Structural;library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use work.fixed_pkg.ALL;
+use work.qTypes.all;
+
+entity Norm_Theta_Ratio is
+    Port (
+        input  : in  fixed64;
+        output : out fixed64
+    );
+end Norm_Theta_Ratio;
+
+architecture behav of Norm_Theta_Ratio is
+    constant DIVISOR : fixed64 := 
+        "000000000000000000000111101010000101";
+    
+    constant reciprocal_DIVISOR : fixed64 := 
+        resize(
+            reciprocal(DIVISOR), 
+            fixed64'high, 
+            fixed64'low,
+            fixed_overflow_style,  -- Lowercase enumeration
+            fixed_round_style       -- Lowercase enumeration
+        );
+begin
+    output <= resize(
+        input * reciprocal_DIVISOR,
+        fixed64'high,
+        fixed64'low,
+        fixed_overflow_style,
+        fixed_round_style
+    );
+end behav;library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use work.qTypes.ALL;
+use work.fixed_pkg.ALL;
+
+entity padeDenominator is
+    Port (
+        clk   : in  std_logic;
+        reset : in  std_logic;
+        start : in  std_logic;
+        B     : in  cmatrix;
+        P     : out cmatrix;
+        done  : out std_logic
+    );
+end padeDenominator;
+
+architecture Behavioral of padeDenominator is
+
+    component Matrix_Plus_Scalar is
+        port (
+            input_cMatrixH : in  cmatrix;
+            scalar         : in  cfixed64;
+            output_cMatrixH: out cmatrix
+        );
+    end component;
+
+    component Matrix_By_Matrix_Multiplication is
+        port (
+            A : in  cmatrix;
+            B : in  cmatrix;
+            C : out cmatrix
+        );
+    end component;
+
+    -- Horner's method coefficients for (((B-12)*B+60)*B-120)
+    constant COEFF1 : cfixed64 := (  -- -12
+        re => "111111111110100000000000000000000000",  -- Adjust binary representation
+        im => (others => '0')                                                     -- based on your fixed64-point format
+    );
+    constant COEFF2 : cfixed64 := (  -- +60
+        re => "000000000111100000000000000000000000",
+        im => (others => '0')
+    );
+    constant COEFF3 : cfixed64 := (  -- -120
+        re => "111111110001000000000000000000000000",
+        im => (others => '0')
+    );
+
+    type state_type is (IDLE, COMPUTING);
+    signal state : state_type := IDLE;
+    signal current_result, B_reg : cmatrix;
+    signal step_counter : integer range 0 to 5 := 0;  -- Reduced counter range
+    signal current_coeff : cfixed64;
+    signal adder_out, mult_out : cmatrix;
+    signal done_s : std_logic;
+
+    function init_cmatrixHigh_zero return cmatrix is
+        variable matrix : cmatrix;
+    begin
+        for i in matrix'range loop
+            for j in matrix(i)'range loop
+                matrix(i)(j) := (
+                    re => (others => '0'),
+                    im => (others => '0')
+                );
+            end loop;
+        end loop;
+        return matrix;
+    end function;
+
+begin
+
+    ADDER: Matrix_Plus_Scalar
+        port map (
+            input_cMatrixH => current_result,
+            scalar         => current_coeff,
+            output_cMatrixH=> adder_out
+        );
+
+    MULTIPLIER: Matrix_By_Matrix_Multiplication
+        port map (
+            A => current_result,
+            B => B_reg,
+            C => mult_out
+        );
+
+    process(step_counter)
+    begin
+        case step_counter/2 is  -- Coefficient selection logic
+            when 0 => current_coeff <= COEFF1;
+            when 1 => current_coeff <= COEFF2;
+            when 2 => current_coeff <= COEFF3;
+            when others => current_coeff <= (
+                re => (others => '0'),
+                im => (others => '0')
+            );
+        end case;
+    end process;
+
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            state <= IDLE;
+            current_result <= init_cmatrixHigh_zero;
+            B_reg <= init_cmatrixHigh_zero;
+            step_counter <= 0;
+            done_s <= '0';
+        elsif rising_edge(clk) then
+            case state is
+                when IDLE =>
+                    done_s <= '0';
+                    if start = '1' then
+                        B_reg <= B;
+                        current_result <= B;  -- Initial value = B
+                        state <= COMPUTING;
+                        step_counter <= 0;
+                    end if;
+                
+                when COMPUTING =>
+                    if step_counter < 5 then
+                        if step_counter mod 2 = 0 then  -- Even steps: addition
+                            current_result <= adder_out;
+                        else                          -- Odd steps: multiplication
+                            current_result <= mult_out;
+                        end if;
+                        step_counter <= step_counter + 1;
+                    else
+                        done_s <= '1';
+                    end if;
+            end case;
+        end if;
+    end process;
+
+    done <= done_s;
+    P <= current_result;
+
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use work.qTypes.ALL;
+use work.fixed_pkg.ALL;
+
+entity padeNumerator is
+    Port (
+        clk   : in  std_logic;
+        reset : in  std_logic;
+        start : in  std_logic;
+        B     : in  cmatrix;
+        P     : out cmatrix;
+        done  : out std_logic
+    );
+end padeNumerator;
+
+architecture Behavioral of padeNumerator is
+
+    component Matrix_Plus_Scalar is
+        port (
+            input_cMatrixH : in  cmatrix;
+            scalar         : in  cfixed64;
+            output_cMatrixH: out cmatrix
+        );
+    end component;
+
+    component Matrix_By_Matrix_Multiplication is
+        port (
+            A : in  cmatrix;
+            B : in  cmatrix;
+            C : out cmatrix
+        );
+    end component;
+
+    -- Horner's method coefficients for -(((B+12)B+60)B+120)
+    constant COEFF1 : cfixed64 := (  -- +12
+        re => "000000000001100000000000000000000000",
+        im => to_sfixed(0, fixed64'high, fixed64'low)
+    );
+    constant COEFF2 : cfixed64 := (  -- +60
+        re => "000000000111100000000000000000000000",
+        im => to_sfixed(0, fixed64'high, fixed64'low)
+    );
+    constant COEFF3 : cfixed64 := (  -- +120
+        re => "000000001111000000000000000000000000",
+        im => to_sfixed(0, fixed64'high, fixed64'low)
+    );
+
+    type state_type is (IDLE, COMPUTING);
+    signal state : state_type := IDLE;
+    signal current_result, B_reg : cmatrix;
+    signal step_counter : integer range 0 to 5 := 0;
+    signal current_coeff : cfixed64;
+    signal adder_out, mult_out : cmatrix;
+    signal done_s : std_logic;
+
+    function init_cmatrixHigh_zero return cmatrix is
+        variable matrix : cmatrix;
+    begin
+        for i in matrix'range loop
+            for j in matrix(i)'range loop
+                matrix(i)(j) := (
+                    re => to_sfixed(0, fixed64'high, fixed64'low),
+                    im => to_sfixed(0, fixed64'high, fixed64'low)
+                );
+            end loop;
+        end loop;
+        return matrix;
+    end function;
+
+    -- Function to negate a cmatrix
+    function negate_cmatrixHigh(matrix : cmatrix) return cmatrix is
+        variable res : cmatrix;
+    begin
+        for i in matrix'range loop
+            for j in matrix(i)'range loop
+                res(i)(j).re := resize(-matrix(i)(j).re, fixed64'high, fixed64'low);
+                res(i)(j).im := resize(-matrix(i)(j).im, fixed64'high, fixed64'low);
+            end loop;
+        end loop;
+        return res;
+    end function;
+
+begin
+
+    ADDER: Matrix_Plus_Scalar
+        port map (
+            input_cMatrixH => current_result,
+            scalar         => current_coeff,
+            output_cMatrixH=> adder_out
+        );
+
+    MULTIPLIER: Matrix_By_Matrix_Multiplication
+        port map (
+            A => current_result,
+            B => B_reg,
+            C => mult_out
+        );
+
+    process(step_counter)
+    begin
+        case step_counter/2 is  -- Coefficient selection logic
+            when 0 => current_coeff <= COEFF1;
+            when 1 => current_coeff <= COEFF2;
+            when 2 => current_coeff <= COEFF3;
+            when others => current_coeff <= (
+                re => to_sfixed(0, fixed64'high, fixed64'low),
+                im => to_sfixed(0, fixed64'high, fixed64'low)
+            );
+        end case;
+    end process;
+
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            state <= IDLE;
+            current_result <= init_cmatrixHigh_zero;
+            B_reg <= init_cmatrixHigh_zero;
+            step_counter <= 0;
+            done_s <= '0';
+        elsif rising_edge(clk) then
+            case state is
+                when IDLE =>
+                    done_s <= '0';
+                    if start = '1' then
+                        B_reg <= B;
+                        current_result <= B;  -- Initial value = B
+                        state <= COMPUTING;
+                        step_counter <= 0;
+                    end if;
+                
+                when COMPUTING =>
+                    if step_counter < 5 then
+                        if step_counter mod 2 = 0 then  -- Even steps: addition
+                            current_result <= adder_out;
+                        else                          -- Odd steps: multiplication
+                            current_result <= mult_out;
+                        end if;
+                        step_counter <= step_counter + 1;
+                    else
+                        done_s <= '1';
+                    end if;
+            end case;
+        end if;
+    end process;
+
+    done <= done_s;
+    -- Apply final negation to the result
+    P <= negate_cmatrixHigh(current_result);
+
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+use work.qTypes.all;
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
+
+entity Pade_Top_Level is
+    Port (
+        clk    : in std_logic;
+        reset  : in std_logic;
+		  H      : in cmatrix;
+        t      : in  cfixed64;
+	padeDone : out std_logic;
+        output : out cmatrix
+    );
+end Pade_Top_Level;
+
+architecture Behavioral of Pade_Top_Level is
+
+    -- Declare a constant Hamiltonian of type cmatrix.
+constant Hamiltonian : cmatrix := (
+    others => (others => (
+        re => (others => '0'),
+        im => (others => '0')
+    ))
+);
+
+    component Insert_Imaginary_Time_Into_CMatrix
+    Port (
+        t : in cfixed64;       -- Input scalar for second multiplication
+		  H : in cmatrix;
+        C_out     : out cmatrix  
+    ); 
+    end component Insert_Imaginary_Time_Into_CMatrix;
+
+    component Calculate_Norm_And_Compare 
+    port (
+        -- Input matrix: dimension = dimension   dimension (from qTypes)
+        A       : in  cmatrix;
+        
+        -- Output: '1' if THETA > infinityNorm(A), else '0'
+        isBelow : out std_logic;
+	InfinityNormOut : out cfixed64
+    );
+    end component Calculate_Norm_And_Compare;
+
+    component Generate_Scaling_Factor
+    Port (
+        input  : in  cfixed64;
+        S      : out cfixed64
+    );
+    end component Generate_Scaling_Factor;
+
+    component Scale_CMatrix_Down 
+    port (
+        Input_Matrix  : in  cmatrix;
+        Shift_Amount  : in  cfixed64; -- Interpreted as signed shift value
+        Output_Matrix : out cmatrix
+    );
+    end component Scale_CMatrix_Down;
+
+    component Scale_CMatrix_Up
+    Port (
+        clk    : in  std_logic;
+        reset  : in  std_logic;
+	start : in std_logic;
+        B      : in  cmatrix;
+        S      : in  cfixed64;
+        Result : out cmatrix;
+        done   : out std_logic
+    );
+    end component Scale_CMatrix_Up;
+
+    component padeDenominator
+    Port (
+        clk   : in  std_logic;
+        reset : in  std_logic;
+        start : in  std_logic;
+        B     : in  cmatrix;
+        P     : out cmatrix;
+        done  : out std_logic
+    );
+    end component;
+
+    component padeNumerator
+    Port (
+        clk   : in  std_logic;
+        reset : in  std_logic;
+        start : in  std_logic;
+        B     : in  cmatrix;
+        P     : out cmatrix;
+        done  : out std_logic
+    );
+    end component;
+
+    component Matrix_Inversion 
+    Port (
+        clk             : in  std_logic;
+        rst             : in  std_logic;
+        start           : in  std_logic;
+        input_matrix    : in  cmatrix;
+        output_matrix   : out cmatrix;
+        done            : out std_logic
+    );
+    end component Matrix_Inversion;
+
+    component Matrix_By_Matrix_Multiplication 
+    Port (
+        A : in  cmatrix;    -- First input matrix (M x N)
+        B : in  cmatrix;    -- Second input matrix (N x P)
+        C : out cmatrix     -- Output matrix (M x P)
+    );
+    end component Matrix_By_Matrix_Multiplication;
+
+    component Register_std_logic
+    Port (
+        clk   : in  std_logic;
+        reset : in  std_logic;
+	load  : in std_logic;
+        d     : in  std_logic;
+        q     : out std_logic
+    );
+    end component;
+
+    component TriStateBuffer_std_logic 
+    Port(
+        clk        : in  std_logic;
+        rst        : in  std_logic;
+        out_signal : out std_logic
+    );
+    end component;
+
+    -- No additional functionality is defined.
+    
+    -- (Optional) You may drive the output to a default value if required.
+    -- For example:
+    -- output <= toCmatrix(Hamiltonian);
+
+    signal IHTtoNormAndCompareandD1 : cmatrix; -- output of Insert_Imaginary_Time_Into_CMatrix
+    signal TorF : std_logic; -- T/F output of Calculate_Norm_And_Compare
+    signal InfNormOut : cfixed64;     
+    signal IHTtoScalar : cmatrix;
+    signal IHTdirect : cmatrix;
+    signal ScalingFactorOut : cfixed64;
+    signal ScaleDownOut : cmatrix;  
+    signal Mux2Out : cmatrix;
+    signal PNumeratorOut : cmatrix;
+    signal PDenominatorOut : cmatrix;
+    signal InvOut : cmatrix;
+    signal MatrixMultOut : cmatrix;
+    signal MatriPowIn : cmatrix;
+    signal Mux4In : cmatrix;
+    signal ScaleUpOut : cmatrix;
+    signal done, matrixInvDone, regStdLogicOut, tBuffStart, PNumDone, PDenDone : std_logic;
+    signal Mux4Out : cmatrix;
+    signal reg1Out, reg2Out, tBuffOut : cmatrix;
+    -- ETC...
+
+begin
+    IHT: Insert_Imaginary_Time_Into_CMatrix port map(t=> t, H => H, C_out => IHTtoNormAndCompareandD1);
+    Norm_And_Compare: Calculate_Norm_And_Compare port map(A => IHTtoNormAndCompareandD1, isBelow => TorF, infinityNormOut => InfNormOut);
+    Gen_Scaling_Factor: Generate_Scaling_Factor port map(input => InfNormOut, S => ScalingFactorOut);
+    Scale_Down: Scale_CMatrix_Down port map(Input_Matrix => IHTtoNormAndCompareandD1, Shift_Amount => ScalingFactorOut, Output_Matrix => ScaleDownOut);
+    P_num: padeNumerator port map(clk => clk, reset => reset, start => tBuffStart, B => ScaleDownOut, P => PNumeratorOut, done => PNumDone);
+    P_den: padeDenominator port map(clk => clk, reset => reset, start => tBuffStart, B => ScaleDownOut, P => PDenominatorOut, done => PDenDone);
+    tBuffS: triStateBuffer_std_logic port map(clk => clk, rst => reset, out_signal => tBuffStart);
+    Invert: Matrix_Inversion port map(clk => clk, rst => reset, start => PDenDone ,input_matrix => PDenominatorOut, output_matrix => InvOut, done => matrixInvDone);
+    MULT: Matrix_By_Matrix_Multiplication port map(A => PNumeratorOut, B => InvOut, C => MatrixMultOut);
+    reg3: Register_std_logic port map(clk => clk, reset => reset, load => '1', d => matrixInvDone, q => regStdLogicOut); 
+    Scale_Up: Scale_CMatrix_Up port map(clk => clk, reset => reset, start => regStdLogicOut, B => MatrixMultOut, S => ScalingFactorOut, Result => ScaleUpOut, done => padeDone);
+
+    
+    output <= ScaleUpOut;
+
+
+    
+
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+-- Include any packages needed by sub-modules.
+use work.fixed_pkg.ALL;
+use work.qTypes.ALL;
+
+entity QPU is
+    Port (
+        -- Global signals
+        clk     : in  std_logic;
+        reset   : in  std_logic;     -- Active High Reset
+        enable  : in  std_logic;     -- NEW: Mode Control (1=Receive, 0=Transmit)
+
+        -- Matrix SPI Receiver Ports (Now gated internally by 'enable')
+        rx_matrix_SCLK     : in  std_logic;
+        rx_matrix_SS       : in  std_logic;
+        rx_matrix_MOSI     : in  std_logic;
+        rx_matrix_NUM      : out std_logic_vector(71 downto 0);
+        rx_matrix_spi_valid: out std_logic;
+
+        -- Vector SPI Receiver Ports (Now gated internally by 'enable')
+        rx_vector_SCLK     : in  std_logic;
+        rx_vector_SS       : in  std_logic;
+        rx_vector_MOSI     : in  std_logic;
+        rx_vector_NUM      : out std_logic_vector(71 downto 0);
+        rx_vector_spi_valid: out std_logic;
+
+        -- SPI Transmitter Ports (Now gated internally by 'enable')
+        tx_SCLK     : in  std_logic;
+        tx_SS       : in  std_logic;
+        MISO        : out std_logic;
+        tx_spi_valid: out std_logic; -- Reflects internal transmitter state
+
+        -- Status Output
+        psi_matrix_assemble_done : out std_logic -- Existing status signal
+        -- REMOVED enable inputs for individual SPI interfaces as they are now controlled by the main 'enable'
+        -- rx_matrix_enable   : in  std_logic;
+        -- rx_vector_enable   : in  std_logic;
+        -- tx_enable          : in  std_logic;
+    );
+end QPU;
+
+architecture Behavioral of QPU is
+
+    --------------------------------------------------------------------------
+    -- Mode Control Signals (Derived from top-level enable and reset)
+    --------------------------------------------------------------------------
+    signal receive_mode_active  : std_logic; -- High when enable='1' and reset='0'
+    signal transmit_mode_active : std_logic; -- High when enable='0' and reset='0'
+
+    --------------------------------------------------------------------------
+    -- Internal Signal Declarations (Existing + Transmitter Output)
+    --------------------------------------------------------------------------
+    signal spi_matrix_data        : std_logic_vector(71 downto 0);
+    signal internal_matrix_valid  : std_logic; -- Renamed to avoid conflict
+
+    signal spi_vector_data        : std_logic_vector(71 downto 0);
+    signal internal_vector_valid  : std_logic; -- Renamed to avoid conflict
+
+    signal assembled_matrix       : cmatrix;
+    signal matrix_done            : std_logic;
+
+    signal assembled_vector       : cvector;
+    signal vector_done            : std_logic;
+
+    signal start_evolution        : std_logic;
+
+    signal qte_output_state       : cvector;
+    signal qte_output_valid       : std_logic;
+    signal qte_t_index            : integer;
+    signal qte_evolution_complete : std_logic;
+
+    signal assembled_psi_matrix   : psi_matrix;
+    signal internal_psi_asm_done  : std_logic; -- Renamed to avoid conflict
+
+    signal start_disassembly      : std_logic;
+    signal disassembled_data      : std_logic_vector((2 * fixed64'length) - 1 downto 0);
+    signal disassemble_valid_out  : std_logic;
+    signal disassemble_done       : std_logic;
+
+    signal internal_tx_spi_valid  : std_logic; -- Handshake from SPI Transmitter
+
+    -- Removed internal tx_done_pulse - using direct connection
+    -- Removed internal enable signals - using mode signals directly
+
+    --------------------------------------------------------------------------
+    -- Component Declarations (Keep as before)
+    --------------------------------------------------------------------------
+    component spi_receive is
+        generic ( NUM_BITS : integer := 72 );
+        port ( clk, reset, enable, SCLK, SS, MOSI : in std_logic;
+               NUM : out std_logic_vector(NUM_BITS-1 downto 0);
+               spi_valid : out std_logic );
+    end component;
+
+    component assemble_matrix is
+         port ( clk, reset : in std_logic;
+                data_in  : in  std_logic_vector((2 * fixed64'length) - 1 downto 0);
+                valid_in : in  std_logic;
+                matrix_out : out cmatrix;
+                done_out   : out std_logic );
+    end component;
+
+    component assemble_vector is
+        port ( clk, reset : in std_logic;
+               data_in  : in  std_logic_vector((2 * fixed64'length) - 1 downto 0);
+               valid_in : in  std_logic;
+               vector_out : out cvector;
+               done_out   : out std_logic );
+    end component;
+
+    component Quantum_Time_Evolution is
+        port ( clk, reset, psiAssemblerDone, matrixAssemblerDone, start_evolution : in std_logic;
+               H_in     : in  cmatrix;
+               psi_in   : in  cvector;
+               output_state : out cvector;
+               output_valid : out std_logic;
+               current_t_index : out integer;
+               evolution_complete : out std_logic );
+    end component;
+
+    component assemble_psi_matrix is
+        port ( clk, reset, valid_in : in std_logic;
+               vector_in    : in  cvector;
+               psi_matrix_out : out psi_matrix;
+               done_out     : out std_logic );
+    end component;
+
+    component disassemble_psi_matrix is
+        port ( clk, reset, start, tx_done_pulse_in : in std_logic;
+               psi_matrix_in : in  psi_matrix;
+               data_out      : out std_logic_vector((2 * fixed64'length) - 1 downto 0);
+               valid_out     : out std_logic;
+               done_out      : out std_logic );
+    end component;
+
+    component spi_transmit is
+        generic ( NUM_BITS : integer := 72 );
+        port ( clk, enable, SCLK_in, SS_in : in std_logic;
+               data_in   : in  std_logic_vector(NUM_BITS - 1 downto 0);
+               MISO      : out std_logic;
+               spi_valid : out std_logic );
+    end component;
+
+begin
+    --------------------------------------------------------------------------
+    -- Derive Mode Control Signals
+    --------------------------------------------------------------------------
+    receive_mode_active  <= enable and (not reset);
+    transmit_mode_active <= (not enable) and (not reset);
+
+    --------------------------------------------------------------------------
+    -- Connect Matrix SPI Receiver Instance (Enabled in Receive Mode)
+    --------------------------------------------------------------------------
+    rx_matrix_inst: spi_receive
+        generic map ( NUM_BITS => 72 )
+        port map (
+            clk       => clk,
+            reset     => reset,           -- Reset overrides everything
+            enable    => receive_mode_active, -- Use derived mode signal
+            SCLK      => rx_matrix_SCLK,
+            SS        => rx_matrix_SS,
+            MOSI      => rx_matrix_MOSI,
+            NUM       => spi_matrix_data,
+            spi_valid => internal_matrix_valid
+        );
+    -- Drive top-level output ports
+    rx_matrix_NUM       <= spi_matrix_data;
+    rx_matrix_spi_valid <= internal_matrix_valid;
+
+    --------------------------------------------------------------------------
+    -- Connect Vector SPI Receiver Instance (Enabled in Receive Mode)
+    --------------------------------------------------------------------------
+    rx_vector_inst: spi_receive
+        generic map ( NUM_BITS => 72 )
+        port map (
+            clk       => clk,
+            reset     => reset,
+            enable    => receive_mode_active, -- Use derived mode signal
+            SCLK      => rx_vector_SCLK,
+            SS        => rx_vector_SS,
+            MOSI      => rx_vector_MOSI,
+            NUM       => spi_vector_data,
+            spi_valid => internal_vector_valid
+        );
+    -- Drive top-level output ports
+    rx_vector_NUM       <= spi_vector_data;
+    rx_vector_spi_valid <= internal_vector_valid;
+
+    --------------------------------------------------------------------------
+    -- Assemble Matrix (Activity based on input valid)
+    --------------------------------------------------------------------------
+    assemble_matrix_inst: assemble_matrix
+        port map (
+            clk         => clk,
+            reset       => reset,
+            data_in     => spi_matrix_data,
+            valid_in    => internal_matrix_valid, -- Driven by receiver
+            matrix_out  => assembled_matrix,
+            done_out    => matrix_done
+        );
+
+    --------------------------------------------------------------------------
+    -- Assemble Vector (Activity based on input valid)
+    --------------------------------------------------------------------------
+    assemble_vector_inst: assemble_vector
+        port map (
+            clk         => clk,
+            reset       => reset,
+            data_in     => spi_vector_data,
+            valid_in    => internal_vector_valid, -- Driven by receiver
+            vector_out  => assembled_vector,
+            done_out    => vector_done
+        );
+
+    --------------------------------------------------------------------------
+    -- Generate Start Signal for Quantum Evolution
+    --------------------------------------------------------------------------
+    start_evolution <= '1' when (matrix_done = '1' and vector_done = '1') else '0';
+
+    --------------------------------------------------------------------------
+    -- Instantiate Quantum Time Evolution Unit (Activity based on start_evolution)
+    --------------------------------------------------------------------------
+    Quantum_Time_Evolution_inst: Quantum_Time_Evolution
+        port map (
+            clk                 => clk,
+            reset               => reset,
+            psiAssemblerDone    => vector_done,       -- Use internal done signal
+            matrixAssemblerDone => matrix_done,       -- Use internal done signal
+            start_evolution     => start_evolution,
+            H_in                => assembled_matrix,
+            psi_in              => assembled_vector,
+            output_state        => qte_output_state,
+            output_valid        => qte_output_valid,
+            current_t_index     => qte_t_index,
+            evolution_complete  => qte_evolution_complete
+        );
+
+    --------------------------------------------------------------------------
+    -- Instantiate Psi Matrix Assembler (Activity based on QTE output valid)
+    --------------------------------------------------------------------------
+    assemble_psi_matrix_inst: assemble_psi_matrix
+        port map (
+            clk            => clk,
+            reset          => reset,
+            vector_in      => qte_output_state,
+            valid_in       => qte_output_valid,
+            psi_matrix_out => assembled_psi_matrix,
+            done_out       => internal_psi_asm_done -- Use internal done signal
+        );
+    -- Drive top-level output port
+    psi_matrix_assemble_done <= internal_psi_asm_done;
+
+    --------------------------------------------------------------------------
+    -- Trigger Disassembly When Psi Matrix Assembly is Complete
+    --------------------------------------------------------------------------
+    start_disassembly <= internal_psi_asm_done; -- Start when assembly finishes
+
+    --------------------------------------------------------------------------
+    -- Instantiate Disassemble Psi Matrix Component (Activity based on start)
+    --------------------------------------------------------------------------
+    disassemble_psi_matrix_inst: disassemble_psi_matrix
+        port map (
+            clk              => clk,
+            reset            => reset,
+            start            => start_disassembly,
+            psi_matrix_in    => assembled_psi_matrix,
+            tx_done_pulse_in => internal_tx_spi_valid, -- Handshake from internal SPI Transmitter
+            data_out         => disassembled_data,
+            valid_out        => disassemble_valid_out,
+            done_out         => disassemble_done
+        );
+
+    --------------------------------------------------------------------------
+    -- Instantiate SPI Transmit Component (Enabled in Transmit Mode)
+    --------------------------------------------------------------------------
+    spi_transmit_inst: spi_transmit
+        generic map ( NUM_BITS => 72 )
+        port map (
+            clk         => clk,
+            enable      => transmit_mode_active, -- Use derived mode signal
+            data_in     => disassembled_data,   -- Fed by disassembler
+            SCLK_in     => tx_SCLK,
+            SS_in       => tx_SS,
+            MISO        => MISO,
+            spi_valid   => internal_tx_spi_valid -- Drives internal handshake & top-level output
+        );
+    -- Drive top-level output port
+    tx_spi_valid <= internal_tx_spi_valid;
+
+end Behavioral;
+-- #############################################################################
+-- #  << Quantum FPGA Emulator >>                                              #
+-- #############################################################################
+-- #  File        : qTypes.vhd                                                 #
+-- #  Authors     : Kelan Zielinski, Michael Denis, Jasem Alkhashti            #
+-- #  Emails      : ksz12@miami.edu, mwd47@miami.edu, jta568@miami.edu         #
+-- #  Affiliation : University of Miami - College of Engineering               #
+-- #  Created     : 02-07-2025                                                 #
+-- #  Revised     : 02-07-2025 - Present                                       #
+-- #  Description : data types that will be used throughout the project        #
+-- #  Dependencies: [List key dependencies (e.g., libraries, other entities)]  #
+-- #  Parameters  : [List key generics/parameters]                             #
+-- #  Usage       : [Usage constraints or target applications]                 #
+-- #############################################################################
+-- #  Copyright (c) 2025 Khizroev's Greatest Minions. All rights reserved.     #
+-- #  Licensed under the [License Name, e.g., MIT License]. See LICENSE file.  #
+-- #############################################################################
+
+-- =============================================================================
+--                               Revision History
+-- =============================================================================
+-- [DD-MM-YYYY] [Your Initials]: [Description of changes]
+-- =============================================================================
+
+-- =============================================================================
+--                              Module Description
+-- =============================================================================
+-- Defines data types for fixed64-point numbers with both low and high precision.
+-- Scaling with the number of qubits (nQubits).
+-- Defines vectors (cvector, cvector) and matrices (cmatrix, cmatrix). 
+-- Defines conversion functions between low and high precision datatypes.
+-- =============================================================================
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
+
+-- Package Specification
+package qTypes is 
+    -- Number of qubits
+    constant numQubits : integer := 1;
+	 
+	 --yum
+    constant numComplexNumbersInMatrix : integer  :=  2**numQubits * 2**numQubits;
+    constant numComplexNumbersinVector : integer  :=  2**numQubits;
+    
+    -- Number of basis states = 2^nQubits
+    constant dimension : integer := 2 ** numQubits;
+    
+    -- fixed64-point subtype with higher precision
+    subtype fixed64 is sfixed(14 downto -21); 
+
+    subtype fixed64_64 is sfixed(19 downto -44);
+    
+    -- Complex fixed64-point record for lower precision
+    type cfixed64 is record
+        re : fixed64;
+        im : fixed64;
+    end record;
+    
+    -- Vector of complex fixed64, length dimension (lower precision)
+    type cvector is array (0 to dimension - 1) of cfixed64;
+    
+    -- Matrix of cvector, dimension dimension x dimension (lower precision)
+    type cmatrix is array (0 to dimension - 1) of cvector;
+    type psi_matrix is array (0 to 29) of cvector;
+    
+    ----------------------------------------------------------------------------
+    -- Conversion Function Declarations
+    ----------------------------------------------------------------------------
+    -- Convert 27-bit fixed64 to 64-bit fixed64_64
+    function to_64bit(f : fixed64) return fixed64_64;
+    
+    -- Convert 64-bit fixed64_64 back to 27-bit fixed64
+    function from_64bit(f : fixed64_64) return fixed64;
+    
+end package qTypes;
+
+-- Package Body
+package body qTypes is
+    -- Function to convert 27-bit fixed64 to 64-bit fixed64_64
+    function to_64bit(f : fixed64) return fixed64_64 is
+    begin
+        return resize(f, fixed64_64'high, fixed64_64'low);
+    end function to_64bit;
+    
+    -- Function to convert 64-bit fixed64_64 back to 27-bit fixed64
+    function from_64bit(f : fixed64_64) return fixed64 is
+    begin
+        return resize(f, fixed64'high, fixed64'low);
+    end function from_64bit;
+
+end package body qTypes;
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.fixed_pkg.ALL; -- Assuming cfixed64, cmatrix, cvector are defined here
+use work.qTypes.all;    -- Or potentially definitions are split between these two
+
+entity Quantum_FPGA is
+    Port (
+        clk    : in std_logic;     -- Clock for sequential sub-components
+        reset  : in std_logic;     -- Reset for sequential sub-components
+        H      : in cmatrix;       -- Input Hamiltonian (passed directly)
+        psi    : in cvector;       -- Input state vector (passed directly)
+        t      : in cfixed64;      -- Input time value (passed directly)
+        done   : out std_logic;    -- Calculation completion signal (from Pade)
+        output : out cvector       -- Result of U(t) * psi
+    );
+end Quantum_FPGA;
+
+architecture Behavioral of Quantum_FPGA is
+
+    -- Component: Pade Approximation Calculation
+    component Pade_Top_Level
+        Port (
+            clk    : in std_logic;
+            reset  : in std_logic;
+            H      : in cmatrix;
+            t      : in cfixed64;
+            padeDone : out std_logic; -- Signal indicating Pade calculation is finished
+            output : out cmatrix      -- Output of Pade approximation, U(t) = exp(-iHt)
+        );
+    end component;
+
+    -- Component: Matrix-Vector Multiplication
+    component Matrix_By_Vector_Multiplication
+        Port (
+            -- Note: This component might need clk/reset if it's pipelined internally
+            -- Assuming it's combinatorial or its clocking is handled internally
+            A      : in  cmatrix;    -- Input complex matrix (U(t))
+            V      : in  cvector;    -- Input complex vector (psi)
+            Result : out cvector     -- Output complex vector (A * V)
+        );
+    end component;
+
+    -- Internal signals to connect components
+    signal pade_output_matrix : cmatrix;   -- Output of the Pade component U(t)
+    signal pade_done_signal   : std_logic; -- Done signal from the Pade component
+
+    -- No internal registers or buffers needed
+
+begin
+
+    -- Instantiate the Pade Approximation component
+    -- Inputs H and t are directly connected from the entity's ports.
+    pade_inst : Pade_Top_Level
+        port map (
+            clk      => clk,
+            reset    => reset,
+            H        => H,              -- Pass H directly
+            t        => t,              -- Pass t directly
+            padeDone => pade_done_signal, -- Capture the done signal
+            output   => pade_output_matrix -- Capture the resulting U(t) matrix
+        );
+
+    -- Instantiate the Matrix-Vector Multiplication component
+    -- Input A comes from the Pade output, input V comes directly from entity port psi.
+    mult_inst : Matrix_By_Vector_Multiplication
+        port map (
+            -- Pass clk/reset if the multiplier component requires them
+            A      => pade_output_matrix, -- Use the calculated U(t)
+            V      => psi,                -- Use the input psi directly
+            Result => output              -- Connect result directly to entity output
+        );
+
+    -- Connect the done signal from the Pade component to the entity's done output
+    done <= pade_done_signal;
+
+    -- The output port is directly driven by the Result of mult_inst.
+
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.fixed_pkg.ALL;  -- For sfixed conversion functions
+use work.qTypes.all;     -- For cmatrix, cvector, cfixed64
+
+entity Quantum_Time_Evolution is
+    port (
+        clk                 : in  std_logic;
+        reset               : in  std_logic;     -- Synchronous reset
+        psiAssemblerDone    : in  std_logic;     -- Input: Psi vector is ready
+        matrixAssemblerDone : in  std_logic;     -- Input: H matrix is ready
+        start_evolution     : in  std_logic;     -- Begin the 30-step evolution when ready
+        H_in                : in  cmatrix;       -- Input Hamiltonian (stable after matrixAssemblerDone = '1')
+        psi_in              : in  cvector;       -- Input initial state vector (stable after psiAssemblerDone = '1')
+    
+        output_state        : out cvector;       -- Output state for the current time step t(i)
+        output_valid        : out std_logic;     -- High for one clock when output_state is valid for t(i)
+        current_t_index     : out integer;       -- Index (0?29) of the time step on output_state
+        evolution_complete  : out std_logic      -- High when all 30 steps are done
+    );
+end Quantum_Time_Evolution;
+
+architecture Behavioral of Quantum_Time_Evolution is
+
+    -- Component Declaration for the simplified worker module
+    component Quantum_FPGA is
+        port (
+            clk    : in  std_logic;
+            reset  : in  std_logic;
+            H      : in  cmatrix;
+            psi    : in  cvector;
+            t      : in  cfixed64;
+            done   : out std_logic;    -- Calculation completion signal (padeDone)
+            output : out cvector       -- Result of U(t) * psi
+        );
+    end component;
+
+    -- Define the number of time steps and an array type for these time values.
+    constant NUM_TIME_STEPS : integer := 30;
+    type time_step_array is array (0 to NUM_TIME_STEPS - 1) of cfixed64;
+    constant T_VALUES : time_step_array := (
+         0  => (re => to_sfixed(0.0,        fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         1  => (re => to_sfixed(0.10833078, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         2  => (re => to_sfixed(0.21666156, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         3  => (re => to_sfixed(0.32499234, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         4  => (re => to_sfixed(0.43332312, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         5  => (re => to_sfixed(0.54165391, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         6  => (re => to_sfixed(0.64998469, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         7  => (re => to_sfixed(0.75831547, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         8  => (re => to_sfixed(0.86664625, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         9  => (re => to_sfixed(0.97497703, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         10 => (re => to_sfixed(1.08330781, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         11 => (re => to_sfixed(1.19163859, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         12 => (re => to_sfixed(1.29996937, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         13 => (re => to_sfixed(1.40830016, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         14 => (re => to_sfixed(1.51663094, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         15 => (re => to_sfixed(1.62496172, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         16 => (re => to_sfixed(1.7332925,  fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         17 => (re => to_sfixed(1.84162328, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         18 => (re => to_sfixed(1.94995406, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         19 => (re => to_sfixed(2.05828484, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         20 => (re => to_sfixed(2.16661562, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         21 => (re => to_sfixed(2.2749464,  fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         22 => (re => to_sfixed(2.38327719, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         23 => (re => to_sfixed(2.49160797, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         24 => (re => to_sfixed(2.59993875, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         25 => (re => to_sfixed(2.70826953, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         26 => (re => to_sfixed(2.81660031, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         27 => (re => to_sfixed(2.92493109, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         28 => (re => to_sfixed(3.03326187, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low)),
+         29 => (re => to_sfixed(3.14159265, fixed64'high, fixed64'low), im => to_sfixed(0.0,        fixed64'high, fixed64'low))
+    );
+
+    -- Define the state machine with an extra state for worker reset.
+    type state_type is (
+        IDLE,               -- Waiting for inputs & start signal
+        RUN_CALCULATION,    -- Performing calculation for the current time value
+        CAPTURE_OUTPUT,     -- Latching the result when qfpga_done is high
+        RESET_WORKER,       -- Asserting qfpga_reset to reinitialize the worker
+        FINISHED            -- All time steps completed
+    );
+    signal current_state, next_state : state_type := IDLE;
+
+    -- Counters for time-step indexing.
+    signal t_index_reg     : integer range 0 to NUM_TIME_STEPS := 0;
+    signal t_index_out_reg : integer range 0 to NUM_TIME_STEPS - 1 := 0;
+
+    -- Signals that connect to the Quantum_FPGA component.
+    signal qfpga_t      : cfixed64;
+    signal qfpga_done   : std_logic;
+    signal qfpga_output : cvector;
+    signal qfpga_reset  : std_logic;  -- Internal reset control for the worker
+
+    -- Output registers.
+    signal output_state_reg       : cvector;
+    signal output_valid_reg       : std_logic := '0';
+    signal evolution_complete_reg : std_logic := '0';
+
+begin
+    ----------------------------------------------------------------------------
+    -- Instantiate the worker module (Quantum_FPGA)
+    ----------------------------------------------------------------------------
+    quantum_unit : Quantum_FPGA
+        port map (
+            clk    => clk,
+            reset  => qfpga_reset,
+            H      => H_in,
+            psi    => psi_in,
+            t      => qfpga_t,
+            done   => qfpga_done,
+            output => qfpga_output
+        );
+
+    ----------------------------------------------------------------------------
+    -- Combinational Process: Determine next state, assign t value, and generate
+    -- the appropriate worker reset signal.
+    ----------------------------------------------------------------------------
+    process(current_state, reset, psiAssemblerDone, matrixAssemblerDone, start_evolution, qfpga_done, t_index_reg)
+    begin
+        -- Default assignments:
+        next_state            <= current_state;
+        qfpga_t               <= T_VALUES(t_index_reg);
+        output_valid_reg      <= '0';
+        evolution_complete_reg<= '0';
+        qfpga_reset           <= '0';
+
+        case current_state is
+            when IDLE =>
+                qfpga_reset <= '1';  -- Hold the worker in reset while idle.
+                if (reset = '0' and psiAssemblerDone = '1' and matrixAssemblerDone = '1' and start_evolution = '1') then
+                    if NUM_TIME_STEPS > 0 then
+                        next_state <= RUN_CALCULATION;
+                        qfpga_reset <= '0';  -- Deassert reset to begin calculation.
+                    else
+                        next_state <= FINISHED;
+                    end if;
+                else
+                    next_state <= IDLE;
+                end if;
+
+            when RUN_CALCULATION =>
+                qfpga_reset <= '0';  -- Ensure the worker is active.
+                qfpga_t <= T_VALUES(t_index_reg);
+                if qfpga_done = '1' then
+                    next_state <= CAPTURE_OUTPUT;
+                else
+                    next_state <= RUN_CALCULATION;
+                end if;
+
+            when CAPTURE_OUTPUT =>
+                output_valid_reg <= '1';  -- Latch output valid for one clock cycle.
+                next_state <= RESET_WORKER;  -- Then assert a reset pulse.
+
+            when RESET_WORKER =>
+                qfpga_reset <= '1';  -- Assert reset to reinitialize the worker.
+                if t_index_reg = NUM_TIME_STEPS - 1 then
+                    next_state <= FINISHED;
+                else
+                    next_state <= RUN_CALCULATION;
+                end if;
+
+            when FINISHED =>
+                evolution_complete_reg <= '1';
+                qfpga_reset <= '1';  -- Keep the worker reset after finishing.
+                next_state <= FINISHED;
+
+            when others =>
+                next_state <= IDLE;
+        end case;
+
+        -- Global external reset overrides all.
+        if reset = '1' then
+            next_state <= IDLE;
+            qfpga_reset <= '1';
+        end if;
+    end process;
+
+    ----------------------------------------------------------------------------
+    -- Sequential Process: Update state and manage time-step index counters.
+    ----------------------------------------------------------------------------
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' then
+                current_state    <= IDLE;
+                t_index_reg      <= 0;
+                t_index_out_reg  <= 0;
+            else
+                current_state <= next_state;
+                case current_state is
+                    when RUN_CALCULATION =>
+                        if next_state = CAPTURE_OUTPUT then
+                            output_state_reg <= qfpga_output;  -- Latch the output.
+                            t_index_out_reg  <= t_index_reg;    -- Latch the index corresponding to this output.
+                        end if;
+                    when CAPTURE_OUTPUT =>
+                        null; -- No index update here.
+                    when RESET_WORKER =>
+                        if next_state = RUN_CALCULATION then
+                            t_index_reg <= t_index_reg + 1;  -- Move to the next time-step.
+                        end if;
+                    when IDLE =>
+                        if next_state = RUN_CALCULATION then
+                            t_index_reg     <= 0;
+                            t_index_out_reg <= 0;
+                        end if;
+                    when others =>
+                        null;
+                end case;
+            end if;
+        end if;
+    end process;
+
+    ----------------------------------------------------------------------------
+    -- Drive top-level outputs.
+    ----------------------------------------------------------------------------
+    output_state       <= output_state_reg;
+    output_valid       <= output_valid_reg;
+    current_t_index    <= t_index_out_reg;
+    evolution_complete <= evolution_complete_reg;
+
+end Behavioral;
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+
+entity ReciprocalEstimation is
+    Port ( 
+        x : in fixed64;   -- Input signal (64-bit)
+        y : out fixed64   -- Output signal (64-bit)
+    );
+end ReciprocalEstimation;
+
+architecture Behavioral of ReciprocalEstimation is
+    -- Define constants a and b (64-bit)
+    --constant a : fixed64_64 := b"1111111111111111111111111111111111111111111010110111000100010011"; -- Example value
+    constant a : fixed64_64 := b"1111111111111111111111111111111111111111111111101011011100001011"; -- Example value
+    --constant b : fixed64_64 := b"0000000000000000000000000000100100010001011110101000000111100101";   -- Example value
+    constant b : fixed64_64 := b"0000000000000000000000000000000010010001000110001111000011110111";
+    -- Declare intermediate signals with the same 64-bit precision
+    signal mult_result : fixed64;
+    signal x_64bit   : fixed64_64;
+    signal result_64 : fixed64_64;
+    
+begin
+
+    x_64bit <= to_64bit(x);
+
+    -- Step 1: Calculate a*x and immediately resize to maintain 64-bit format
+    --mult_result <= resize(a * x, fixed64'high, fixed64'low);
+    result_64 <= resize(a * x_64bit + b, fixed64_64'high, fixed64_64'low);
+    
+    -- Step 2: Add b to a*x and maintain 64-bit format with final resize
+    --y <= resize(mult_result + b, fixed64'high, fixed64'low);
+
+    y <= from_64bit(resize(result_64, fixed64_64'high, fixed64_64'low));
+    
+end Behavioral;library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+entity Register_cfixed is
+    Port (
+        clk   : in std_logic;
+        reset : in std_logic;
+        load  : in std_logic;
+        d     : in cfixed64;
+        q     : out cfixed64
+    );
+end Register_cfixed;
+
+architecture Behavioral of Register_cfixed is
+    signal q_reg : cfixed64;
+begin
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            q_reg <= (re => (others => '0'),
+                      im => (others => '0'));
+        elsif rising_edge(clk) then
+            if load = '1' then
+                q_reg <= d;
+            end if;
+        end if;
+    end process;
+    
+    q <= q_reg;
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+entity Register_cmatrix is
+    Port (
+        clk      : in std_logic;
+        rst      : in std_logic;
+        load     : in std_logic;
+        data_in  : in cmatrix;
+        data_out : out cmatrix
+    );
+end Register_cmatrix;
+
+architecture Behavioral of Register_cmatrix is
+    signal register_value : cmatrix;
+begin
+
+    process(clk, rst)
+    begin
+        if rst = '1' then
+            -- Reset: set every element in the matrix to zero.
+            register_value <= (others => (others => (re => (others => '0'),
+                                                      im => (others => '0'))));
+        elsif rising_edge(clk) then
+            if load = '1' then
+                register_value <= data_in;
+            end if;
+        end if;
+    end process;
+
+    data_out <= register_value;
+
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+--use IEEE.NUMERIC_STD.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+entity Register_cvector is
+    Port (
+        clk      : in  std_logic;
+        rst      : in  std_logic;
+        load     : in  std_logic;
+        data_in  : in  cvector;
+        data_out : out cvector
+    );
+end Register_cvector;
+
+architecture Behavioral of Register_cvector is
+    signal register_value : cvector;
+begin
+
+    process(clk, rst)
+    begin
+        if rst = '1' then
+            -- Reset: initialize each element to zero.
+            register_value <= (others => (re => (others => '0'),
+                                          im => (others => '0')));
+        elsif rising_edge(clk) then
+            if load = '1' then
+                register_value <= data_in;
+            end if;
+        end if;
+    end process;
+
+    data_out <= register_value;
+
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Register_std_logic is
+    Port (
+        clk   : in  std_logic;
+        reset : in  std_logic;
+        load  : in  std_logic;
+        d     : in  std_logic;
+        q     : out std_logic
+    );
+end Register_std_logic;
+
+architecture Behavioral of Register_std_logic is
+    signal q_reg : std_logic;
+begin
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            q_reg <= '0';
+        elsif rising_edge(clk) then
+            if load = '1' then
+                q_reg <= d;
+            end if;
+        end if;
+    end process;
+    
+    q <= q_reg;
+end Behavioral;
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+--use work.fixed64.ALL;
+use work.qTypes.ALL;
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
+
+entity Scale_cmatrix_Down is
+port (
+    Input_Matrix  : in  cmatrix;
+    Shift_Amount  : in  cfixed64; -- Integer shift value (absolute value used)
+    Output_Matrix : out cmatrix
+);
+end Scale_cmatrix_Down;
+
+architecture Structural of Scale_cmatrix_Down is
+    constant MAX_SHIFT_BITS : integer := 64;
+    
+    -- Convert shift amount to unsigned integer
+    signal shift_mag : natural := 0;
+begin
+    -- Convert fixed64-point shift amount to natural number
+    shift_mag <= abs(to_integer(Shift_Amount.re));
+    --shift_mag <= to_natural(Shift_Amount.re);
+
+    -- Generate scaling logic for matrix elements
+    row_gen: for i in 0 to dimension-1 generate
+        col_gen: for j in 0 to dimension-1 generate
+            -- Real component scaling
+            Output_Matrix(i)(j).re <= 
+                shift_right(Input_Matrix(i)(j).re, shift_mag);
+            
+            -- Imaginary component scaling
+            Output_Matrix(i)(j).im <= 
+                shift_right(Input_Matrix(i)(j).im, shift_mag);
+        end generate col_gen;
+    end generate row_gen;
+end Structural;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+entity Scale_cmatrix_Up is
+    Port (
+        clk    : in  std_logic;
+        reset  : in  std_logic;
+        start  : in  std_logic;
+        B      : in  cmatrix;
+        S      : in  cfixed64;
+        Result : out cmatrix;
+        done   : out std_logic
+    );
+end Scale_cmatrix_Up;
+
+architecture Behavioral of Scale_cmatrix_Up is
+    type state_type is (IDLE, INIT, SQUARING, EOE);
+    signal state : state_type := IDLE;
+    
+    signal current_matrix : cmatrix;
+    signal next_matrix    : cmatrix;
+    signal counter        : natural := 0;
+    
+    component Matrix_By_Matrix_Multiplication is
+        Port (
+            A : in  cmatrix;
+            B : in  cmatrix;
+            C : out cmatrix
+        );
+    end component;
+
+begin
+    Matrix_Multiplier: Matrix_By_Matrix_Multiplication
+        port map (
+            A => current_matrix,
+            B => current_matrix,
+            C => next_matrix
+        );
+
+    process(clk, reset)
+        variable s_val : natural;
+    begin
+        if reset = '1' then
+            state <= IDLE;
+            done <= '0';
+            -- Initialize Result using "others" to assign zeros
+            Result <= (others => (others => (
+                re => (others => '0'),
+                im => (others => '0')
+            )));
+            -- Initialize current_matrix using "others"
+            current_matrix <= (others => (others => (
+                re => (others => '0'),
+                im => (others => '0')
+            )));
+            counter <= 0;
+            
+        elsif rising_edge(clk) then
+            case state is
+                when IDLE =>
+                    if start = '1' then
+                        state <= INIT;
+                    end if;
+                    
+                when INIT =>
+                    s_val := to_integer(S.re);
+                    
+                    if s_val = 0 then
+                        Result <= B;
+                        done <= '1';
+                        state <= EOE;
+                    else
+                        current_matrix <= B;
+                        counter <= s_val - 1;  -- Adjust for first squaring
+                        state <= SQUARING;
+                    end if;
+                    
+                when SQUARING =>
+                    if counter > 0 then
+                        current_matrix <= next_matrix;
+                        counter <= counter - 1;
+                    else
+                        Result <= next_matrix;  -- Capture final result
+                        done <= '1';
+                        state <= EOE;
+                    end if;
+                    
+                when EOE =>
+                    if start = '0' then
+                        state <= IDLE;
+                    end if;
+                                   
+                when others =>
+                    state <= IDLE;
+            end case;
+        end if;
+    end process;
+
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity spi_receive is
+    generic (
+        NUM_BITS : integer := 28  -- Number of bits to receive.
+    );
+    port (
+        clk       : in  std_logic;  -- FPGA system clock.
+        reset     : in  std_logic;  -- Synchronous reset (active high)
+        enable    : in  std_logic;  -- When '0', device is disabled.
+        SCLK      : in  std_logic;  -- External SPI clock signal (RAW input).
+        SS        : in  std_logic;  -- Active low chip select (RAW input).
+        MOSI      : in  std_logic;  -- External SPI data input (RAW input).
+        NUM       : out std_logic_vector(NUM_BITS-1 downto 0); -- Final word output
+        -- spi_valid is high WHEN state is VALID
+        spi_valid : out std_logic
+    );
+end spi_receive;
+
+architecture Behavioral of spi_receive is
+
+    -- State machine definition
+    type state_type is (IDLE, RECEIVING, VALID);
+    signal state          : state_type := IDLE;
+
+    -- Internal data register (accumulates bits MSB-first)
+    signal num_reg        : std_logic_vector(NUM_BITS-1 downto 0) := (others => '0');
+    -- Output data register (holds stable output value)
+    signal num_output_reg : std_logic_vector(NUM_BITS-1 downto 0) := (others => '0');
+
+    -- Counter to track number of bits received.
+    signal bit_count      : integer range 0 to NUM_BITS := 0; -- Can reach NUM_BITS momentarily
+
+    -- Input Synchronization Registers
+    signal sclk_s1, sclk_s2 : std_logic := '0'; -- Synchronized SCLK stages
+    signal ss_s1,   ss_s2   : std_logic := '0'; -- Synchronized SS stages (init high/idle)
+    signal mosi_s1, mosi_s2 : std_logic := '0'; -- Synchronized MOSI stages
+
+    -- Synchronized SCLK edge detection
+    signal sclk_sync_d1   : std_logic := '0'; -- Previous cycle's synchronized SCLK
+
+begin
+
+    -- Synchronization Process
+    sync_proc: process(clk, SCLK)
+    begin
+        if rising_edge(clk) then
+            sclk_s1 <= SCLK; sclk_s2 <= sclk_s1;
+            ss_s1   <= SS;   ss_s2   <= ss_s1;
+            mosi_s1 <= MOSI; mosi_s2 <= mosi_s1;
+        end if;
+    end process sync_proc;
+
+    -- Main SPI Logic Process
+    spi_logic_proc: process(clk)
+        -- Temporary variable to construct the final value before assigning to output register
+        variable temp_num : std_logic_vector(NUM_BITS-1 downto 0);
+    begin
+        if rising_edge(clk) then
+            -- Synchronous Reset
+            if reset = '1' then
+                state          <= IDLE;
+                bit_count      <= 0;
+                num_reg        <= (others => '0');
+                num_output_reg <= (others => '0');
+            -- Disabled or Chip Select Inactive (Go to IDLE)
+            elsif (enable = '0' or ss_s2 = '1') then
+                 -- If SS goes high, reset the process regardless of current state
+                state          <= IDLE;
+                bit_count      <= 0;
+                num_reg        <= (others => '0');
+                -- Decide if NUM should reset when SS goes high, or hold last value. Resetting here.
+                num_output_reg <= (others => '0');
+            -- Enabled and Chip Selected - Normal Operation
+            else
+                -- Store previous synchronized SCLK for edge detection
+                sclk_sync_d1 <= sclk_s2;
+                -- Output register holds its value unless explicitly updated
+                -- num_output_reg <= num_output_reg; -- (Implicit)
+
+                -- Detect rising edge of synchronized SCLK (Samples data - assumes CPOL=0, CPHA=0 or CPOL=1, CPHA=1)
+                if ((sclk_s2 = '1') and (sclk_sync_d1 = '0')) then
+                    case state is
+                        when IDLE =>
+                            -- SS is low (checked by outer condition), SCLK rising: Start transfer
+                            -- Capture first bit (MSB)
+                            num_reg <= (others => '0'); -- Clear internal register
+                            num_reg(NUM_BITS-1) <= mosi_s2;
+                            bit_count <= 1; -- We have received 1 bit
+                            state     <= RECEIVING;
+
+                        when RECEIVING =>
+                             -- SS is low, SCLK rising: Capture next bit
+                             -- Place bit at index (NUM_BITS - 1 - current_bit_count)
+                             -- Example: NUM_BITS=8. bit_count=1 -> index 6. bit_count=7 -> index 0.
+                            if (NUM_BITS - 1 - bit_count) >= 0 then -- Check index valid
+                                num_reg(NUM_BITS - 1 - bit_count) <= mosi_s2;
+                            end if;
+
+                            if bit_count = NUM_BITS - 1 then
+                                -- This SCLK edge just clocked in the LAST bit (LSB) at index 0
+                                -- Prepare the final value for the output register
+                                temp_num := num_reg;        -- Get bits already placed (MSB down to index 1)
+                                temp_num(0) := mosi_s2;     -- Add the final LSB just received
+
+                                -- Update state and the stable output register
+                                state          <= VALID;
+                                num_output_reg <= temp_num; -- *** Update NUM output ***
+                                bit_count      <= 0;       -- Reset bit count for next potential transfer
+                            else
+                                -- Not the last bit yet
+                                bit_count <= bit_count + 1;
+                                state     <= RECEIVING; -- Stay in RECEIVING state
+                            end if;
+
+                        when VALID =>
+                             -- Currently in VALID state (spi_valid output is high).
+                             -- A full word was received on the *previous* clock edge.
+                             -- Output register holds the complete word.
+                             -- If SS is still low on this new SCLK edge: start a new transfer immediately.
+                             -- Capture first bit (MSB) of the new word.
+                             num_reg <= (others => '0');
+                             num_reg(NUM_BITS-1) <= mosi_s2;
+                             bit_count <= 1;
+                             state     <= RECEIVING; -- Exit VALID state, start receiving next word
+
+                    end case; -- state
+                -- No SCLK edge detected this clock cycle
+                else
+                     -- If we were in VALID state, and SS is still low, but there's no SCLK edge,
+                     -- just stay VALID. Transition out happens only on SCLK edge (above) or SS going high (outer condition).
+                     null;
+                end if; -- End rising edge SCLK detection
+            end if; -- End reset/enable/SS condition
+        end if; -- End rising_edge(clk)
+    end process spi_logic_proc;
+
+    -- Drive outputs continuously
+    NUM <= num_output_reg;
+    -- spi_valid is high ('1') if and only if the state machine is in the VALID state.
+    spi_valid <= '1' when state = VALID else '0';
+
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity spi_transmit is
+    generic (
+        NUM_BITS : integer := 72 -- Number of bits to transmit.
+    );
+    port (
+        clk       : in  std_logic;  -- FPGA system clock.
+        enable    : in  std_logic;  -- When '0', device is disabled.
+        data_in   : in  std_logic_vector(NUM_BITS - 1 downto 0); -- Data word to be transmitted.
+        SCLK_in   : in  std_logic;  -- External SPI clock signal (RAW input).
+        SS_in     : in  std_logic;  -- Active low chip select (RAW input).
+        MISO      : out std_logic;  -- Output line to send data to the master.
+        spi_valid : out std_logic -- Asserted when a full word is transmitted (optional use).
+    );
+end spi_transmit;
+
+architecture Behavioral of spi_transmit is
+
+    -- Input Synchronization Registers
+    signal sclk_s1, sclk_s2 : std_logic := '0';
+    signal ss_s1, ss_s2     : std_logic := '1'; -- Default SS to idle (high)
+
+    -- Synchronized Signals
+    signal SCLK : std_logic;
+    signal SS   : std_logic;
+
+    -- State machine
+    type state_type is (IDLE, TRANSMITTING); -- Simplified state
+    signal state     : state_type := IDLE;
+
+    -- Pattern removed, using data_in port instead
+    -- constant PATTERN : std_logic_vector(NUM_BITS-1 downto 0) := "111100001111000011110000111100001111000011110000111100001111000011110000";
+
+    -- Counter tracks how many bits have been sent. Reset state sends bit MSB.
+    -- Counts from 0 (ready to send MSB) up to NUM_BITS (finished sending LSB).
+    signal bit_counter : integer range 0 to NUM_BITS := 0;
+
+    -- Internal signals
+    signal miso_reg   : std_logic := '0';
+    signal valid_reg  : std_logic := '0'; -- Will pulse for one clk cycle
+
+    -- Edge detection for synchronized SCLK
+    signal sclk_last  : std_logic := '0';
+    signal sclk_rising_edge : boolean;
+
+begin
+
+    -- Input Synchronization
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            sclk_s1 <= SCLK_in;
+            sclk_s2 <= sclk_s1;
+            ss_s1   <= SS_in;
+            ss_s2   <= ss_s1;
+        end if;
+    end process;
+    SCLK <= sclk_s2; -- Use synchronized SCLK
+    SS   <= ss_s2;   -- Use synchronized SS
+
+    -- Main SPI Logic
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            -- Default assignments
+            valid_reg <= '0'; -- Default valid low, pulse high when done
+            sclk_rising_edge <= (SCLK = '1' and sclk_last = '0'); -- Detect edge on synchronized SCLK
+
+            -- Reset condition
+            if (enable = '0' or SS = '1') then -- Reset if disabled OR slave deselected
+                state       <= IDLE;
+                bit_counter <= 0;
+                miso_reg    <= '0'; -- Or 'Z' if tristate needed
+                valid_reg   <= '0';
+            else
+                -- Active state machine (SS='0' and enable='1')
+                -- Logic reacts to the SCLK edge detected *in the previous cycle*
+                if sclk_rising_edge then
+                    case state is
+                        when IDLE =>
+                            -- First rising edge detected while selected
+                            -- Output MSB (index NUM_BITS-1) from the input data
+                            miso_reg    <= data_in(NUM_BITS - 1);
+                            bit_counter <= 1;                    -- Prepare for the next bit index
+                            state       <= TRANSMITTING;
+                            valid_reg   <= '0';
+
+                        when TRANSMITTING =>
+                            if bit_counter < NUM_BITS then
+                                -- Subsequent rising edge detected
+                                -- Output the bit corresponding to the current bit_counter
+                                -- data_in is indexed MSB first (NUM_BITS-1 down to 0)
+                                -- Counter goes 1, 2, ..., NUM_BITS-1
+                                -- So we need data_in(NUM_BITS - 1 - bit_counter)
+                                miso_reg    <= data_in(NUM_BITS - 1 - bit_counter); -- Output current bit
+                                bit_counter <= bit_counter + 1;                  -- Increment for next edge
+                                state       <= TRANSMITTING;
+                                valid_reg   <= '0';
+                            else
+                                -- Rising edge #NUM_BITS detected (after sending NUM_BITS-1 on previous edge)
+                                -- This edge doesn't correspond to a data bit in this MSB-first scheme.
+                                -- The last bit (LSB, index 0) was put on MISO just before this edge.
+                                miso_reg    <= '0'; -- Go low (or 'Z') after last bit transmission completed
+                                bit_counter <= 0;   -- Reset for potential next transfer
+                                state       <= IDLE; -- Go back to idle, ready for next sequence
+                                valid_reg   <= '1'; -- Pulse valid for one FPGA clock cycle
+                            end if;
+                    end case;
+                end if; -- end SCLK edge detection
+            end if; -- end enable/SS check
+
+            sclk_last <= SCLK; -- Update SCLK history for next cycle's edge detection
+        end if; -- end rising_edge(clk)
+    end process;
+
+    -- Drive outputs
+	 MISO <= miso_reg;
+    spi_valid <= valid_reg;
+
+end Behavioral;library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+entity TristateBuffer_cmatrix is
+    Port (
+        data_in  : in  cmatrix;
+        enable   : in  std_logic;
+        data_out : out cmatrix
+    );
+end TristateBuffer_cmatrix;
+
+architecture Behavioral of TristateBuffer_cmatrix is
+    -- Define a default complex constant for type cfixed64.
+    constant default_complex : cfixed64 := (re => (others => '0'), im => (others => '0'));
+    -- Use the default complex to fill the entire cmatrix.
+    constant default_cmatrix : cmatrix := (others => (others => default_complex));
+begin
+    -- Multiplexer: when enable = '1', pass through data_in; otherwise, drive zeros.
+    data_out <= data_in when enable = '1' else default_cmatrix;
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+entity TristateBuffer_cvector is
+    Port (
+        data_in  : in  cvector;
+        enable   : in  std_logic;
+        data_out : out cvector
+    );
+end TristateBuffer_cvector;
+
+architecture Behavioral of TristateBuffer_cvector is
+    -- Define a default complex constant
+    constant default_complex : cfixed64 := (re => (others => '0'), im => (others => '0'));
+    -- Use the default complex to fill the entire cvector
+    constant default_cvector : cvector := (others => default_complex);
+begin
+    -- When enable is '1', pass data_in; otherwise, drive zeros.
+    data_out <= data_in when enable = '1' else default_cvector;
+end Behavioral;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.fixed_pkg.ALL;
+
+entity TriStateBuffer_std_logic is
+    Port(
+        clk        : in  std_logic;
+        rst        : in  std_logic;
+        out_signal : out std_logic
+    );
+end TriStateBuffer_std_logic;
+
+architecture Behavioral of TriStateBuffer_std_logic is
+    signal counter : natural := 0;
+begin
+    process(clk, rst)
+    begin
+        if rst = '1' then
+            counter    <= 0;
+            out_signal <= '0';
+        elsif rising_edge(clk) then
+            if counter < 50 then
+                counter    <= counter + 1;
+                out_signal <= '0';
+            else
+                out_signal <= '1';
+            end if;
+        end if;
+    end process;
+end Behavioral;
+
