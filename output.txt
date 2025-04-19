@@ -415,45 +415,50 @@ use work.qTypes.ALL;
 entity assemble_vector is
     port (
         -- Clock and Reset
-        clk       : in  std_logic;
-        reset     : in  std_logic;  -- Active high synchronous reset
+        clk        : in  std_logic;
+        reset      : in  std_logic;  -- Active high synchronous reset
 
         -- Input Data Interface
-        data_in   : in  std_logic_vector((2 * fixed64'length) - 1 downto 0);  -- 72 bits: [RE(35 downto 0) | IM(35 downto 0)]
-        valid_in  : in  std_logic;  -- Indicates that data_in is valid
+        data_in    : in  std_logic_vector((2 * fixed64'length) - 1 downto 0);  -- [RE | IM]
+        valid_in   : in  std_logic;  -- Indicates that data_in is valid
 
         -- Output Data Interface
-        vector_out : out cvector;   -- Assembled vector
-        done_out   : out std_logic  -- High when vector is fully assembled (latched until reset)
+        vector_out : out cvector;     -- Assembled vector
+        done_out   : out std_logic    -- High when vector is fully assembled
     );
 end entity assemble_vector;
 
 architecture rtl of assemble_vector is
 
-    -- Define state machine states
+    -- State machine
     type state_t is (IDLE, RECEIVING, DONE);
     signal current_state, next_state : state_t;
 
-    -- Constant definitions for data slicing and zero values
-    constant F_LEN      : integer := fixed64'length; -- 36
-    constant RE_HIGH    : integer := (2 * F_LEN) - 1;  -- 71
-    constant RE_LOW     : integer := F_LEN;            -- 36
-    constant IM_HIGH    : integer := F_LEN - 1;        -- 35
-    constant IM_LOW     : integer := 0;                -- 0
-
-    constant ZERO_fixed64  : fixed64 := to_sfixed(0.0, fixed64'high, fixed64'low);
+    -- Zero constants
+    constant ZERO_fixed64  : fixed64  := to_sfixed(0.0, fixed64'high, fixed64'low);
     constant ZERO_cfixed64 : cfixed64 := (re => ZERO_fixed64, im => ZERO_fixed64);
 
-    -- Internal storage for the vector, defaulting all elements to zero.
+    -- Internal vector storage
     signal internal_vector : cvector := (others => ZERO_cfixed64);
 
-    -- Single index counter for the vector elements
-    signal index_cnt : natural range 0 to dimension - 1;
+    -- Index counter
+    signal index_cnt : natural range 0 to dimension - 1 := 0;
+
+    -- Data‐slice constants
+    constant F_LEN   : integer := fixed64'length;   -- 36
+    constant RE_HIGH : integer := (2 * F_LEN) - 1;   -- 71
+    constant RE_LOW  : integer := F_LEN;             -- 36
+    constant IM_HIGH : integer := F_LEN - 1;         -- 35
+    constant IM_LOW  : integer := 0;                 -- 0
+
+    -- valid_in edge detection
+    signal valid_in_d1          : std_logic := '0';
+    signal valid_in_rising_edge : std_logic;
 
 begin
 
     ----------------------------------------------------------------------------
-    -- State Register Process (Synchronous)
+    -- State Register (synchronous)
     ----------------------------------------------------------------------------
     process(clk)
     begin
@@ -467,7 +472,28 @@ begin
     end process;
 
     ----------------------------------------------------------------------------
-    -- Index Counter and Internal Vector Update Process (Synchronous)
+    -- valid_in Delay Register (for edge detection)
+    ----------------------------------------------------------------------------
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' then
+                valid_in_d1 <= '0';
+            else
+                valid_in_d1 <= valid_in;
+            end if;
+        end if;
+    end process;
+
+    ----------------------------------------------------------------------------
+    -- Combinatorial Edge Detector
+    ----------------------------------------------------------------------------
+    valid_in_rising_edge <= '1'
+        when (valid_in = '1' and valid_in_d1 = '0')
+        else '0';
+
+    ----------------------------------------------------------------------------
+    -- Data Capture & Index Counter (only in RECEIVING, and during IDLE->RECEIVING first)
     ----------------------------------------------------------------------------
     process(clk)
         variable temp_cfixed64 : cfixed64;
@@ -478,65 +504,51 @@ begin
             if reset = '1' then
                 index_cnt       <= 0;
                 internal_vector <= (others => ZERO_cfixed64);
-            else
-                if current_state = RECEIVING and valid_in = '1' then
-                    -- Slice input data into real and imaginary parts
-                    temp_re_slv := data_in(RE_HIGH downto RE_LOW);
-                    temp_im_slv := data_in(IM_HIGH downto IM_LOW);
+            elsif current_state /= DONE and valid_in_rising_edge = '1' then
+                -- Slice real & imag
+                temp_re_slv := data_in(RE_HIGH downto RE_LOW);
+                temp_im_slv := data_in(IM_HIGH downto IM_LOW);
 
-                    -- Convert the slices to fixed-point numbers and form a complex value
-                    temp_cfixed64.re := to_sfixed(signed(temp_re_slv), fixed64'high, fixed64'low);
-                    temp_cfixed64.im := to_sfixed(signed(temp_im_slv), fixed64'high, fixed64'low);
+                -- Convert to fixed-point
+                temp_cfixed64.re := sfixed(temp_re_slv);
+                temp_cfixed64.im := sfixed(temp_im_slv);
 
-                    -- Store the converted value in the current element of the vector
-                    internal_vector(index_cnt) <= temp_cfixed64;
+                -- Store into vector
+                internal_vector(index_cnt) <= temp_cfixed64;
 
-                    -- Update index counter unless the current element is the last one
-                    if index_cnt < dimension - 1 then
-                        index_cnt <= index_cnt + 1;
-                    end if;
+                -- Bump index until last element
+                if index_cnt < dimension - 1 then
+                    index_cnt <= index_cnt + 1;
                 end if;
             end if;
         end if;
     end process;
 
     ----------------------------------------------------------------------------
-    -- Next State and Output Logic Process (Combinatorial)
+    -- Next State & Output Logic (combinatorial)
     ----------------------------------------------------------------------------
-    process(current_state, valid_in, index_cnt)
+    process(current_state, valid_in_rising_edge, index_cnt, internal_vector)
     begin
-        -- Default assignments
-        next_state  <= current_state;
-        done_out    <= '0';
-        vector_out  <= internal_vector;
+        -- Defaults
+        next_state <= current_state;
+        done_out   <= '0';
+        vector_out <= internal_vector;
 
         case current_state is
             when IDLE =>
-                if valid_in = '1' then
-                    if dimension = 0 then
-                        next_state <= IDLE;  -- Nothing to do for a zero-dimension vector
-                    elsif dimension = 1 then  -- Special case: only one element to capture
-                        next_state <= DONE;
-                    else
-                        next_state <= RECEIVING;
-                    end if;
-                else
-                    next_state <= IDLE;
+                if valid_in_rising_edge = '1' then
+                    next_state <= RECEIVING;
                 end if;
 
             when RECEIVING =>
-                if valid_in = '1' then
-                    if index_cnt = dimension - 1 then
-                        next_state <= DONE;
-                    else
-                        next_state <= RECEIVING;
-                    end if;
+                if valid_in_rising_edge = '1' and index_cnt = dimension - 1 then
+                    next_state <= DONE;
                 else
                     next_state <= RECEIVING;
                 end if;
 
             when DONE =>
-                done_out   <= '1';  -- Signal that the vector is fully assembled
+                done_out   <= '1';
                 next_state <= DONE;
 
             when others =>
@@ -545,7 +557,6 @@ begin
     end process;
 
 end architecture rtl;
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
@@ -760,6 +771,40 @@ begin
     result.im <=(others => '0');
     --result.im <= to_sfixed(0.0, fixed64'high, fixed64'low);
 end Structural;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity clock_divider is
+    generic (
+        -- Adjust this constant to change the division factor
+        DIVISOR : natural := 10000000
+    );
+    port (
+        clk_in  : in  std_logic;
+        clk_out : out std_logic
+    );
+end entity clock_divider;
+
+architecture rtl of clock_divider is
+    -- Counter range depends on DIVISOR
+    signal counter : natural range 0 to DIVISOR-1 := 0;
+    signal clk_reg : std_logic := '0';
+begin
+    process(clk_in)
+    begin
+        if rising_edge(clk_in) then
+            if counter = DIVISOR-1 then
+                counter <= 0;
+                clk_reg <= not clk_reg;
+            else
+                counter <= counter + 1;
+            end if;
+        end if;
+    end process;
+
+    clk_out <= clk_reg;
+end architecture rtl;
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
@@ -1331,41 +1376,73 @@ begin
 end architecture Concurrent;
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
---use IEEE.NUMERIC_STD.ALL;
---use work.fixed64.ALL;
-use work.qTypes.ALL;
---use IEEE.fixed_pkg.ALL;
 use work.fixed_pkg.ALL;
+use work.qTypes.ALL;
 
 entity Matrix_By_Scalar_Multiplication is
     Port (
         A      : in  cmatrix;    -- Input matrix
-        scalar : in  cfixed64;     -- Scalar to multiply
+        scalar : in  cfixed64;   -- Scalar to multiply
         C      : out cmatrix     -- Output matrix (A * scalar)
     );
 end Matrix_By_Scalar_Multiplication;
 
-architecture Concurrent of Matrix_By_Scalar_Multiplication is
+architecture Minimal of Matrix_By_Scalar_Multiplication is
+    -- final, 36‑bit fixed‑point width
+    constant OUT_HIGH : integer := fixed64'high;
+    constant OUT_LOW  : integer := fixed64'low;
+
+    -- compute (scalar.re + scalar.im) once, then truncate
+    signal a_sum : sfixed(OUT_HIGH downto OUT_LOW);
 begin
-    -- Generate multipliers for each matrix element
-    gen_row_mult : for row_idx in 0 to dimension-1 generate
-        gen_col_mult : for col_idx in 0 to dimension-1 generate
+    a_sum <= resize(scalar.re + scalar.im,
+                    OUT_HIGH, OUT_LOW);
+
+    gen_row : for row_idx in 0 to dimension-1 generate
+        gen_col : for col_idx in 0 to dimension-1 generate
+            -- all intermediates at 36‑bit width
+            signal b_sum           : sfixed(OUT_HIGH downto OUT_LOW);
+            signal p1_s, p2_s, p3_s : sfixed(OUT_HIGH downto OUT_LOW);
         begin
-            -- Complex multiplication implementation
-            -- Real part: (A.re * scalar.re) - (A.im * scalar.im)
+            -- 1) p1 = A.re * scalar.re, truncated to 36 bits
+            p1_s <= resize(
+                        A(row_idx)(col_idx).re * scalar.re,
+                        OUT_HIGH, OUT_LOW
+                    );
+
+            -- 2) p2 = A.im * scalar.im, truncated to 36 bits
+            p2_s <= resize(
+                        A(row_idx)(col_idx).im * scalar.im,
+                        OUT_HIGH, OUT_LOW
+                    );
+
+            -- 3) b_sum = A.re + A.im, truncated to 36 bits
+            b_sum <= resize(
+                        A(row_idx)(col_idx).re +
+                        A(row_idx)(col_idx).im,
+                        OUT_HIGH, OUT_LOW
+                     );
+
+            -- 4) p3 = (scalar.re+scalar.im)*b_sum, truncated
+            p3_s <= resize(
+                        a_sum * b_sum,
+                        OUT_HIGH, OUT_LOW
+                    );
+
+            -- 5) final real = p1_s - p2_s, truncated
             C(row_idx)(col_idx).re <= resize(
-                A(row_idx)(col_idx).re * scalar.re - 
-                A(row_idx)(col_idx).im * scalar.im, fixed64'high, fixed64'low
+                p1_s - p2_s,
+                OUT_HIGH, OUT_LOW
             );
-            
-            -- Imaginary part: (A.re * scalar.im) + (A.im * scalar.re)
+
+            -- 6) final imag = p3_s - p1_s - p2_s, truncated
             C(row_idx)(col_idx).im <= resize(
-                A(row_idx)(col_idx).re * scalar.im + 
-                A(row_idx)(col_idx).im * scalar.re, fixed64'high, fixed64'low
+                p3_s - p1_s - p2_s,
+                OUT_HIGH, OUT_LOW
             );
-        end generate gen_col_mult;
-    end generate gen_row_mult;
-end architecture Concurrent;
+        end generate gen_col;
+    end generate gen_row;
+end architecture Minimal;
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
@@ -1822,37 +1899,60 @@ use work.qTypes.ALL;
 
 entity Multiply_Column_By_Scalar is
     Port (
-        constComplex : in  cfixed64;   -- ?? High-precision complex scalar
-        rowVector    : in  cvector;  -- ?? High-precision input vector
-        outputVector : out cvector   -- ?? High-precision output vector
+        constComplex : in  cfixed64;   -- High‑precision complex scalar
+        rowVector    : in  cvector;     -- High‑precision input vector
+        outputVector : out cvector      -- High‑precision output vector
     );
 end Multiply_Column_By_Scalar;
 
-architecture Behavioral of Multiply_Column_By_Scalar is
-    -- ?? High-precision range constants
-    constant PROD_HIGH : integer := fixed64'high + fixed64'high + 1;  -- ?? Extra safety bit
-    constant PROD_LOW  : integer := fixed64'low + fixed64'low;         -- ?? Maintain precision
-begin
+architecture Minimal of Multiply_Column_By_Scalar is
+    -- your fixed64 range is 36 bits wide (high downto low)
+    constant OUT_HIGH : integer := fixed64'high;
+    constant OUT_LOW  : integer := fixed64'low;
 
-    -- ?? Generate high-precision complex multiplications
-    gen_multiply: for i in 0 to dimension - 1 generate
+    -- 1‑time scalar sum, explicitly truncated to 36 bits
+    signal a_sum : sfixed(OUT_HIGH downto OUT_LOW);
+begin
+    a_sum <= resize(constComplex.re + constComplex.im,
+                    OUT_HIGH, OUT_LOW);
+
+    gen_multiply: for i in 0 to dimension-1 generate
+        -- per‑element 36‑bit intermediates
+        signal b_sum           : sfixed(OUT_HIGH downto OUT_LOW);
+        signal p1_s, p2_s, p3_s : sfixed(OUT_HIGH downto OUT_LOW);
     begin
-        -- Real part: (a.re * b.re) - (a.im * b.im) ??
+        -- a) two direct multiplies, each truncated to 36 bits
+        p1_s <= resize(constComplex.re * rowVector(i).re,
+                       OUT_HIGH, OUT_LOW);
+        p2_s <= resize(constComplex.im * rowVector(i).im,
+                       OUT_HIGH, OUT_LOW);
+
+        -- b) per‑element vector sum (36+36→37), then truncate → 36
+        b_sum <= resize(
+                    rowVector(i).re + rowVector(i).im,
+                    OUT_HIGH, OUT_LOW
+                 );
+
+        -- c) Gauss cross‑term multiply (36×36→72), then truncate → 36
+        p3_s <= resize(
+                    a_sum * b_sum,
+                    OUT_HIGH, OUT_LOW
+               );
+
+        -- d) real = p1_s – p2_s  (36–36→37), truncate to 36
         outputVector(i).re <= resize(
-            resize(constComplex.re * rowVector(i).re, PROD_HIGH, PROD_LOW) - 
-            resize(constComplex.im * rowVector(i).im, PROD_HIGH, PROD_LOW),
-            fixed64'high, fixed64'low  -- ?? Final resize to high-precision output
-        );
-        
-        -- Imaginary part: (a.re * b.im) + (a.im * b.re) ??
+                                p1_s - p2_s,
+                                OUT_HIGH, OUT_LOW
+                             );
+
+        -- e) imag = p3_s – p1_s – p2_s  (36–36–36→38), truncate to 36
         outputVector(i).im <= resize(
-            resize(constComplex.re * rowVector(i).im, PROD_HIGH, PROD_LOW) + 
-            resize(constComplex.im * rowVector(i).re, PROD_HIGH, PROD_LOW),
-            fixed64'high, fixed64'low  -- ?? Final resize to high-precision output
-        );
+                                p3_s - p1_s - p2_s,
+                                OUT_HIGH, OUT_LOW
+                             );
     end generate gen_multiply;
 
-end Behavioral;
+end architecture Minimal;
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.qTypes.all;
@@ -2450,224 +2550,257 @@ entity QPU is
         -- Global signals
         clk     : in  std_logic;
         reset   : in  std_logic;     -- Active High Reset
-        enable  : in  std_logic;     -- NEW: Mode Control (1=Receive, 0=Transmit)
+        enable  : in  std_logic;     -- Mode Control (1=Receive, 0=Transmit)
 
-        -- Matrix SPI Receiver Ports (Now gated internally by 'enable')
+        -- Matrix SPI Receiver Ports
         rx_matrix_SCLK     : in  std_logic;
         rx_matrix_SS       : in  std_logic;
         rx_matrix_MOSI     : in  std_logic;
         rx_matrix_NUM      : out std_logic_vector(71 downto 0);
         rx_matrix_spi_valid: out std_logic;
 
-        -- Vector SPI Receiver Ports (Now gated internally by 'enable')
+        -- Vector SPI Receiver Ports
         rx_vector_SCLK     : in  std_logic;
         rx_vector_SS       : in  std_logic;
         rx_vector_MOSI     : in  std_logic;
         rx_vector_NUM      : out std_logic_vector(71 downto 0);
         rx_vector_spi_valid: out std_logic;
 
-        -- SPI Transmitter Ports (Now gated internally by 'enable')
+        -- SPI Transmitter Ports
         tx_SCLK     : in  std_logic;
         tx_SS       : in  std_logic;
         MISO        : out std_logic;
-        tx_spi_valid: out std_logic; -- Reflects internal transmitter state
+        tx_spi_valid: out std_logic;
 
         -- Status Output
-        psi_matrix_assemble_done : out std_logic -- Existing status signal
-        -- REMOVED enable inputs for individual SPI interfaces as they are now controlled by the main 'enable'
-        -- rx_matrix_enable   : in  std_logic;
-        -- rx_vector_enable   : in  std_logic;
-        -- tx_enable          : in  std_logic;
+        psi_matrix_assemble_done : out std_logic
     );
 end QPU;
 
 architecture Behavioral of QPU is
 
-    --------------------------------------------------------------------------
-    -- Mode Control Signals (Derived from top-level enable and reset)
-    --------------------------------------------------------------------------
-    signal receive_mode_active  : std_logic; -- High when enable='1' and reset='0'
-    signal transmit_mode_active : std_logic; -- High when enable='0' and reset='0'
+    ----------------------------------------------------------------------
+    -- Signal Declarations
+    ----------------------------------------------------------------------
+    signal slow_clk            : std_logic;
+    signal receive_mode_active : std_logic;
+    signal transmit_mode_active: std_logic;
 
-    --------------------------------------------------------------------------
-    -- Internal Signal Declarations (Existing + Transmitter Output)
-    --------------------------------------------------------------------------
-    signal spi_matrix_data        : std_logic_vector(71 downto 0);
-    signal internal_matrix_valid  : std_logic; -- Renamed to avoid conflict
+    signal spi_matrix_data       : std_logic_vector(71 downto 0);
+    signal internal_matrix_valid : std_logic;
+    signal spi_vector_data       : std_logic_vector(71 downto 0);
+    signal internal_vector_valid : std_logic;
 
-    signal spi_vector_data        : std_logic_vector(71 downto 0);
-    signal internal_vector_valid  : std_logic; -- Renamed to avoid conflict
+    signal assembled_matrix      : cmatrix;
+    signal matrix_done           : std_logic;
+    signal assembled_vector      : cvector;
+    signal vector_done           : std_logic;
+    signal start_evolution       : std_logic;
 
-    signal assembled_matrix       : cmatrix;
-    signal matrix_done            : std_logic;
+    signal qte_output_state      : cvector;
+    signal qte_output_valid      : std_logic;
+    signal qte_t_index           : integer;
+    signal qte_evolution_complete: std_logic;
 
-    signal assembled_vector       : cvector;
-    signal vector_done            : std_logic;
+    signal assembled_psi_matrix  : psi_matrix;
+    signal internal_psi_asm_done : std_logic;
+    signal start_disassembly     : std_logic;
+    signal disassembled_data     : std_logic_vector((2*fixed64'length)-1 downto 0);
+    signal disassemble_valid_out : std_logic;
+    signal disassemble_done      : std_logic;
+    signal internal_tx_spi_valid : std_logic;
 
-    signal start_evolution        : std_logic;
+    ----------------------------------------------------------------------
+    -- Component Declarations
+    ----------------------------------------------------------------------
+    component clock_divider is
+        generic(
+            DIVISOR : natural := 10000000
+        );
+        port(
+            clk_in  : in  std_logic;
+            clk_out : out std_logic
+        );
+    end component;
 
-    signal qte_output_state       : cvector;
-    signal qte_output_valid       : std_logic;
-    signal qte_t_index            : integer;
-    signal qte_evolution_complete : std_logic;
-
-    signal assembled_psi_matrix   : psi_matrix;
-    signal internal_psi_asm_done  : std_logic; -- Renamed to avoid conflict
-
-    signal start_disassembly      : std_logic;
-    signal disassembled_data      : std_logic_vector((2 * fixed64'length) - 1 downto 0);
-    signal disassemble_valid_out  : std_logic;
-    signal disassemble_done       : std_logic;
-
-    signal internal_tx_spi_valid  : std_logic; -- Handshake from SPI Transmitter
-
-    -- Removed internal tx_done_pulse - using direct connection
-    -- Removed internal enable signals - using mode signals directly
-
-    --------------------------------------------------------------------------
-    -- Component Declarations (Keep as before)
-    --------------------------------------------------------------------------
     component spi_receive is
-        generic ( NUM_BITS : integer := 72 );
-        port ( clk, reset, enable, SCLK, SS, MOSI : in std_logic;
-               NUM : out std_logic_vector(NUM_BITS-1 downto 0);
-               spi_valid : out std_logic );
+        generic(NUM_BITS : integer := 72);
+        port(
+            clk, reset, enable : in std_logic;
+            SCLK, SS, MOSI     : in std_logic;
+            NUM                : out std_logic_vector(NUM_BITS-1 downto 0);
+            spi_valid          : out std_logic
+        );
     end component;
 
     component assemble_matrix is
-         port ( clk, reset : in std_logic;
-                data_in  : in  std_logic_vector((2 * fixed64'length) - 1 downto 0);
-                valid_in : in  std_logic;
-                matrix_out : out cmatrix;
-                done_out   : out std_logic );
+        port(
+            clk       : in std_logic;
+            reset     : in std_logic;
+            data_in   : in std_logic_vector((2*fixed64'length)-1 downto 0);
+            valid_in  : in std_logic;
+            matrix_out: out cmatrix;
+            done_out  : out std_logic
+        );
     end component;
 
     component assemble_vector is
-        port ( clk, reset : in std_logic;
-               data_in  : in  std_logic_vector((2 * fixed64'length) - 1 downto 0);
-               valid_in : in  std_logic;
-               vector_out : out cvector;
-               done_out   : out std_logic );
+        port(
+            clk       : in std_logic;
+            reset     : in std_logic;
+            data_in   : in std_logic_vector((2*fixed64'length)-1 downto 0);
+            valid_in  : in std_logic;
+            vector_out: out cvector;
+            done_out  : out std_logic
+        );
     end component;
 
     component Quantum_Time_Evolution is
-        port ( clk, reset, psiAssemblerDone, matrixAssemblerDone, start_evolution : in std_logic;
-               H_in     : in  cmatrix;
-               psi_in   : in  cvector;
-               output_state : out cvector;
-               output_valid : out std_logic;
-               current_t_index : out integer;
-               evolution_complete : out std_logic );
+        port(
+            clk, reset           : in std_logic;
+            psiAssemblerDone     : in std_logic;
+            matrixAssemblerDone  : in std_logic;
+            start_evolution      : in std_logic;
+            H_in                 : in cmatrix;
+            psi_in               : in cvector;
+            output_state         : out cvector;
+            output_valid         : out std_logic;
+            current_t_index      : out integer;
+            evolution_complete   : out std_logic
+        );
     end component;
 
     component assemble_psi_matrix is
-        port ( clk, reset, valid_in : in std_logic;
-               vector_in    : in  cvector;
-               psi_matrix_out : out psi_matrix;
-               done_out     : out std_logic );
+        port(
+            clk            : in std_logic;
+            reset          : in std_logic;
+            vector_in      : in cvector;
+            valid_in       : in std_logic;
+            psi_matrix_out : out psi_matrix;
+            done_out       : out std_logic
+        );
     end component;
 
     component disassemble_psi_matrix is
-        port ( clk, reset, start, tx_done_pulse_in : in std_logic;
-               psi_matrix_in : in  psi_matrix;
-               data_out      : out std_logic_vector((2 * fixed64'length) - 1 downto 0);
-               valid_out     : out std_logic;
-               done_out      : out std_logic );
+        port(
+            clk, reset           : in std_logic;
+            start                : in std_logic;
+            tx_done_pulse_in     : in std_logic;
+            psi_matrix_in        : in psi_matrix;
+            data_out             : out std_logic_vector((2*fixed64'length)-1 downto 0);
+            valid_out            : out std_logic;
+            done_out             : out std_logic
+        );
     end component;
 
     component spi_transmit is
-        generic ( NUM_BITS : integer := 72 );
-        port ( clk, enable, SCLK_in, SS_in : in std_logic;
-               data_in   : in  std_logic_vector(NUM_BITS - 1 downto 0);
-               MISO      : out std_logic;
-               spi_valid : out std_logic );
+        generic(NUM_BITS : integer := 72);
+        port(
+            clk       : in std_logic;
+            enable    : in std_logic;
+            SCLK_in   : in std_logic;
+            SS_in     : in std_logic;
+            data_in   : in std_logic_vector(NUM_BITS-1 downto 0);
+            MISO      : out std_logic;
+            spi_valid : out std_logic
+        );
     end component;
 
 begin
-    --------------------------------------------------------------------------
-    -- Derive Mode Control Signals
-    --------------------------------------------------------------------------
-    receive_mode_active  <= enable and (not reset);
-    transmit_mode_active <= (not enable) and (not reset);
+    ----------------------------------------------------------------------
+    -- Clock Divider Instantiation
+    ----------------------------------------------------------------------
+    clock_div_inst : clock_divider
+        generic map(
+            DIVISOR => 10000000
+        )
+        port map(
+            clk_in  => clk,
+            clk_out => slow_clk
+        );
 
-    --------------------------------------------------------------------------
-    -- Connect Matrix SPI Receiver Instance (Enabled in Receive Mode)
-    --------------------------------------------------------------------------
+    ----------------------------------------------------------------------
+    -- Derive Mode Control Signals
+    ----------------------------------------------------------------------
+    receive_mode_active  <= enable and not reset;
+    transmit_mode_active <= not enable and not reset;
+
+    ----------------------------------------------------------------------
+    -- Connect Matrix SPI Receiver
+    ----------------------------------------------------------------------
     rx_matrix_inst: spi_receive
-        generic map ( NUM_BITS => 72 )
-        port map (
-            clk       => clk,
-            reset     => reset,           -- Reset overrides everything
-            enable    => receive_mode_active, -- Use derived mode signal
+        generic map(NUM_BITS => 72)
+        port map(
+            clk       => slow_clk,
+            reset     => reset,
+            enable    => receive_mode_active,
             SCLK      => rx_matrix_SCLK,
             SS        => rx_matrix_SS,
             MOSI      => rx_matrix_MOSI,
             NUM       => spi_matrix_data,
             spi_valid => internal_matrix_valid
         );
-    -- Drive top-level output ports
     rx_matrix_NUM       <= spi_matrix_data;
     rx_matrix_spi_valid <= internal_matrix_valid;
 
-    --------------------------------------------------------------------------
-    -- Connect Vector SPI Receiver Instance (Enabled in Receive Mode)
-    --------------------------------------------------------------------------
+    ----------------------------------------------------------------------
+    -- Connect Vector SPI Receiver
+    ----------------------------------------------------------------------
     rx_vector_inst: spi_receive
-        generic map ( NUM_BITS => 72 )
-        port map (
-            clk       => clk,
+        generic map(NUM_BITS => 72)
+        port map(
+            clk       => slow_clk,
             reset     => reset,
-            enable    => receive_mode_active, -- Use derived mode signal
+            enable    => receive_mode_active,
             SCLK      => rx_vector_SCLK,
             SS        => rx_vector_SS,
             MOSI      => rx_vector_MOSI,
             NUM       => spi_vector_data,
             spi_valid => internal_vector_valid
         );
-    -- Drive top-level output ports
     rx_vector_NUM       <= spi_vector_data;
     rx_vector_spi_valid <= internal_vector_valid;
 
-    --------------------------------------------------------------------------
-    -- Assemble Matrix (Activity based on input valid)
-    --------------------------------------------------------------------------
+    ----------------------------------------------------------------------
+    -- Assemble Matrix
+    ----------------------------------------------------------------------
     assemble_matrix_inst: assemble_matrix
-        port map (
-            clk         => clk,
-            reset       => reset,
-            data_in     => spi_matrix_data,
-            valid_in    => internal_matrix_valid, -- Driven by receiver
-            matrix_out  => assembled_matrix,
-            done_out    => matrix_done
+        port map(
+            clk        => slow_clk,
+            reset      => reset,
+            data_in    => spi_matrix_data,
+            valid_in   => internal_matrix_valid,
+            matrix_out => assembled_matrix,
+            done_out   => matrix_done
         );
 
-    --------------------------------------------------------------------------
-    -- Assemble Vector (Activity based on input valid)
-    --------------------------------------------------------------------------
+    ----------------------------------------------------------------------
+    -- Assemble Vector
+    ----------------------------------------------------------------------
     assemble_vector_inst: assemble_vector
-        port map (
-            clk         => clk,
-            reset       => reset,
-            data_in     => spi_vector_data,
-            valid_in    => internal_vector_valid, -- Driven by receiver
-            vector_out  => assembled_vector,
-            done_out    => vector_done
+        port map(
+            clk        => slow_clk,
+            reset      => reset,
+            data_in    => spi_vector_data,
+            valid_in   => internal_vector_valid,
+            vector_out => assembled_vector,
+            done_out   => vector_done
         );
 
-    --------------------------------------------------------------------------
+    ----------------------------------------------------------------------
     -- Generate Start Signal for Quantum Evolution
-    --------------------------------------------------------------------------
-    start_evolution <= '1' when (matrix_done = '1' and vector_done = '1') else '0';
+    ----------------------------------------------------------------------
+    start_evolution <= '1' when matrix_done = '1' and vector_done = '1' else '0';
 
-    --------------------------------------------------------------------------
-    -- Instantiate Quantum Time Evolution Unit (Activity based on start_evolution)
-    --------------------------------------------------------------------------
+    ----------------------------------------------------------------------
+    -- Quantum Time Evolution Unit
+    ----------------------------------------------------------------------
     Quantum_Time_Evolution_inst: Quantum_Time_Evolution
-        port map (
-            clk                 => clk,
+        port map(
+            clk                 => slow_clk,
             reset               => reset,
-            psiAssemblerDone    => vector_done,       -- Use internal done signal
-            matrixAssemblerDone => matrix_done,       -- Use internal done signal
+            psiAssemblerDone    => vector_done,
+            matrixAssemblerDone => matrix_done,
             start_evolution     => start_evolution,
             H_in                => assembled_matrix,
             psi_in              => assembled_vector,
@@ -2677,56 +2810,50 @@ begin
             evolution_complete  => qte_evolution_complete
         );
 
-    --------------------------------------------------------------------------
-    -- Instantiate Psi Matrix Assembler (Activity based on QTE output valid)
-    --------------------------------------------------------------------------
+    ----------------------------------------------------------------------
+    -- Psi Matrix Assembler
+    ----------------------------------------------------------------------
     assemble_psi_matrix_inst: assemble_psi_matrix
-        port map (
-            clk            => clk,
+        port map(
+            clk            => slow_clk,
             reset          => reset,
             vector_in      => qte_output_state,
             valid_in       => qte_output_valid,
             psi_matrix_out => assembled_psi_matrix,
-            done_out       => internal_psi_asm_done -- Use internal done signal
+            done_out       => internal_psi_asm_done
         );
-    -- Drive top-level output port
     psi_matrix_assemble_done <= internal_psi_asm_done;
 
-    --------------------------------------------------------------------------
-    -- Trigger Disassembly When Psi Matrix Assembly is Complete
-    --------------------------------------------------------------------------
-    start_disassembly <= internal_psi_asm_done; -- Start when assembly finishes
-
-    --------------------------------------------------------------------------
-    -- Instantiate Disassemble Psi Matrix Component (Activity based on start)
-    --------------------------------------------------------------------------
+    ----------------------------------------------------------------------
+    -- Disassemble Psi Matrix
+    ----------------------------------------------------------------------
+    start_disassembly <= internal_psi_asm_done;
     disassemble_psi_matrix_inst: disassemble_psi_matrix
-        port map (
-            clk              => clk,
+        port map(
+            clk              => slow_clk,
             reset            => reset,
             start            => start_disassembly,
+            tx_done_pulse_in => internal_tx_spi_valid,
             psi_matrix_in    => assembled_psi_matrix,
-            tx_done_pulse_in => internal_tx_spi_valid, -- Handshake from internal SPI Transmitter
             data_out         => disassembled_data,
             valid_out        => disassemble_valid_out,
             done_out         => disassemble_done
         );
 
-    --------------------------------------------------------------------------
-    -- Instantiate SPI Transmit Component (Enabled in Transmit Mode)
-    --------------------------------------------------------------------------
+    ----------------------------------------------------------------------
+    -- SPI Transmit Component
+    ----------------------------------------------------------------------
     spi_transmit_inst: spi_transmit
-        generic map ( NUM_BITS => 72 )
-        port map (
-            clk         => clk,
-            enable      => transmit_mode_active, -- Use derived mode signal
-            data_in     => disassembled_data,   -- Fed by disassembler
-            SCLK_in     => tx_SCLK,
-            SS_in       => tx_SS,
-            MISO        => MISO,
-            spi_valid   => internal_tx_spi_valid -- Drives internal handshake & top-level output
+        generic map(NUM_BITS => 72)
+        port map(
+            clk       => slow_clk,
+            enable    => transmit_mode_active,
+            SCLK_in   => tx_SCLK,
+            SS_in     => tx_SS,
+            data_in   => disassembled_data,
+            MISO      => MISO,
+            spi_valid => internal_tx_spi_valid
         );
-    -- Drive top-level output port
     tx_spi_valid <= internal_tx_spi_valid;
 
 end Behavioral;
