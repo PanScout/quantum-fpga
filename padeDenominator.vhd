@@ -33,18 +33,33 @@ architecture Behavioral of padeDenominator is
     end component;
 
     -- Horner's method coefficients for (((B-12)*B+60)*B-120)
-    constant COEFF1 : cfixed64 := (  -- -12
-        re => "111111111110100000000000000000000000",  -- Adjust binary representation
-        im => (others => '0')                                                     -- based on your fixed64-point format
-    );
-    constant COEFF2 : cfixed64 := (  -- +60
-        re => "000000000111100000000000000000000000",
-        im => (others => '0')
-    );
-    constant COEFF3 : cfixed64 := (  -- -120
-        re => "111111110001000000000000000000000000",
-        im => (others => '0')
-    );
+   -- constant COEFF1 : cfixed64 := (  -- -12
+  --      re => "111111111110100000000000000000000000",  -- Adjust binary representation
+   --     im => (others => '0')                                                     -- based on your fixed64-point format
+  --  );
+  --  constant COEFF2 : cfixed64 := (  -- +60
+   --     re => "000000000111100000000000000000000000",
+  --      im => (others => '0')
+   -- );
+  --  constant COEFF3 : cfixed64 := (  -- -120
+  --      re => "111111110001000000000000000000000000",
+   --     im => (others => '0')
+  --  );
+			 
+	  constant COEFF1 : cfixed64 := (
+			 re => to_sfixed(-12.0, fixed64'High, fixed64'Low),
+			 im => (others => '0')  -- equivalent to to_sfixed(0.0, fixed64’High, fixed64’Low)
+		);
+
+	  constant COEFF2 : cfixed64 := (
+			 re => to_sfixed( 60.0, fixed64'High, fixed64'Low),
+			 im => (others => '0')
+		);
+
+	  constant COEFF3 : cfixed64 := (
+			 re => to_sfixed(-120.0, fixed64'High, fixed64'Low),
+			 im => (others => '0')
+		);
 
     type state_type is (IDLE, COMPUTING);
     signal state : state_type := IDLE;
