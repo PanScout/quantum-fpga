@@ -40,7 +40,7 @@ use work.fixed_pkg.ALL;
 -- Package Specification
 package qTypes is 
     -- Number of qubits
-    constant numQubits : integer := 1;
+    constant numQubits : integer := 2;
 	 
 	 --yum
     constant numComplexNumbersInMatrix : integer  :=  2**numQubits * 2**numQubits;
@@ -50,7 +50,8 @@ package qTypes is
     constant dimension : integer := 2 ** numQubits;
     
     -- fixed64-point subtype with higher precision
-    subtype fixed64 is sfixed(14 downto -21); 
+    --subtype fixed64 is sfixed(14 downto -21); 
+	 subtype fixed64 is sfixed(14 downto -21); 
 
     subtype fixed64_64 is sfixed(19 downto -44);
     

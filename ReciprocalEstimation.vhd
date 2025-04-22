@@ -15,9 +15,17 @@ end ReciprocalEstimation;
 architecture Behavioral of ReciprocalEstimation is
     -- Define constants a and b (64-bit)
     --constant a : fixed64_64 := b"1111111111111111111111111111111111111111111010110111000100010011"; -- Example value
-    constant a : fixed64_64 := b"1111111111111111111111111111111111111111111111101011011100001011"; -- Example value
+    --constant a : fixed64_64 := b"1111111111111111111111111111111111111111111111101011011100001011"; -- Example value
     --constant b : fixed64_64 := b"0000000000000000000000000000100100010001011110101000000111100101";   -- Example value
-    constant b : fixed64_64 := b"0000000000000000000000000000000010010001000110001111000011110111";
+    --constant b : fixed64_64 := b"0000000000000000000000000000000010010001000110001111000011110111";
+	 
+	     -- Linear‐regression coefficients for 1/x over [14400.0 : 14508.0]
+    constant a : fixed64_64 := 
+        to_sfixed(-4.786935579730009e-9, fixed64_64'high, fixed64_64'low);
+    constant b : fixed64_64 := 
+        to_sfixed( 0.0001383756893529524,  fixed64_64'high, fixed64_64'low);
+		  
+		  
     -- Declare intermediate signals with the same 64-bit precision
     signal mult_result : fixed64;
     signal x_64bit   : fixed64_64;

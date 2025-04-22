@@ -11,8 +11,10 @@ entity Norm_Theta_Ratio is
 end Norm_Theta_Ratio;
 
 architecture behav of Norm_Theta_Ratio is
-    constant DIVISOR : fixed64 := 
-        "000000000000000000000111101010000101";
+    --constant DIVISOR : fixed64 := 
+      --  "000000000000000000000111101010000101";
+		constant DIVISOR: fixed64 := to_sfixed(-0.0149558, fixed64'high, fixed64'low);
+
     
     constant reciprocal_DIVISOR : fixed64 := 
         resize(

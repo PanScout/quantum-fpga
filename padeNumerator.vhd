@@ -33,19 +33,34 @@ architecture Behavioral of padeNumerator is
     end component;
 
     -- Horner's method coefficients for -(((B+12)B+60)B+120)
-    constant COEFF1 : cfixed64 := (  -- +12
-        re => "000000000001100000000000000000000000",
-        im => to_sfixed(0, fixed64'high, fixed64'low)
-    );
-    constant COEFF2 : cfixed64 := (  -- +60
-        re => "000000000111100000000000000000000000",
-        im => to_sfixed(0, fixed64'high, fixed64'low)
-    );
-    constant COEFF3 : cfixed64 := (  -- +120
-        re => "000000001111000000000000000000000000",
-        im => to_sfixed(0, fixed64'high, fixed64'low)
-    );
-
+   -- constant COEFF1 : cfixed64 := (  -- +12
+  --      re => "000000000001100000000000000000000000",
+   --     im => to_sfixed(0, fixed64'high, fixed64'low)
+   -- );
+   -- constant COEFF2 : cfixed64 := (  -- +60
+   --     re => "000000000111100000000000000000000000",
+   --     im => to_sfixed(0, fixed64'high, fixed64'low)
+   -- );
+    --constant COEFF3 : cfixed64 := (  -- +120
+    --    re => "000000001111000000000000000000000000",
+   --     im => to_sfixed(0, fixed64'high, fixed64'low)
+	-- );
+   -- );
+	 
+	 
+		 -- Horner's method coefficients for -(((B+12)B+60)B+120)
+		constant COEFF1 : cfixed64 := (
+		re => to_sfixed( 12.0, fixed64'High, fixed64'Low),
+		im => to_sfixed(  0.0, fixed64'High, fixed64'Low)
+		);
+		constant COEFF2 : cfixed64 := (
+		re => to_sfixed( 60.0, fixed64'High, fixed64'Low),
+		im => to_sfixed(  0.0, fixed64'High, fixed64'Low)
+		);
+		constant COEFF3 : cfixed64 := (
+		re => to_sfixed(120.0, fixed64'High, fixed64'Low),
+		im => to_sfixed(  0.0, fixed64'High, fixed64'Low)
+		);
     type state_type is (IDLE, COMPUTING);
     signal state : state_type := IDLE;
     signal current_result, B_reg : cmatrix;

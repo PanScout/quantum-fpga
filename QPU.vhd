@@ -60,9 +60,9 @@ architecture Behavioral of QPU is
     signal receive_mode_active : std_logic;
     signal transmit_mode_active: std_logic;
 
-    signal spi_matrix_data       : std_logic_vector(71 downto 0);
+    signal spi_matrix_data       : std_logic_vector((2*fixed64'length)-1 downto 0);
     signal internal_matrix_valid : std_logic;
-    signal spi_vector_data       : std_logic_vector(71 downto 0);
+    signal spi_vector_data       : std_logic_vector((2*fixed64'length)-1 downto 0);
     signal internal_vector_valid : std_logic;
 
     signal assembled_matrix      : cmatrix;
@@ -98,7 +98,7 @@ architecture Behavioral of QPU is
     end component;
 
     component spi_receive is
-        generic(NUM_BITS : integer := 72);
+        generic(NUM_BITS : integer :=  cfixed64.re'length + cfixed64.im'length);
         port(
             clk, reset, enable : in std_logic;
             SCLK, SS, MOSI     : in std_logic;
@@ -168,7 +168,7 @@ architecture Behavioral of QPU is
     end component;
 
     component spi_transmit is
-        generic(NUM_BITS : integer := 72);
+        generic(NUM_BITS : integer :=  cfixed64.re'length + cfixed64.im'length);
         port(
             clk       : in std_logic;
             enable    : in std_logic;
@@ -217,7 +217,7 @@ begin
     -- Connect Matrix SPI Receiver
     ----------------------------------------------------------------------
     rx_matrix_inst: spi_receive
-        generic map(NUM_BITS => 72)
+        generic map(NUM_BITS => cfixed64.re'length + cfixed64.im'length)
         port map(
             clk       => clk,
             reset     => reset,
@@ -234,7 +234,7 @@ begin
     -- Connect Vector SPI Receiver
     ----------------------------------------------------------------------
     rx_vector_inst: spi_receive
-        generic map(NUM_BITS => 72)
+        generic map(NUM_BITS => cfixed64.re'length + cfixed64.im'length)
         port map(
             clk       => clk,
             reset     => reset,
@@ -330,7 +330,7 @@ begin
     -- SPI Transmit Component
     ----------------------------------------------------------------------
     spi_transmit_inst: spi_transmit
-        generic map(NUM_BITS => 72)
+        generic map(NUM_BITS => cfixed64.re'length + cfixed64.im'length)
         port map(
             clk       => clk,
             enable    => transmit_mode_active,
