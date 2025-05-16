@@ -40,7 +40,7 @@ use work.fixed_pkg.ALL;
 -- Package Specification
 package qTypes is 
     -- Number of qubits
-    constant numQubits : integer := 2;
+    constant numQubits : integer := 1;
 	 
 	 --yum
     constant numComplexNumbersInMatrix : integer  :=  2**numQubits * 2**numQubits;
