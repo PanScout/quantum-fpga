@@ -60,6 +60,7 @@ vcom -93 -work work {C:/Users/mail/OneDrive/Desktop/quantum-fpga/spi_receive.vhd
 vcom -93 -work work {C:/Users/mail/OneDrive/Desktop/quantum-fpga/spi_transmit.vhd}
 vcom -93 -work work {C:/Users/mail/OneDrive/Desktop/quantum-fpga/Register_std_logic.vhd}
 vcom -93 -work work {C:/Users/mail/OneDrive/Desktop/quantum-fpga/fixed_float_types.vhd}
+vcom -93 -work work {C:/Users/mail/OneDrive/Desktop/quantum-fpga/clock_divider.vhd}
 vcom -93 -work work {C:/Users/mail/OneDrive/Desktop/quantum-fpga/fixed_pkg.vhd}
 vcom -93 -work work {C:/Users/mail/OneDrive/Desktop/quantum-fpga/triStateBuffer_std_logic.vhd}
 vcom -93 -work work {C:/Users/mail/OneDrive/Desktop/quantum-fpga/qTypes.vhd}
