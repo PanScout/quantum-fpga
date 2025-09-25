@@ -1,0 +1,1 @@
+ Fixed-point complex math unit implementing an e iHt quantum operation using single-cycle matrix and vector computations. Interfaces with a GUI python program over SPI in order to accelerate quantum circuit simulations.
