@@ -21,60 +21,58 @@ vlib work
 # IMPORTANT: Update file names and paths as necessary!
 # Compile packages first
 
-# Compile fixed-point package (compile fixed_pkg_c.vhd first if applicable)
-# vcom path/to/fixed_pkg_c.vhd
-vcom fixed_pkg.vhd
-vcom qTypes.vhd
+# Compile fixed-point package
+vcom src/rtl/fixed_pkg.vhd
+vcom src/rtl/qtypes.vhd
 
-# Compile individual component entities (Order might matter if using direct instantiation without component declarations)
 # --- Compile leaf components first ---
-vcom Absolute_Row_Summation.vhd
-vcom Add_Vectors_Element_Wise.vhd
-vcom assemble_matrix.vhd
-vcom assemble_psi_matrix.vhd
-vcom assemble_vector.vhd
-vcom Ceiling_Of_Log2.vhd
-vcom hex_to_7seg.vhd # Assuming not directly used by QPU, but compiling anyway
-vcom Matrix_Addition.vhd
-vcom Matrix_By_Scalar_Multiplication.vhd
-vcom Matrix_Plus_Scalar.vhd
-vcom Matrix_Transpose.vhd
-vcom Max_Of_CVector.vhd
-vcom Multiply_Column_By_Scalar.vhd # Use the Gauss version if desired
-vcom Norm_Theta_Ratio.vhd
-vcom ReciprocalEstimation.vhd
-vcom Register_cfixed.vhd
-vcom Register_cmatrix.vhd
-vcom Register_cvector.vhd
-vcom Register_std_logic.vhd
-vcom Scale_cmatrix_Down.vhd
-vcom spi_receive.vhd
-vcom spi_transmit.vhd
-vcom TristateBuffer_cmatrix.vhd
-vcom TristateBuffer_cvector.vhd
-vcom TriStateBuffer_std_logic.vhd # Delay component
+vcom src/rtl/absolute_row_summation.vhd
+vcom src/rtl/add_vectors_element_wise.vhd
+vcom src/rtl/assemble_matrix.vhd
+vcom src/rtl/assemble_psi_matrix.vhd
+vcom src/rtl/assemble_vector.vhd
+vcom src/rtl/ceiling_of_log2.vhd
+vcom src/rtl/hex_to_7seg.vhd
+vcom src/rtl/matrix_addition.vhd
+vcom src/rtl/matrix_by_scalar_multiplication.vhd
+vcom src/rtl/add_scalar_to_diagonal.vhd
+vcom src/rtl/matrix_transpose.vhd
+vcom src/rtl/max_real_part_of_cvector.vhd
+vcom src/rtl/multiply_column_by_scalar.vhd
+vcom src/rtl/norm_theta_ratio.vhd
+vcom src/rtl/linear_reciprocal_approximation.vhd
+vcom src/rtl/register_cfixed.vhd
+vcom src/rtl/register_cmatrix.vhd
+vcom src/rtl/register_cvector.vhd
+vcom src/rtl/register_std_logic.vhd
+vcom src/rtl/scale_cmatrix_down.vhd
+vcom src/rtl/spi_receive.vhd
+vcom src/rtl/spi_transmit.vhd
+vcom src/rtl/tri_state_buffer_cmatrix.vhd
+vcom src/rtl/tri_state_buffer_cvector.vhd
+vcom src/rtl/delayed_pulse_generator.vhd
 
 # --- Compile components with dependencies ---
-vcom Calculate_Norm_And_Compare.vhd     # Depends on Absolute_Row_Summation, Max_Of_CVector
-vcom disassemble_matrix.vhd          # Depends on Register_* ? (No, likely self-contained FSM)
-vcom disassemble_psi_matrix.vhd       # Depends on Register_* ? (No, likely self-contained FSM)
-vcom Generate_Scaling_Factor.vhd      # Depends on Norm_Theta_Ratio, Ceiling_Of_Log2
-vcom Insert_Imaginary_Time_Into_CMatrix.vhd # Depends on Matrix_By_Scalar_Multiplication
-vcom Matrix_By_Vector_Multiplication.vhd # Depends on Multiply_By_Scalar_Then_Add
-vcom Multiply_By_Scalar_Then_Add.vhd  # Depends on Multiply_Column_By_Scalar, Add_Vectors_Element_Wise
-vcom Matrix_By_Matrix_Multiplication.vhd # Depends on Matrix_By_Vector_Multiplication
-vcom Newtons_Guess.vhd                # Depends on Matrix_Transpose, Calculate_Norm_And_Compare, ReciprocalEstimation
-vcom Matrix_Inversion_State_Machine.vhd # Depends on Matrix_By_Matrix_Multiplication
-vcom Matrix_Inversion.vhd             # Depends on Newtons_Guess, Matrix_Inversion_State_Machine
-vcom padeDenominator.vhd              # Depends on Matrix_Plus_Scalar, Matrix_By_Matrix_Multiplication
-vcom padeNumerator.vhd                # Depends on Matrix_Plus_Scalar, Matrix_By_Matrix_Multiplication
-vcom Scale_cmatrix_Up.vhd             # Depends on Matrix_By_Matrix_Multiplication
-vcom Pade_Top_Level.vhd               # Depends on many components
-vcom Quantum_FPGA.vhd                 # Depends on Pade_Top_Level, Matrix_By_Vector_Multiplication
-vcom Quantum_Time_Evolution.vhd       # Depends on Quantum_FPGA
+vcom src/rtl/calculate_norm_and_compare.vhd
+vcom src/rtl/disassemble_matrix.vhd
+vcom src/rtl/disassemble_psi_matrix.vhd
+vcom src/rtl/generate_scaling_factor.vhd
+vcom src/rtl/insert_imaginary_time_into_cmatrix.vhd
+vcom src/rtl/matrix_by_vector_multiplication.vhd
+vcom src/rtl/multiply_by_scalar_then_add.vhd
+vcom src/rtl/matrix_by_matrix_multiplication.vhd
+vcom src/rtl/matrix_inversion_initial_guess.vhd
+vcom src/rtl/matrix_inversion_state_machine.vhd
+vcom src/rtl/matrix_inversion.vhd
+vcom src/rtl/pade_denominator.vhd
+vcom src/rtl/pade_numerator.vhd
+vcom src/rtl/repeated_matrix_squaring.vhd
+vcom src/rtl/pade_top_level.vhd
+vcom src/rtl/quantum_fpga.vhd
+vcom src/rtl/quantum_time_evolution.vhd
 
 # Compile the top-level QPU entity
-vcom QPU.vhd
+vcom src/rtl/qpu.vhd
 
 #==============================================================================
 # Start Simulation

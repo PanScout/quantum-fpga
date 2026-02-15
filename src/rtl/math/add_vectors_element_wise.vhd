@@ -1,0 +1,25 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.qTypes.all;  -- Use your custom package
+--use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
+
+entity add_vectors_element_wise is
+    port(
+        a : in  cvector;  -- Input complex vector 1
+        b : in  cvector;  -- Input complex vector 2
+        c : out cvector   -- Output complex vector (a + b)
+    );
+end entity;
+
+architecture concurrent_arch of add_vectors_element_wise is
+begin
+    -- Generate adders for each element in the cvector
+    gen_adders_High : for i in 0 to dimension-1 generate
+        -- Real part addition
+        c(i).re <= resize (a(i).re + b(i).re, sfixed36'high, sfixed36'low);
+        -- Imaginary part addition
+        c(i).im <= resize (a(i).im + b(i).im, sfixed36'high, sfixed36'low);
+    end generate gen_adders_High;
+end architecture;

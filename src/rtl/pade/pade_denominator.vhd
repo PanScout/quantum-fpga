@@ -1,0 +1,139 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use work.qTypes.ALL;
+use work.fixed_pkg.ALL;
+
+entity pade_denominator is
+    Port (
+        clk   : in  std_logic;
+        reset : in  std_logic;
+        start : in  std_logic;
+        B     : in  cmatrix;
+        P     : out cmatrix;
+        done  : out std_logic
+    );
+end pade_denominator;
+
+architecture Behavioral of pade_denominator is
+
+    component add_scalar_to_diagonal is
+        port (
+            input_cMatrixH : in  cmatrix;
+            scalar         : in  csfixed36;
+            output_cMatrixH: out cmatrix
+        );
+    end component;
+
+    component matrix_by_matrix_multiplication is
+        port (
+            A : in  cmatrix;
+            B : in  cmatrix;
+            C : out cmatrix
+        );
+    end component;
+
+    -- Horner's method coefficients for (((B-12)*B+60)*B-120)
+	  constant COEFF1 : csfixed36 := (
+			 re => to_sfixed(-12.0, sfixed36'High, sfixed36'Low),
+			 im => (others => '0')  -- equivalent to to_sfixed(0.0, sfixed36’High, sfixed36’Low)
+		);
+
+	  constant COEFF2 : csfixed36 := (
+			 re => to_sfixed( 60.0, sfixed36'High, sfixed36'Low),
+			 im => (others => '0')
+		);
+
+	  constant COEFF3 : csfixed36 := (
+			 re => to_sfixed(-120.0, sfixed36'High, sfixed36'Low),
+			 im => (others => '0')
+		);
+
+    type state_type is (IDLE, COMPUTING);
+    signal state : state_type := IDLE;
+    signal current_result, B_reg : cmatrix;
+    signal step_counter : integer range 0 to 5 := 0;  -- Reduced counter range
+    signal current_coeff : csfixed36;
+    signal adder_out, mult_out : cmatrix;
+    signal done_s : std_logic;
+
+    function init_cmatrix_zero return cmatrix is
+        variable matrix : cmatrix;
+    begin
+        for i in matrix'range loop
+            for j in matrix(i)'range loop
+                matrix(i)(j) := (
+                    re => (others => '0'),
+                    im => (others => '0')
+                );
+            end loop;
+        end loop;
+        return matrix;
+    end function;
+
+begin
+
+    ADDER: add_scalar_to_diagonal
+        port map (
+            input_cMatrixH => current_result,
+            scalar         => current_coeff,
+            output_cMatrixH=> adder_out
+        );
+
+    MULTIPLIER: matrix_by_matrix_multiplication
+        port map (
+            A => current_result,
+            B => B_reg,
+            C => mult_out
+        );
+
+    process(step_counter)
+    begin
+        case step_counter/2 is  -- Coefficient selection logic
+            when 0 => current_coeff <= COEFF1;
+            when 1 => current_coeff <= COEFF2;
+            when 2 => current_coeff <= COEFF3;
+            when others => current_coeff <= (
+                re => (others => '0'),
+                im => (others => '0')
+            );
+        end case;
+    end process;
+
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            state <= IDLE;
+            current_result <= init_cmatrix_zero;
+            B_reg <= init_cmatrix_zero;
+            step_counter <= 0;
+            done_s <= '0';
+        elsif rising_edge(clk) then
+            case state is
+                when IDLE =>
+                    done_s <= '0';
+                    if start = '1' then
+                        B_reg <= B;
+                        current_result <= B;  -- Initial value = B
+                        state <= COMPUTING;
+                        step_counter <= 0;
+                    end if;
+                
+                when COMPUTING =>
+                    if step_counter < 5 then
+                        if step_counter mod 2 = 0 then  -- Even steps: addition
+                            current_result <= adder_out;
+                        else                          -- Odd steps: multiplication
+                            current_result <= mult_out;
+                        end if;
+                        step_counter <= step_counter + 1;
+                    else
+                        done_s <= '1';
+                    end if;
+            end case;
+        end if;
+    end process;
+
+    done <= done_s;
+    P <= current_result;
+
+end Behavioral;

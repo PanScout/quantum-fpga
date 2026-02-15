@@ -28,8 +28,4 @@ simulation/modelsim/*_run_msim_*.do
 simulation/questa/*_run_msim_*.do
 
 # GHDL build artifacts
-*.o
-*.cf
-*.vcd
-e~*.o
-qpu_tb
+build/
