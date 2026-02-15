@@ -1,0 +1,156 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use work.qTypes.all;
+use work.fixed_pkg.ALL;
+
+entity matrix_inversion_state_machine is
+    Port (
+        clk             : in  std_logic;
+        rst             : in  std_logic;
+        start           : in  std_logic;
+        input_matrix    : in  cmatrix;
+        input_guess     : in  cmatrix;
+        output_matrix   : out cmatrix;
+        done            : out std_logic
+    );
+end matrix_inversion_state_machine;
+
+architecture Behavioral of matrix_inversion_state_machine is
+    component matrix_by_matrix_multiplication is
+        Port (
+            A : in  cmatrix;
+            B : in  cmatrix;
+            C : out cmatrix
+        );
+    end component;
+
+    type state_type is (
+        IDLE, INIT, LOAD_AX, CALC_AX, 
+        LOAD_2I, SUB_2I, LOAD_XNEXT, 
+        CALC_XNEXT, UPDATE_X, CHECK_CONV, FINISH
+    );
+
+    signal state : state_type := IDLE;
+    
+    -- Matrix storage registers
+    signal Xk, Xnext, AX, twoI_minus_AX : cmatrix;
+    signal matA, matB, matC : cmatrix;
+    
+    -- Control signals
+    signal mult_start, mult_done : std_logic := '0';
+    signal iteration : natural range 0 to 150 := 0;
+    
+begin
+
+    -- Instantiate matrix multiplier
+    MAT_MULT: matrix_by_matrix_multiplication
+    port map (
+        A => matA,
+        B => matB,
+        C => matC
+    );
+
+    process(clk)
+        variable identity : cmatrix;
+    begin
+        if rising_edge(clk) then
+            if rst = '1' then
+                state <= IDLE;
+                done <= '0';
+                Xk <= (others => (others => (
+                    re => (others => '0'),
+                    im => (others => '0'))));
+                iteration <= 0;
+                mult_start <= '0';
+            else
+                case state is
+                    when IDLE =>
+                        done <= '0';
+                        if start = '1' then
+                            Xk <= input_guess;
+                            iteration <= 0;
+                            state <= INIT;
+                        end if;
+                        
+                    when INIT =>
+                        matA <= input_matrix;
+                        matB <= Xk;
+                        mult_start <= '1';
+                        state <= LOAD_AX;
+                        
+                    when LOAD_AX =>
+                        mult_start <= '0';
+                        state <= CALC_AX;
+                        
+                    when CALC_AX =>
+                        AX <= matC;
+                        state <= LOAD_2I;
+                        
+                    when LOAD_2I =>
+                        for i in 0 to dimension-1 loop
+                            for j in 0 to dimension-1 loop
+                                if i = j then
+                                    --identity(i)(j).re := "0000000000000100000000000000000000000000000000000000000000000000";
+                                    identity(i)(j).re := to_sfixed(2, sfixed36'high, sfixed36'low);
+				    identity(i)(j).im := (others => '0');
+                                else
+                                    identity(i)(j).re := (others => '0');
+                                    identity(i)(j).im := (others => '0');
+                                end if;
+                            end loop;
+                        end loop;
+                        matA <= identity;
+                        matB <= AX;
+                        state <= SUB_2I;
+                        
+                    when SUB_2I =>
+                        for i in 0 to dimension-1 loop
+                            for j in 0 to dimension-1 loop
+                                twoI_minus_AX(i)(j).re <= resize(
+                                    matA(i)(j).re - matB(i)(j).re,
+                                    sfixed36'high, sfixed36'low
+                                );
+                                twoI_minus_AX(i)(j).im <= resize(
+                                    matA(i)(j).im - matB(i)(j).im,
+                                    sfixed36'high, sfixed36'low
+                                );
+                            end loop;
+                        end loop;
+                        state <= LOAD_XNEXT;
+                        
+                    when LOAD_XNEXT =>
+                        matA <= Xk;
+                        matB <= twoI_minus_AX;
+                        mult_start <= '1';
+                        state <= CALC_XNEXT;
+                        
+                    when CALC_XNEXT =>
+                        mult_start <= '0';
+                        Xnext <= matC;
+                        state <= UPDATE_X;
+                        
+                    when UPDATE_X =>
+                        Xk <= Xnext;
+                        iteration <= iteration + 1;
+                        state <= CHECK_CONV;
+                        
+                    when CHECK_CONV =>
+                        -- Check iteration count
+                        report "Iteration: " & integer'image(iteration) severity note;
+                        if iteration < 40 then
+                            state <= INIT;
+                        else
+                            state <= FINISH;
+                        end if;
+                        
+                    when FINISH =>
+                        output_matrix <= Xk;
+                        done <= '1';
+                        state <= IDLE;
+                        
+                end case;
+            end if;
+        end if;
+    end process;
+
+end Behavioral;

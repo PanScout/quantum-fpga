@@ -4,6 +4,8 @@ use IEEE.NUMERIC_STD.ALL;
 use work.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
+use STD.TEXTIO.ALL;
+
 entity qpu_tb is
 end entity qpu_tb;
 
@@ -63,6 +65,19 @@ architecture sim of qpu_tb is
     -- Storage for received results
     type result_array is array (0 to 59) of std_logic_vector(NUM_BITS-1 downto 0);
     signal rx_results : result_array := (others => (others => '0'));
+
+    -- Convert a 72-bit std_logic_vector to an 18-character hex string
+    function slv_to_hexstr(v : std_logic_vector(71 downto 0)) return string is
+        variable result : string(1 to 18);
+        variable nibble : std_logic_vector(3 downto 0);
+        constant hex_chars : string(1 to 16) := "0123456789abcdef";
+    begin
+        for i in 0 to 17 loop
+            nibble := v(71 - i*4 downto 68 - i*4);
+            result(i+1) := hex_chars(to_integer(unsigned(nibble)) + 1);
+        end loop;
+        return result;
+    end function;
 
 begin
 
@@ -166,6 +181,11 @@ begin
         end procedure;
 
         variable rx_word : std_logic_vector(NUM_BITS-1 downto 0);
+
+        -- File output for results
+        file     outfile : text;
+        variable fstatus : file_open_status;
+        variable ln      : line;
     begin
         -----------------------------------------------------------------------
         -- Phase 1: Reset
@@ -224,6 +244,20 @@ begin
             rx_results(w) <= rx_word;
         end loop;
         report "QPU TB: All 60 result words received.";
+
+        -----------------------------------------------------------------------
+        -- Phase 5b: Write results to file
+        -----------------------------------------------------------------------
+        file_open(fstatus, outfile, "qpu_results.txt", write_mode);
+        assert fstatus = open_ok
+            report "QPU TB: Could not open qpu_results.txt for writing!"
+            severity failure;
+        for w in 0 to 59 loop
+            write(ln, slv_to_hexstr(rx_results(w)));
+            writeline(outfile, ln);
+        end loop;
+        file_close(outfile);
+        report "QPU TB: Results written to qpu_results.txt";
 
         -----------------------------------------------------------------------
         -- Phase 6: End simulation

@@ -22,7 +22,7 @@
 #------------------------------------------------------------------------------
 
 # Load the design (adjust library and top-level entity name if needed)
-vsim -t 1ps work.Quantum_Time_Evolution
+vsim -t 1ps work.quantum_time_evolution
 
 # Force the clock with the specified pattern:
 #   - '1' for 2 ps, then '0' for 2 ps, repeating every 4 ps.
