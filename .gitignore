@@ -1,37 +1,35 @@
-# Ignore everything
-*
+# ModelSim projects
+*.mpf
+*.wlf
+*.vstf
+transcript
+work/
 
-# Allow directories so that git can recurse into them.
-!*/
-
-# Unignore the .gitignore file itself
-!.gitignore
-
-# Unignore Python files
-!*.py
-
-# Unignore VHDL files (adjust extensions as needed)
-!*.vhd
-!*.vhdl
-
-# Unignore ModelSim project files (adjust extensions as needed)
-!*.do
-!*.prj
-
-# Unignore image files (PNGs and JPEGs)
-#!*.png
-#!*.jpg
-#!*.jpeg
-
-# Unignore text files
-!*.txt
-
-# Unignore MP4 files
-#!*.mp4
-
-# Unignore Jupyter Notebook files
-!*.ipynb
-
-# Ignore the 'db' folder
+# Quartus generated
 db/
+output_files/
+*.rpt
+*.summary
+c5_pin_model_dump.txt
+serv_req_info.txt
+output.txt
 
+# IDE
+Support/
+.vscode/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Auto-generated simulation scripts
+simulation/modelsim/*_run_msim_*.do
+simulation/questa/*_run_msim_*.do
+
+# GHDL build artifacts
+*.o
+*.cf
+*.vcd
+e~*.o
+qpu_tb

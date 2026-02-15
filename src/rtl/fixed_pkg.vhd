@@ -1,6 +1,6 @@
 -- --------------------------------------------------------------------
--- "fixed_pkg_c.vhdl" package contains functions for fixed64 point math.
--- Please see the documentation for the fixed64 point package.
+-- "fixed_pkg_c.vhdl" package contains functions for fixed point math.
+-- Please see the documentation for the fixed point package.
 -- This package should be compiled into "ieee_proposed" and used as follows:
 -- use ieee.std_logic_1164.all;
 -- use ieee.numeric_std.all;
@@ -24,9 +24,9 @@ use work.fixed_float_types.all;
 
 package fixed_pkg is
 -- generic (
-  -- Rounding routine to use in fixed64 point, fixed_round or fixed_truncate
+  -- Rounding routine to use in fixed point, fixed_round or fixed_truncate
   constant fixed_round_style    : fixed_round_style_type    := fixed_round;
-  -- Overflow routine to use in fixed64 point, fixed_saturate or fixed_wrap
+  -- Overflow routine to use in fixed point, fixed_saturate or fixed_wrap
   constant fixed_overflow_style : fixed_overflow_style_type := fixed_saturate;
   -- Extra bits used in divide routines
   constant fixed_guard_bits     : NATURAL                   := 3;
@@ -36,9 +36,9 @@ package fixed_pkg is
 
   -- Author David Bishop (dbishop@vhdl.org)
 
-  -- base Unsigned fixed64 point type, downto direction assumed
+  -- base Unsigned fixed point type, downto direction assumed
   type UNRESOLVED_ufixed is array (INTEGER range <>) of STD_ULOGIC;
-  -- base Signed fixed64 point type, downto direction assumed
+  -- base Signed fixed point type, downto direction assumed
   type UNRESOLVED_sfixed is array (INTEGER range <>) of STD_ULOGIC;
 
   subtype U_ufixed is UNRESOLVED_ufixed;
@@ -111,11 +111,11 @@ package fixed_pkg is
 
   ----------------------------------------------------------------------------
   -- In these routines the "real" or "natural" (integer)
-  -- are converted into a fixed64 point number and then the operation is
+  -- are converted into a fixed point number and then the operation is
   -- performed.  It is assumed that the array will be large enough.
-  -- If the input is "real" then the real number is converted into a fixed64 of
-  -- the same size as the fixed64 point input.  If the number is an "integer"
-  -- then it is converted into fixed64 with the range (l'high downto 0).
+  -- If the input is "real" then the real number is converted into a fixed of
+  -- the same size as the fixed point input.  If the number is an "integer"
+  -- then it is converted into fixed with the range (l'high downto 0).
   ----------------------------------------------------------------------------
 
   -- ufixed(a downto b) + ufixed(a downto b) = ufixed(a+1 downto b)
@@ -281,14 +281,14 @@ package fixed_pkg is
   -- These functions return 1/X
   -- 1 / ufixed(a downto b) = ufixed(-b downto -a-1)
   function reciprocal (
-    arg                  : UNRESOLVED_ufixed;  -- fixed64 point input
+    arg                  : UNRESOLVED_ufixed;  -- fixed point input
     constant round_style : fixed_round_style_type := fixed_round_style;
     constant guard_bits  : NATURAL                := fixed_guard_bits)
     return UNRESOLVED_ufixed;
 
   -- 1 / sfixed(a downto b) = sfixed(-b+1 downto -a)
   function reciprocal (
-    arg                  : UNRESOLVED_sfixed;  -- fixed64 point input
+    arg                  : UNRESOLVED_sfixed;  -- fixed point input
     constant round_style : fixed_round_style_type := fixed_round_style;
     constant guard_bits  : NATURAL                := fixed_guard_bits)
     return UNRESOLVED_sfixed;
@@ -396,7 +396,7 @@ package fixed_pkg is
 
   ----------------------------------------------------------------------------
   -- In these compare functions a natural is converted into a
-  -- fixed64 point number of the bounds "maximum(l'high,0) downto 0"
+  -- fixed point number of the bounds "maximum(l'high,0) downto 0"
   ----------------------------------------------------------------------------
 
   function "="  (l : UNRESOLVED_ufixed; r : NATURAL) return BOOLEAN;
@@ -437,7 +437,7 @@ package fixed_pkg is
     return UNRESOLVED_ufixed;
   ----------------------------------------------------------------------------
   -- In these compare functions a real is converted into a
-  -- fixed64 point number of the bounds "l'high+1 downto l'low"
+  -- fixed point number of the bounds "l'high+1 downto l'low"
   ----------------------------------------------------------------------------
 
   function "="  (l : UNRESOLVED_ufixed; r : REAL) return BOOLEAN;
@@ -474,7 +474,7 @@ package fixed_pkg is
   function minimum (l : REAL; r : UNRESOLVED_ufixed) return UNRESOLVED_ufixed;
   ----------------------------------------------------------------------------
   -- In these compare functions an integer is converted into a
-  -- fixed64 point number of the bounds "maximum(l'high,1) downto 0"
+  -- fixed point number of the bounds "maximum(l'high,1) downto 0"
   ----------------------------------------------------------------------------
 
   function "="  (l : UNRESOLVED_sfixed; r : INTEGER) return BOOLEAN;
@@ -515,7 +515,7 @@ package fixed_pkg is
     return UNRESOLVED_sfixed;
   ----------------------------------------------------------------------------
   -- In these compare functions a real is converted into a
-  -- fixed64 point number of the bounds "l'high+1 downto l'low"
+  -- fixed point number of the bounds "l'high+1 downto l'low"
   ----------------------------------------------------------------------------
 
   function "="  (l : UNRESOLVED_sfixed; r : REAL) return BOOLEAN;
@@ -735,7 +735,7 @@ package fixed_pkg is
   -- Conversion Functions
   --===========================================================================
 
-  -- integer (natural) to unsigned fixed64 point.
+  -- integer (natural) to unsigned fixed point.
   -- arguments are the upper and lower bounds of the number, thus
   -- ufixed (7 downto -3) <= to_ufixed (int, 7, -3);
   function to_ufixed (
@@ -753,7 +753,7 @@ package fixed_pkg is
     constant round_style    : fixed_round_style_type    := fixed_round_style)
     return UNRESOLVED_ufixed;
 
-  -- real to unsigned fixed64 point
+  -- real to unsigned fixed point
   function to_ufixed (
     arg                     : REAL;     -- real
     constant left_index     : INTEGER;  -- left index (high index)
@@ -771,7 +771,7 @@ package fixed_pkg is
     constant guard_bits     : NATURAL                   := fixed_guard_bits)
     return UNRESOLVED_ufixed;
 
-  -- unsigned to unsigned fixed64 point
+  -- unsigned to unsigned fixed point
   function to_ufixed (
     arg                     : UNSIGNED;                        -- unsigned
     constant left_index     : INTEGER;  -- left index (high index)
@@ -792,30 +792,30 @@ package fixed_pkg is
     arg : UNSIGNED)          -- unsigned
     return UNRESOLVED_ufixed;
 
-  -- unsigned fixed64 point to unsigned
+  -- unsigned fixed point to unsigned
   function to_unsigned (
-    arg                     : UNRESOLVED_ufixed;  -- fixed64 point input
+    arg                     : UNRESOLVED_ufixed;  -- fixed point input
     constant size           : NATURAL;            -- length of output
     constant overflow_style : fixed_overflow_style_type := fixed_overflow_style;
     constant round_style    : fixed_round_style_type    := fixed_round_style)
     return UNSIGNED;
 
-  -- unsigned fixed64 point to unsigned
+  -- unsigned fixed point to unsigned
   function to_unsigned (
-    arg                     : UNRESOLVED_ufixed;    -- fixed64 point input
+    arg                     : UNRESOLVED_ufixed;    -- fixed point input
     size_res                : UNSIGNED;  -- used for length of output
     constant overflow_style : fixed_overflow_style_type := fixed_overflow_style;
     constant round_style    : fixed_round_style_type    := fixed_round_style)
     return UNSIGNED;
 
-  -- unsigned fixed64 point to real
+  -- unsigned fixed point to real
   function to_real (
-    arg : UNRESOLVED_ufixed)            -- fixed64 point input
+    arg : UNRESOLVED_ufixed)            -- fixed point input
     return REAL;
 
-  -- unsigned fixed64 point to integer
+  -- unsigned fixed point to integer
   function to_integer (
-    arg                     : UNRESOLVED_ufixed;  -- fixed64 point input
+    arg                     : UNRESOLVED_ufixed;  -- fixed point input
     constant overflow_style : fixed_overflow_style_type := fixed_overflow_style;
     constant round_style    : fixed_round_style_type    := fixed_round_style)
     return NATURAL;
@@ -880,35 +880,35 @@ package fixed_pkg is
     arg : UNRESOLVED_ufixed)
     return UNRESOLVED_sfixed;
 
-  -- signed fixed64 point to signed
+  -- signed fixed point to signed
   function to_signed (
-    arg                     : UNRESOLVED_sfixed;  -- fixed64 point input
+    arg                     : UNRESOLVED_sfixed;  -- fixed point input
     constant size           : NATURAL;            -- length of output
     constant overflow_style : fixed_overflow_style_type := fixed_overflow_style;
     constant round_style    : fixed_round_style_type    := fixed_round_style)
     return SIGNED;
 
-  -- signed fixed64 point to signed
+  -- signed fixed point to signed
   function to_signed (
-    arg                     : UNRESOLVED_sfixed;  -- fixed64 point input
+    arg                     : UNRESOLVED_sfixed;  -- fixed point input
     size_res                : SIGNED;  -- used for length of output
     constant overflow_style : fixed_overflow_style_type := fixed_overflow_style;
     constant round_style    : fixed_round_style_type    := fixed_round_style)
     return SIGNED;
 
-  -- signed fixed64 point to real
+  -- signed fixed point to real
   function to_real (
-    arg : UNRESOLVED_sfixed)            -- fixed64 point input
+    arg : UNRESOLVED_sfixed)            -- fixed point input
     return REAL;
 
-  -- signed fixed64 point to integer
+  -- signed fixed point to integer
   function to_integer (
-    arg                     : UNRESOLVED_sfixed;  -- fixed64 point input
+    arg                     : UNRESOLVED_sfixed;  -- fixed point input
     constant overflow_style : fixed_overflow_style_type := fixed_overflow_style;
     constant round_style    : fixed_round_style_type    := fixed_round_style)
     return INTEGER;
 
-  -- Because of the fairly complicated sizing rules in the fixed64 point
+  -- Because of the fairly complicated sizing rules in the fixed point
   -- packages these functions are provided to compute the result ranges
   -- Example:
   -- signal uf1 : ufixed (3 downto -3);
@@ -989,13 +989,13 @@ package fixed_pkg is
 
   -- maps meta-logical values
   function to_01 (
-    s             : UNRESOLVED_ufixed;  -- fixed64 point input
+    s             : UNRESOLVED_ufixed;  -- fixed point input
     constant XMAP : STD_ULOGIC := '0')  -- Map x to
     return UNRESOLVED_ufixed;
 
   -- maps meta-logical values
   function to_01 (
-    s             : UNRESOLVED_sfixed;  -- fixed64 point input
+    s             : UNRESOLVED_sfixed;  -- fixed point input
     constant XMAP : STD_ULOGIC := '0')  -- Map x to
     return UNRESOLVED_sfixed;
 
@@ -1014,7 +1014,7 @@ package fixed_pkg is
   -- not convert these vectors because of their negative index.
   
   function to_slv (
-    arg : UNRESOLVED_ufixed)            -- fixed64 point vector
+    arg : UNRESOLVED_ufixed)            -- fixed point vector
     return STD_LOGIC_VECTOR;
   alias to_StdLogicVector is to_slv [UNRESOLVED_ufixed
                                      return STD_LOGIC_VECTOR];
@@ -1022,7 +1022,7 @@ package fixed_pkg is
                                        return STD_LOGIC_VECTOR];
 
   function to_slv (
-    arg : UNRESOLVED_sfixed)            -- fixed64 point vector
+    arg : UNRESOLVED_sfixed)            -- fixed point vector
     return STD_LOGIC_VECTOR;
   alias to_StdLogicVector is to_slv [UNRESOLVED_sfixed
                                      return STD_LOGIC_VECTOR];
@@ -1030,7 +1030,7 @@ package fixed_pkg is
                                        return STD_LOGIC_VECTOR];
 
   function to_sulv (
-    arg : UNRESOLVED_ufixed)            -- fixed64 point vector
+    arg : UNRESOLVED_ufixed)            -- fixed point vector
     return STD_ULOGIC_VECTOR;
   alias to_StdULogicVector is to_sulv [UNRESOLVED_ufixed
                                       return STD_ULOGIC_VECTOR];
@@ -1038,7 +1038,7 @@ package fixed_pkg is
                                         return STD_ULOGIC_VECTOR];
 
   function to_sulv (
-    arg : UNRESOLVED_sfixed)            -- fixed64 point vector
+    arg : UNRESOLVED_sfixed)            -- fixed point vector
     return STD_ULOGIC_VECTOR;
   alias to_StdULogicVector is to_sulv [UNRESOLVED_sfixed
                                       return STD_ULOGIC_VECTOR];
@@ -1069,19 +1069,19 @@ package fixed_pkg is
 
   -- As a concession to those who use a graphical DSP environment,
   -- these functions take parameters in those tools format and create
-  -- fixed64 point numbers.  These functions are designed to convert from
-  -- a std_logic_vector to the VHDL fixed64 point format using the conventions
+  -- fixed point numbers.  These functions are designed to convert from
+  -- a std_logic_vector to the VHDL fixed point format using the conventions
   -- of these packages.  In a pure VHDL environment you should use the
   -- "to_ufixed" and "to_sfixed" routines.
 
-  -- unsigned fixed64 point
+  -- unsigned fixed point
   function to_UFix (
     arg      : STD_ULOGIC_VECTOR;
     width    : NATURAL;                 -- width of vector
     fraction : NATURAL)                 -- width of fraction
     return UNRESOLVED_ufixed;
 
-  -- signed fixed64 point
+  -- signed fixed point
   function to_SFix (
     arg      : STD_ULOGIC_VECTOR;
     width    : NATURAL;                 -- width of vector
@@ -1107,8 +1107,8 @@ package fixed_pkg is
                      width2, fraction2 : NATURAL   := 0)
     return INTEGER;
 
-  -- Same as above but for signed fixed64 point.  Note that the width
-  -- of a signed fixed64 point number ignores the sign bit, thus
+  -- Same as above but for signed fixed point.  Note that the width
+  -- of a signed fixed point number ignores the sign bit, thus
   -- width = sxxx'length-1
   
   function SFix_high (width, fraction   : NATURAL;
@@ -1126,17 +1126,17 @@ package fixed_pkg is
   -- string and textio Functions
   --===========================================================================
 
-  -- purpose: writes fixed64 point into a line
+  -- purpose: writes fixed point into a line
   procedure WRITE (
     L         : inout LINE;               -- input line
-    VALUE     : in    UNRESOLVED_ufixed;  -- fixed64 point input
+    VALUE     : in    UNRESOLVED_ufixed;  -- fixed point input
     JUSTIFIED : in    SIDE  := right;
     FIELD     : in    WIDTH := 0);
 
-  -- purpose: writes fixed64 point into a line
+  -- purpose: writes fixed point into a line
   procedure WRITE (
     L         : inout LINE;               -- input line
-    VALUE     : in    UNRESOLVED_sfixed;  -- fixed64 point input
+    VALUE     : in    UNRESOLVED_sfixed;  -- fixed point input
     JUSTIFIED : in    SIDE  := right;
     FIELD     : in    WIDTH := 0);
 
@@ -1170,13 +1170,13 @@ package fixed_pkg is
   -- octal read and write
   procedure OWRITE (
     L         : inout LINE;               -- input line
-    VALUE     : in    UNRESOLVED_ufixed;  -- fixed64 point input
+    VALUE     : in    UNRESOLVED_ufixed;  -- fixed point input
     JUSTIFIED : in    SIDE  := right;
     FIELD     : in    WIDTH := 0);
 
   procedure OWRITE (
     L         : inout LINE;               -- input line
-    VALUE     : in    UNRESOLVED_sfixed;  -- fixed64 point input
+    VALUE     : in    UNRESOLVED_sfixed;  -- fixed point input
     JUSTIFIED : in    SIDE  := right;
     FIELD     : in    WIDTH := 0);
 
@@ -1203,14 +1203,14 @@ package fixed_pkg is
   -- hex read and write
   procedure HWRITE (
     L         : inout LINE;               -- input line
-    VALUE     : in    UNRESOLVED_ufixed;  -- fixed64 point input
+    VALUE     : in    UNRESOLVED_ufixed;  -- fixed point input
     JUSTIFIED : in    SIDE  := right;
     FIELD     : in    WIDTH := 0);
 
-  -- purpose: writes fixed64 point into a line
+  -- purpose: writes fixed point into a line
   procedure HWRITE (
     L         : inout LINE;               -- input line
-    VALUE     : in    UNRESOLVED_sfixed;  -- fixed64 point input
+    VALUE     : in    UNRESOLVED_sfixed;  -- fixed point input
     JUSTIFIED : in    SIDE  := right;
     FIELD     : in    WIDTH := 0);
 
@@ -1256,7 +1256,7 @@ package fixed_pkg is
   function to_hstring (value : UNRESOLVED_sfixed) return STRING;
   alias TO_HEX_STRING is TO_HSTRING [UNRESOLVED_sfixed return STRING];
 
-  -- From string functions allow you to convert a string into a fixed64
+  -- From string functions allow you to convert a string into a fixed
   -- point number.  Example:
   --  signal uf1 : ufixed (3 downto -3);
   --  uf1 <= from_string ("0110.100", uf1'high, uf1'low); -- 6.5
@@ -1436,14 +1436,14 @@ package fixed_pkg is
     size_res : UNRESOLVED_sfixed)       -- for size only
     return UNRESOLVED_sfixed;
 
-  -- unsigned fixed64 point
+  -- unsigned fixed point
   function to_UFix (
     arg      : STD_LOGIC_VECTOR;
     width    : NATURAL;                 -- width of vector
     fraction : NATURAL)                 -- width of fraction
     return UNRESOLVED_ufixed;
 
-  -- signed fixed64 point
+  -- signed fixed point
   function to_SFix (
     arg      : STD_LOGIC_VECTOR;
     width    : NATURAL;                 -- width of vector
@@ -1453,7 +1453,7 @@ package fixed_pkg is
 end package fixed_pkg;
 -------------------------------------------------------------------------------
 -- Proposed package body for the VHDL-200x-FT fixed_pkg package
--- (fixed64 point math package)
+-- (fixed point math package)
 -- This package body supplies a recommended implementation of these functions
 -- Version    : $Revision: 2.0 $
 -- Date       : $Date: 2011/01/26 15:55:27 $
@@ -2232,7 +2232,7 @@ package body fixed_pkg is
         else
           result := not saturate (result'high, result'low);
         end if;
-        -- Sign bit not fixed64 when wrapping
+        -- Sign bit not fixed when wrapping
       end if;
     end if;
     return result;
@@ -2264,7 +2264,7 @@ package body fixed_pkg is
   -- Conversion functions.  These are needed for synthesis where typically
   -- the only input and output type is a std_logic_vector.
   function to_sulv (
-    arg : UNRESOLVED_ufixed)            -- fixed64 point vector
+    arg : UNRESOLVED_ufixed)            -- fixed point vector
     return STD_ULOGIC_VECTOR is
     variable result : STD_ULOGIC_VECTOR (arg'length-1 downto 0);
   begin
@@ -2276,26 +2276,28 @@ package body fixed_pkg is
   end function to_sulv;
 
   function to_sulv (
-    arg : UNRESOLVED_sfixed)            -- fixed64 point vector
+    arg : UNRESOLVED_sfixed)            -- fixed point vector
     return STD_ULOGIC_VECTOR is
     variable result : STD_ULOGIC_VECTOR (arg'length-1 downto 0);
   begin
     if arg'length < 1 then
       return NSLV;
     end if;
-    result := STD_ULOGIC_VECTOR (arg);
+    for i in 0 to arg'length-1 loop
+      result(i) := arg(arg'low + i);
+    end loop;
     return result;
   end function to_sulv;
 
   function to_slv (
-    arg : UNRESOLVED_ufixed)            -- fixed64 point vector
+    arg : UNRESOLVED_ufixed)            -- fixed point vector
     return STD_LOGIC_VECTOR is
   begin
     return to_stdlogicvector(to_sulv(arg));
   end function to_slv;
 
   function to_slv (
-    arg : UNRESOLVED_sfixed)            -- fixed64 point vector
+    arg : UNRESOLVED_sfixed)            -- fixed point vector
     return STD_LOGIC_VECTOR is
   begin
     return to_stdlogicvector(to_sulv(arg));
@@ -2354,7 +2356,7 @@ package body fixed_pkg is
   -- Two's complement number, Grows the vector by 1 bit.
   -- because "abs (1000.000) = 01000.000" or abs(-16) = 16.
   function "abs" (
-    arg : UNRESOLVED_sfixed)            -- fixed64 point input
+    arg : UNRESOLVED_sfixed)            -- fixed point input
     return UNRESOLVED_sfixed is
     constant left_index  : INTEGER := arg'high;
     constant right_index : INTEGER := mine(arg'low, arg'low);
@@ -2372,7 +2374,7 @@ package body fixed_pkg is
 
   -- also grows the vector by 1 bit.
   function "-" (
-    arg : UNRESOLVED_sfixed)            -- fixed64 point input
+    arg : UNRESOLVED_sfixed)            -- fixed point input
     return UNRESOLVED_sfixed is
     constant left_index  : INTEGER := arg'high+1;
     constant right_index : INTEGER := mine(arg'low, arg'low);
@@ -2621,7 +2623,7 @@ package body fixed_pkg is
 
   -- 1 / ufixed(a downto b) = ufixed(-b downto -a-1)
   function reciprocal (
-    arg                  : UNRESOLVED_ufixed;  -- fixed64 point input
+    arg                  : UNRESOLVED_ufixed;  -- fixed point input
     constant round_style : fixed_round_style_type := fixed_round_style;
     constant guard_bits  : NATURAL                := fixed_guard_bits)
     return UNRESOLVED_ufixed is
@@ -2635,7 +2637,7 @@ package body fixed_pkg is
 
   -- 1 / sfixed(a downto b) = sfixed(-b+1 downto -a)
   function reciprocal (
-    arg                  : UNRESOLVED_sfixed;              -- fixed64 point input
+    arg                  : UNRESOLVED_sfixed;              -- fixed point input
     constant round_style : fixed_round_style_type := fixed_round_style;
     constant guard_bits  : NATURAL                := fixed_guard_bits)
     return UNRESOLVED_sfixed is
@@ -2656,7 +2658,7 @@ package body fixed_pkg is
   -- ufixed (a downto b) rem ufixed (c downto d)
   --        = ufixed (min(a,c) downto min(b,d))
   function "rem" (
-    l, r : UNRESOLVED_ufixed)           -- fixed64 point input
+    l, r : UNRESOLVED_ufixed)           -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return remainder (l, r);
@@ -2666,7 +2668,7 @@ package body fixed_pkg is
   -- sfixed (a downto b) rem sfixed (c downto d)
   --        = sfixed (min(a,c) downto min(b,d))
   function "rem" (
-    l, r : UNRESOLVED_sfixed)           -- fixed64 point input
+    l, r : UNRESOLVED_sfixed)           -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return remainder (l, r);
@@ -2675,7 +2677,7 @@ package body fixed_pkg is
   -- ufixed (a downto b) rem ufixed (c downto d)
   --        = ufixed (min(a,c) downto min(b,d))
   function remainder (
-    l, r                 : UNRESOLVED_ufixed;            -- fixed64 point input
+    l, r                 : UNRESOLVED_ufixed;            -- fixed point input
     constant round_style : fixed_round_style_type := fixed_round_style;
     constant guard_bits  : NATURAL                := fixed_guard_bits)
     return UNRESOLVED_ufixed is
@@ -2731,7 +2733,7 @@ package body fixed_pkg is
   -- sfixed (a downto b) rem sfixed (c downto d)
   --        = sfixed (min(a,c) downto min(b,d))
   function remainder (
-    l, r                 : UNRESOLVED_sfixed;  -- fixed64 point input
+    l, r                 : UNRESOLVED_sfixed;  -- fixed point input
     constant round_style : fixed_round_style_type := fixed_round_style;
     constant guard_bits  : NATURAL                := fixed_guard_bits)
     return UNRESOLVED_sfixed is
@@ -2763,7 +2765,7 @@ package body fixed_pkg is
   -- ufixed (a downto b) mod ufixed (c downto d)
   --        = ufixed (min(a,c) downto min(b, d))
   function "mod" (
-    l, r : UNRESOLVED_ufixed)           -- fixed64 point input
+    l, r : UNRESOLVED_ufixed)           -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return modulo (l, r);
@@ -2772,7 +2774,7 @@ package body fixed_pkg is
   -- sfixed (a downto b) mod sfixed (c downto d)
   --        = sfixed (c downto min(b, d))
   function "mod" (
-    l, r : UNRESOLVED_sfixed)           -- fixed64 point input
+    l, r : UNRESOLVED_sfixed)           -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return modulo(l, r);
@@ -2782,7 +2784,7 @@ package body fixed_pkg is
   -- ufixed (a downto b) mod ufixed (c downto d)
   --        = ufixed (min(a,c) downto min(b, d))
   function modulo (
-    l, r                 : UNRESOLVED_ufixed;  -- fixed64 point input
+    l, r                 : UNRESOLVED_ufixed;  -- fixed point input
     constant round_style : fixed_round_style_type := fixed_round_style;
     constant guard_bits  : NATURAL                := fixed_guard_bits)
     return UNRESOLVED_ufixed is
@@ -2796,7 +2798,7 @@ package body fixed_pkg is
   -- sfixed (a downto b) mod sfixed (c downto d)
   --        = sfixed (c downto min(b, d))
   function modulo (
-    l, r                    : UNRESOLVED_sfixed;  -- fixed64 point input
+    l, r                    : UNRESOLVED_sfixed;  -- fixed point input
     constant overflow_style : fixed_overflow_style_type := fixed_overflow_style;
     constant round_style    : fixed_round_style_type    := fixed_round_style;
     constant guard_bits     : NATURAL                   := fixed_guard_bits)
@@ -3970,7 +3972,7 @@ package body fixed_pkg is
 
   -- compare functions
   function "=" (
-    l, r : UNRESOLVED_ufixed)           -- fixed64 point input
+    l, r : UNRESOLVED_ufixed)           -- fixed point input
     return BOOLEAN is
     constant left_index       : INTEGER := maximum(l'high, r'high);
     constant right_index      : INTEGER := mins(l'low, r'low);
@@ -3998,7 +4000,7 @@ package body fixed_pkg is
   end function "=";
 
   function "=" (
-    l, r : UNRESOLVED_sfixed)           -- fixed64 point input
+    l, r : UNRESOLVED_sfixed)           -- fixed point input
     return BOOLEAN is
     constant left_index       : INTEGER := maximum(l'high, r'high);
     constant right_index      : INTEGER := mins(l'low, r'low);
@@ -4026,7 +4028,7 @@ package body fixed_pkg is
   end function "=";
 
   function "/=" (
-    l, r : UNRESOLVED_ufixed)           -- fixed64 point input
+    l, r : UNRESOLVED_ufixed)           -- fixed point input
     return BOOLEAN is
     constant left_index       : INTEGER := maximum(l'high, r'high);
     constant right_index      : INTEGER := mins(l'low, r'low);
@@ -4054,7 +4056,7 @@ package body fixed_pkg is
   end function "/=";
 
   function "/=" (
-    l, r : UNRESOLVED_sfixed)           -- fixed64 point input
+    l, r : UNRESOLVED_sfixed)           -- fixed point input
     return BOOLEAN is
     constant left_index       : INTEGER := maximum(l'high, r'high);
     constant right_index      : INTEGER := mins(l'low, r'low);
@@ -4082,7 +4084,7 @@ package body fixed_pkg is
   end function "/=";
 
   function ">" (
-    l, r : UNRESOLVED_ufixed)           -- fixed64 point input
+    l, r : UNRESOLVED_ufixed)           -- fixed point input
     return BOOLEAN is
     constant left_index       : INTEGER := maximum(l'high, r'high);
     constant right_index      : INTEGER := mins(l'low, r'low);
@@ -4110,7 +4112,7 @@ package body fixed_pkg is
   end function ">";
 
   function ">" (
-    l, r : UNRESOLVED_sfixed)           -- fixed64 point input
+    l, r : UNRESOLVED_sfixed)           -- fixed point input
     return BOOLEAN is
     constant left_index       : INTEGER := maximum(l'high, r'high);
     constant right_index      : INTEGER := mins(l'low, r'low);
@@ -4138,7 +4140,7 @@ package body fixed_pkg is
   end function ">";
 
   function "<" (
-    l, r : UNRESOLVED_ufixed)           -- fixed64 point input
+    l, r : UNRESOLVED_ufixed)           -- fixed point input
     return BOOLEAN is
     constant left_index       : INTEGER := maximum(l'high, r'high);
     constant right_index      : INTEGER := mins(l'low, r'low);
@@ -4166,7 +4168,7 @@ package body fixed_pkg is
   end function "<";
 
   function "<" (
-    l, r : UNRESOLVED_sfixed)           -- fixed64 point input
+    l, r : UNRESOLVED_sfixed)           -- fixed point input
     return BOOLEAN is
     constant left_index       : INTEGER := maximum(l'high, r'high);
     constant right_index      : INTEGER := mins(l'low, r'low);
@@ -4194,7 +4196,7 @@ package body fixed_pkg is
   end function "<";
 
   function ">=" (
-    l, r : UNRESOLVED_ufixed)           -- fixed64 point input
+    l, r : UNRESOLVED_ufixed)           -- fixed point input
     return BOOLEAN is
     constant left_index       : INTEGER := maximum(l'high, r'high);
     constant right_index      : INTEGER := mins(l'low, r'low);
@@ -4222,7 +4224,7 @@ package body fixed_pkg is
   end function ">=";
 
   function ">=" (
-    l, r : UNRESOLVED_sfixed)           -- fixed64 point input
+    l, r : UNRESOLVED_sfixed)           -- fixed point input
     return BOOLEAN is
     constant left_index       : INTEGER := maximum(l'high, r'high);
     constant right_index      : INTEGER := mins(l'low, r'low);
@@ -4250,7 +4252,7 @@ package body fixed_pkg is
   end function ">=";
 
   function "<=" (
-    l, r : UNRESOLVED_ufixed)           -- fixed64 point input
+    l, r : UNRESOLVED_ufixed)           -- fixed point input
     return BOOLEAN is
     constant left_index       : INTEGER := maximum(l'high, r'high);
     constant right_index      : INTEGER := mins(l'low, r'low);
@@ -4278,7 +4280,7 @@ package body fixed_pkg is
   end function "<=";
 
   function "<=" (
-    l, r : UNRESOLVED_sfixed)           -- fixed64 point input
+    l, r : UNRESOLVED_sfixed)           -- fixed point input
     return BOOLEAN is
     constant left_index       : INTEGER := maximum(l'high, r'high);
     constant right_index      : INTEGER := mins(l'low, r'low);
@@ -4667,7 +4669,7 @@ package body fixed_pkg is
     return result;
   end function to_sfixed;
 
-  -- Because of the fairly complicated sizing rules in the fixed64 point
+  -- Because of the fairly complicated sizing rules in the fixed point
   -- packages these functions are provided to compute the result ranges
   -- Example:
   -- signal uf1 : ufixed (3 downto -3);
@@ -4835,11 +4837,11 @@ package body fixed_pkg is
 
   -- As a concession to those who use a graphical DSP environment,
   -- these functions take parameters in those tools format and create
-  -- fixed64 point numbers.  These functions are designed to convert from
-  -- a std_logic_vector to the VHDL fixed64 point format using the conventions
+  -- fixed point numbers.  These functions are designed to convert from
+  -- a std_logic_vector to the VHDL fixed point format using the conventions
   -- of these packages.  In a pure VHDL environment you should use the
   -- "to_ufixed" and "to_sfixed" routines.
-  -- Unsigned fixed64 point
+  -- Unsigned fixed point
   function to_UFix (
     arg      : STD_ULOGIC_VECTOR;
     width    : NATURAL;                 -- width of vector
@@ -4861,7 +4863,7 @@ package body fixed_pkg is
     end if;
   end function to_UFix;
 
-  -- signed fixed64 point
+  -- signed fixed point
   function to_SFix (
     arg      : STD_ULOGIC_VECTOR;
     width    : NATURAL;                 -- width of vector
@@ -5056,7 +5058,7 @@ package body fixed_pkg is
   end function to_real;
 
   function to_integer (
-    arg                     : UNRESOLVED_ufixed;  -- fixed64 point input
+    arg                     : UNRESOLVED_ufixed;  -- fixed point input
     constant overflow_style : fixed_overflow_style_type := fixed_overflow_style;
     constant round_style    : fixed_round_style_type    := fixed_round_style)
     return NATURAL is
@@ -5086,7 +5088,7 @@ package body fixed_pkg is
   end function to_integer;
 
   function to_integer (
-    arg                     : UNRESOLVED_sfixed;  -- fixed64 point input
+    arg                     : UNRESOLVED_sfixed;  -- fixed point input
     constant overflow_style : fixed_overflow_style_type := fixed_overflow_style;
     constant round_style    : fixed_round_style_type    := fixed_round_style)
     return INTEGER is
@@ -5579,7 +5581,7 @@ package body fixed_pkg is
 
   -- Overloaded math functions for real
   function "+" (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : REAL)
     return UNRESOLVED_ufixed is
   begin
@@ -5588,14 +5590,14 @@ package body fixed_pkg is
 
   function "+" (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return (to_ufixed (l, r'high, r'low) + r);
   end function "+";
 
   function "+" (
-    l : UNRESOLVED_sfixed;              -- fixed64 point input
+    l : UNRESOLVED_sfixed;              -- fixed point input
     r : REAL)
     return UNRESOLVED_sfixed is
   begin
@@ -5604,14 +5606,14 @@ package body fixed_pkg is
 
   function "+" (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return (to_sfixed (l, r'high, r'low) + r);
   end function "+";
 
   function "-" (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : REAL)
     return UNRESOLVED_ufixed is
   begin
@@ -5620,14 +5622,14 @@ package body fixed_pkg is
 
   function "-" (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return (to_ufixed (l, r'high, r'low) - r);
   end function "-";
 
   function "-" (
-    l : UNRESOLVED_sfixed;              -- fixed64 point input
+    l : UNRESOLVED_sfixed;              -- fixed point input
     r : REAL)
     return UNRESOLVED_sfixed is
   begin
@@ -5636,14 +5638,14 @@ package body fixed_pkg is
 
   function "-" (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return (to_sfixed (l, r'high, r'low) - r);
   end function "-";
 
   function "*" (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : REAL)
     return UNRESOLVED_ufixed is
   begin
@@ -5652,14 +5654,14 @@ package body fixed_pkg is
 
   function "*" (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return (to_ufixed (l, r'high, r'low) * r);
   end function "*";
 
   function "*" (
-    l : UNRESOLVED_sfixed;              -- fixed64 point input
+    l : UNRESOLVED_sfixed;              -- fixed point input
     r : REAL)
     return UNRESOLVED_sfixed is
   begin
@@ -5668,14 +5670,14 @@ package body fixed_pkg is
 
   function "*" (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return (to_sfixed (l, r'high, r'low) * r);
   end function "*";
 
   function "/" (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : REAL)
     return UNRESOLVED_ufixed is
   begin
@@ -5684,14 +5686,14 @@ package body fixed_pkg is
 
   function "/" (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return (to_ufixed (l, r'high, r'low) / r);
   end function "/";
 
   function "/" (
-    l : UNRESOLVED_sfixed;              -- fixed64 point input
+    l : UNRESOLVED_sfixed;              -- fixed point input
     r : REAL)
     return UNRESOLVED_sfixed is
   begin
@@ -5700,14 +5702,14 @@ package body fixed_pkg is
 
   function "/" (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return (to_sfixed (l, r'high, r'low) / r);
   end function "/";
 
   function "rem" (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : REAL)
     return UNRESOLVED_ufixed is
   begin
@@ -5716,14 +5718,14 @@ package body fixed_pkg is
 
   function "rem" (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return (to_ufixed (l, r'high, r'low) rem r);
   end function "rem";
 
   function "rem" (
-    l : UNRESOLVED_sfixed;              -- fixed64 point input
+    l : UNRESOLVED_sfixed;              -- fixed point input
     r : REAL)
     return UNRESOLVED_sfixed is
   begin
@@ -5732,14 +5734,14 @@ package body fixed_pkg is
 
   function "rem" (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return (to_sfixed (l, r'high, r'low) rem r);
   end function "rem";
 
   function "mod" (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : REAL)
     return UNRESOLVED_ufixed is
   begin
@@ -5748,14 +5750,14 @@ package body fixed_pkg is
 
   function "mod" (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return (to_ufixed (l, r'high, r'low) mod r);
   end function "mod";
 
   function "mod" (
-    l : UNRESOLVED_sfixed;              -- fixed64 point input
+    l : UNRESOLVED_sfixed;              -- fixed point input
     r : REAL)
     return UNRESOLVED_sfixed is
   begin
@@ -5764,7 +5766,7 @@ package body fixed_pkg is
 
   function "mod" (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return (to_sfixed (l, r'high, r'low) mod r);
@@ -5772,7 +5774,7 @@ package body fixed_pkg is
 
   -- Overloaded math functions for integers
   function "+" (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : NATURAL)
     return UNRESOLVED_ufixed is
   begin
@@ -5781,14 +5783,14 @@ package body fixed_pkg is
 
   function "+" (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return (to_ufixed (l, r'high, 0) + r);
   end function "+";
 
   function "+" (
-    l : UNRESOLVED_sfixed;              -- fixed64 point input
+    l : UNRESOLVED_sfixed;              -- fixed point input
     r : INTEGER)
     return UNRESOLVED_sfixed is
   begin
@@ -5797,7 +5799,7 @@ package body fixed_pkg is
 
   function "+" (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return (to_sfixed (l, r'high, 0) + r);
@@ -5805,7 +5807,7 @@ package body fixed_pkg is
 
   -- Overloaded functions
   function "-" (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : NATURAL)
     return UNRESOLVED_ufixed is
   begin
@@ -5814,14 +5816,14 @@ package body fixed_pkg is
 
   function "-" (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return (to_ufixed (l, r'high, 0) - r);
   end function "-";
 
   function "-" (
-    l : UNRESOLVED_sfixed;              -- fixed64 point input
+    l : UNRESOLVED_sfixed;              -- fixed point input
     r : INTEGER)
     return UNRESOLVED_sfixed is
   begin
@@ -5830,7 +5832,7 @@ package body fixed_pkg is
 
   function "-" (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return (to_sfixed (l, r'high, 0) - r);
@@ -5838,7 +5840,7 @@ package body fixed_pkg is
 
   -- Overloaded functions
   function "*" (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : NATURAL)
     return UNRESOLVED_ufixed is
   begin
@@ -5847,14 +5849,14 @@ package body fixed_pkg is
 
   function "*" (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return (to_ufixed (l, r'high, 0) * r);
   end function "*";
 
   function "*" (
-    l : UNRESOLVED_sfixed;              -- fixed64 point input
+    l : UNRESOLVED_sfixed;              -- fixed point input
     r : INTEGER)
     return UNRESOLVED_sfixed is
   begin
@@ -5863,7 +5865,7 @@ package body fixed_pkg is
 
   function "*" (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return (to_sfixed (l, r'high, 0) * r);
@@ -5871,7 +5873,7 @@ package body fixed_pkg is
 
   -- Overloaded functions
   function "/" (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : NATURAL)
     return UNRESOLVED_ufixed is
   begin
@@ -5880,14 +5882,14 @@ package body fixed_pkg is
 
   function "/" (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return (to_ufixed (l, r'high, 0) / r);
   end function "/";
 
   function "/" (
-    l : UNRESOLVED_sfixed;              -- fixed64 point input
+    l : UNRESOLVED_sfixed;              -- fixed point input
     r : INTEGER)
     return UNRESOLVED_sfixed is
   begin
@@ -5896,14 +5898,14 @@ package body fixed_pkg is
 
   function "/" (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return (to_sfixed (l, r'high, 0) / r);
   end function "/";
 
   function "rem" (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : NATURAL)
     return UNRESOLVED_ufixed is
   begin
@@ -5912,14 +5914,14 @@ package body fixed_pkg is
 
   function "rem" (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return (to_ufixed (l, r'high, 0) rem r);
   end function "rem";
 
   function "rem" (
-    l : UNRESOLVED_sfixed;              -- fixed64 point input
+    l : UNRESOLVED_sfixed;              -- fixed point input
     r : INTEGER)
     return UNRESOLVED_sfixed is
   begin
@@ -5928,14 +5930,14 @@ package body fixed_pkg is
 
   function "rem" (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return (to_sfixed (l, r'high, 0) rem r);
   end function "rem";
 
   function "mod" (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : NATURAL)
     return UNRESOLVED_ufixed is
   begin
@@ -5944,14 +5946,14 @@ package body fixed_pkg is
 
   function "mod" (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return (to_ufixed (l, r'high, 0) mod r);
   end function "mod";
 
   function "mod" (
-    l : UNRESOLVED_sfixed;              -- fixed64 point input
+    l : UNRESOLVED_sfixed;              -- fixed point input
     r : INTEGER)
     return UNRESOLVED_sfixed is
   begin
@@ -5960,7 +5962,7 @@ package body fixed_pkg is
 
   function "mod" (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return UNRESOLVED_sfixed is
   begin
     return (to_sfixed (l, r'high, 0) mod r);
@@ -5969,7 +5971,7 @@ package body fixed_pkg is
   -- overloaded ufixed compare functions with integer
   function "=" (
     l : UNRESOLVED_ufixed;
-    r : NATURAL)                        -- fixed64 point input
+    r : NATURAL)                        -- fixed point input
     return BOOLEAN is
   begin
     return (l = to_ufixed (r, l'high, l'low));
@@ -5977,7 +5979,7 @@ package body fixed_pkg is
 
   function "/=" (
     l : UNRESOLVED_ufixed;
-    r : NATURAL)                        -- fixed64 point input
+    r : NATURAL)                        -- fixed point input
     return BOOLEAN is
   begin
     return (l /= to_ufixed (r, l'high, l'low));
@@ -5985,7 +5987,7 @@ package body fixed_pkg is
 
   function ">=" (
     l : UNRESOLVED_ufixed;
-    r : NATURAL)                        -- fixed64 point input
+    r : NATURAL)                        -- fixed point input
     return BOOLEAN is
   begin
     return (l >= to_ufixed (r, l'high, l'low));
@@ -5993,7 +5995,7 @@ package body fixed_pkg is
 
   function "<=" (
     l : UNRESOLVED_ufixed;
-    r : NATURAL)                        -- fixed64 point input
+    r : NATURAL)                        -- fixed point input
     return BOOLEAN is
   begin
     return (l <= to_ufixed (r, l'high, l'low));
@@ -6001,7 +6003,7 @@ package body fixed_pkg is
 
   function ">" (
     l : UNRESOLVED_ufixed;
-    r : NATURAL)                        -- fixed64 point input
+    r : NATURAL)                        -- fixed point input
     return BOOLEAN is
   begin
     return (l > to_ufixed (r, l'high, l'low));
@@ -6009,7 +6011,7 @@ package body fixed_pkg is
 
   function "<" (
     l : UNRESOLVED_ufixed;
-    r : NATURAL)                        -- fixed64 point input
+    r : NATURAL)                        -- fixed point input
     return BOOLEAN is
   begin
     return (l < to_ufixed (r, l'high, l'low));
@@ -6017,7 +6019,7 @@ package body fixed_pkg is
 
   function \?=\ (
     l : UNRESOLVED_ufixed;
-    r : NATURAL)                        -- fixed64 point input
+    r : NATURAL)                        -- fixed point input
     return STD_ULOGIC is
   begin
     return \?=\ (l,  to_ufixed (r, l'high, l'low));
@@ -6025,7 +6027,7 @@ package body fixed_pkg is
 
   function \?/=\ (
     l : UNRESOLVED_ufixed;
-    r : NATURAL)                        -- fixed64 point input
+    r : NATURAL)                        -- fixed point input
     return STD_ULOGIC is
   begin
     return \?/=\ (l,  to_ufixed (r, l'high, l'low));
@@ -6033,7 +6035,7 @@ package body fixed_pkg is
 
   function \?>=\ (
     l : UNRESOLVED_ufixed;
-    r : NATURAL)                        -- fixed64 point input
+    r : NATURAL)                        -- fixed point input
     return STD_ULOGIC is
   begin
     return \?>=\ (l,  to_ufixed (r, l'high, l'low));
@@ -6041,7 +6043,7 @@ package body fixed_pkg is
 
   function \?<=\ (
     l : UNRESOLVED_ufixed;
-    r : NATURAL)                        -- fixed64 point input
+    r : NATURAL)                        -- fixed point input
                  return STD_ULOGIC is
   begin
     return \?<=\ (l,  to_ufixed (r, l'high, l'low));
@@ -6049,7 +6051,7 @@ package body fixed_pkg is
 
   function \?>\ (
     l : UNRESOLVED_ufixed;
-    r : NATURAL)                        -- fixed64 point input
+    r : NATURAL)                        -- fixed point input
     return STD_ULOGIC is
   begin
     return \?>\ (l,  to_ufixed (r, l'high, l'low));
@@ -6057,14 +6059,14 @@ package body fixed_pkg is
 
   function \?<\ (
     l : UNRESOLVED_ufixed;
-    r : NATURAL)                        -- fixed64 point input
+    r : NATURAL)                        -- fixed point input
     return STD_ULOGIC is
   begin
     return \?<\ (l,  to_ufixed (r, l'high, l'low));
   end function \?<\;
 
   function maximum (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : NATURAL)
     return UNRESOLVED_ufixed is
   begin
@@ -6072,7 +6074,7 @@ package body fixed_pkg is
   end function maximum;
 
   function minimum (
-    l : UNRESOLVED_ufixed;              -- fixed64 point input
+    l : UNRESOLVED_ufixed;              -- fixed point input
     r : NATURAL)
     return UNRESOLVED_ufixed is
   begin
@@ -6082,7 +6084,7 @@ package body fixed_pkg is
   -- NATURAL to ufixed
   function "=" (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_ufixed (l, r'high, r'low) = r);
@@ -6090,7 +6092,7 @@ package body fixed_pkg is
 
   function "/=" (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_ufixed (l, r'high, r'low) /= r);
@@ -6098,7 +6100,7 @@ package body fixed_pkg is
 
   function ">=" (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_ufixed (l, r'high, r'low) >= r);
@@ -6106,7 +6108,7 @@ package body fixed_pkg is
 
   function "<=" (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_ufixed (l, r'high, r'low) <= r);
@@ -6114,7 +6116,7 @@ package body fixed_pkg is
 
   function ">" (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_ufixed (l, r'high, r'low) > r);
@@ -6122,7 +6124,7 @@ package body fixed_pkg is
 
   function "<" (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_ufixed (l, r'high, r'low) < r);
@@ -6130,7 +6132,7 @@ package body fixed_pkg is
 
   function \?=\ (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?=\ (to_ufixed (l, r'high, r'low), r);
@@ -6138,7 +6140,7 @@ package body fixed_pkg is
 
   function \?/=\ (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?/=\ (to_ufixed (l, r'high, r'low), r);
@@ -6146,7 +6148,7 @@ package body fixed_pkg is
 
   function \?>=\ (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?>=\ (to_ufixed (l, r'high, r'low), r);
@@ -6154,7 +6156,7 @@ package body fixed_pkg is
 
   function \?<=\ (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
                  return STD_ULOGIC is
   begin
     return \?<=\ (to_ufixed (l, r'high, r'low), r);
@@ -6162,7 +6164,7 @@ package body fixed_pkg is
 
   function \?>\ (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?>\ (to_ufixed (l, r'high, r'low), r);
@@ -6170,7 +6172,7 @@ package body fixed_pkg is
 
   function \?<\ (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?<\ (to_ufixed (l, r'high, r'low), r);
@@ -6178,7 +6180,7 @@ package body fixed_pkg is
 
   function maximum (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return maximum (to_ufixed (l, r'high, r'low), r);
@@ -6186,7 +6188,7 @@ package body fixed_pkg is
 
   function minimum (
     l : NATURAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return minimum (to_ufixed (l, r'high, r'low), r);
@@ -6308,7 +6310,7 @@ package body fixed_pkg is
   -- real and ufixed
   function "=" (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_ufixed (l, r'high, r'low) = r);
@@ -6316,7 +6318,7 @@ package body fixed_pkg is
 
   function "/=" (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_ufixed (l, r'high, r'low) /= r);
@@ -6324,7 +6326,7 @@ package body fixed_pkg is
 
   function ">=" (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_ufixed (l, r'high, r'low) >= r);
@@ -6332,7 +6334,7 @@ package body fixed_pkg is
 
   function "<=" (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_ufixed (l, r'high, r'low) <= r);
@@ -6340,7 +6342,7 @@ package body fixed_pkg is
 
   function ">" (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_ufixed (l, r'high, r'low) > r);
@@ -6348,7 +6350,7 @@ package body fixed_pkg is
 
   function "<" (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_ufixed (l, r'high, r'low) < r);
@@ -6356,7 +6358,7 @@ package body fixed_pkg is
 
   function \?=\ (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?=\ (to_ufixed (l, r'high, r'low), r);
@@ -6364,7 +6366,7 @@ package body fixed_pkg is
 
   function \?/=\ (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?/=\ (to_ufixed (l, r'high, r'low), r);
@@ -6372,7 +6374,7 @@ package body fixed_pkg is
 
   function \?>=\ (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?>=\ (to_ufixed (l, r'high, r'low), r);
@@ -6380,7 +6382,7 @@ package body fixed_pkg is
 
   function \?<=\ (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
                  return STD_ULOGIC is
   begin
     return \?<=\ (to_ufixed (l, r'high, r'low), r);
@@ -6388,7 +6390,7 @@ package body fixed_pkg is
 
   function \?>\ (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?>\ (to_ufixed (l, r'high, r'low), r);
@@ -6396,7 +6398,7 @@ package body fixed_pkg is
 
   function \?<\ (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?<\ (to_ufixed (l, r'high, r'low), r);
@@ -6404,7 +6406,7 @@ package body fixed_pkg is
   
   function maximum (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return maximum (to_ufixed (l, r'high, r'low), r);
@@ -6412,7 +6414,7 @@ package body fixed_pkg is
 
   function minimum (
     l : REAL;
-    r : UNRESOLVED_ufixed)              -- fixed64 point input
+    r : UNRESOLVED_ufixed)              -- fixed point input
     return UNRESOLVED_ufixed is
   begin
     return minimum (to_ufixed (l, r'high, r'low), r);
@@ -6534,7 +6536,7 @@ package body fixed_pkg is
   -- integer and sfixed
   function "=" (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_sfixed (l, r'high, r'low) = r);
@@ -6542,7 +6544,7 @@ package body fixed_pkg is
 
   function "/=" (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_sfixed (l, r'high, r'low) /= r);
@@ -6550,7 +6552,7 @@ package body fixed_pkg is
 
   function ">=" (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_sfixed (l, r'high, r'low) >= r);
@@ -6558,7 +6560,7 @@ package body fixed_pkg is
 
   function "<=" (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_sfixed (l, r'high, r'low) <= r);
@@ -6566,7 +6568,7 @@ package body fixed_pkg is
 
   function ">" (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_sfixed (l, r'high, r'low) > r);
@@ -6574,7 +6576,7 @@ package body fixed_pkg is
 
   function "<" (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_sfixed (l, r'high, r'low) < r);
@@ -6582,7 +6584,7 @@ package body fixed_pkg is
 
   function \?=\ (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?=\ (to_sfixed (l, r'high, r'low), r);
@@ -6590,7 +6592,7 @@ package body fixed_pkg is
 
   function \?/=\ (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?/=\ (to_sfixed (l, r'high, r'low), r);
@@ -6598,7 +6600,7 @@ package body fixed_pkg is
 
   function \?>=\ (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?>=\ (to_sfixed (l, r'high, r'low), r);
@@ -6606,7 +6608,7 @@ package body fixed_pkg is
 
   function \?<=\ (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
                  return STD_ULOGIC is
   begin
     return \?<=\ (to_sfixed (l, r'high, r'low), r);
@@ -6614,7 +6616,7 @@ package body fixed_pkg is
 
   function \?>\ (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?>\ (to_sfixed (l, r'high, r'low), r);
@@ -6622,7 +6624,7 @@ package body fixed_pkg is
 
   function \?<\ (
     l : INTEGER;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?<\ (to_sfixed (l, r'high, r'low), r);
@@ -6760,7 +6762,7 @@ package body fixed_pkg is
   -- REAL and sfixed
   function "=" (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_sfixed (l, r'high, r'low) = r);
@@ -6768,7 +6770,7 @@ package body fixed_pkg is
 
   function "/=" (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_sfixed (l, r'high, r'low) /= r);
@@ -6776,7 +6778,7 @@ package body fixed_pkg is
 
   function ">=" (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_sfixed (l, r'high, r'low) >= r);
@@ -6784,7 +6786,7 @@ package body fixed_pkg is
 
   function "<=" (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_sfixed (l, r'high, r'low) <= r);
@@ -6792,7 +6794,7 @@ package body fixed_pkg is
 
   function ">" (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_sfixed (l, r'high, r'low) > r);
@@ -6800,7 +6802,7 @@ package body fixed_pkg is
 
   function "<" (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return BOOLEAN is
   begin
     return (to_sfixed (l, r'high, r'low) < r);
@@ -6808,7 +6810,7 @@ package body fixed_pkg is
 
   function \?=\ (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?=\ (to_sfixed (l, r'high, r'low), r);
@@ -6816,7 +6818,7 @@ package body fixed_pkg is
 
   function \?/=\ (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?/=\ (to_sfixed (l, r'high, r'low), r);
@@ -6824,7 +6826,7 @@ package body fixed_pkg is
 
   function \?>=\ (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?>=\ (to_sfixed (l, r'high, r'low), r);
@@ -6832,7 +6834,7 @@ package body fixed_pkg is
 
   function \?<=\ (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
                  return STD_ULOGIC is
   begin
     return \?<=\ (to_sfixed (l, r'high, r'low), r);
@@ -6840,7 +6842,7 @@ package body fixed_pkg is
 
   function \?>\ (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?>\ (to_sfixed (l, r'high, r'low), r);
@@ -6848,7 +6850,7 @@ package body fixed_pkg is
 
   function \?<\ (
     l : REAL;
-    r : UNRESOLVED_sfixed)              -- fixed64 point input
+    r : UNRESOLVED_sfixed)              -- fixed point input
     return STD_ULOGIC is
   begin
     return \?<\ (to_sfixed (l, r'high, r'low), r);
@@ -7048,10 +7050,10 @@ package body fixed_pkg is
 
 -- %%% END replicated textio functions
   
-  -- purpose: writes fixed64 point into a line
+  -- purpose: writes fixed point into a line
   procedure write (
     L         : inout LINE;               -- input line
-    VALUE     : in    UNRESOLVED_ufixed;  -- fixed64 point input
+    VALUE     : in    UNRESOLVED_ufixed;  -- fixed point input
     JUSTIFIED : in    SIDE  := right;
     FIELD     : in    WIDTH := 0) is
     variable s     : STRING(1 to value'length +1) := (others => ' ');
@@ -7069,10 +7071,10 @@ package body fixed_pkg is
     write(l, s, justified, field);
   end procedure write;
 
-  -- purpose: writes fixed64 point into a line
+  -- purpose: writes fixed point into a line
   procedure write (
     L         : inout LINE;               -- input line
-    VALUE     : in    UNRESOLVED_sfixed;  -- fixed64 point input
+    VALUE     : in    UNRESOLVED_sfixed;  -- fixed point input
     JUSTIFIED : in    SIDE  := right;
     FIELD     : in    WIDTH := 0) is
     variable s     : STRING(1 to value'length +1);
@@ -7302,7 +7304,7 @@ package body fixed_pkg is
   -- octal read and write
   procedure owrite (
     L         : inout LINE;               -- input line
-    VALUE     : in    UNRESOLVED_ufixed;  -- fixed64 point input
+    VALUE     : in    UNRESOLVED_ufixed;  -- fixed point input
     JUSTIFIED : in    SIDE  := right;
     FIELD     : in    WIDTH := 0) is
   begin  -- Example 03.30
@@ -7314,7 +7316,7 @@ package body fixed_pkg is
 
   procedure owrite (
     L         : inout LINE;               -- input line
-    VALUE     : in    UNRESOLVED_sfixed;  -- fixed64 point input
+    VALUE     : in    UNRESOLVED_sfixed;  -- fixed point input
     JUSTIFIED : in    SIDE  := right;
     FIELD     : in    WIDTH := 0) is
   begin  -- Example 03.30
@@ -7558,7 +7560,7 @@ package body fixed_pkg is
   -- hex read and write
   procedure hwrite (
     L         : inout LINE;               -- input line
-    VALUE     : in    UNRESOLVED_ufixed;  -- fixed64 point input
+    VALUE     : in    UNRESOLVED_ufixed;  -- fixed point input
     JUSTIFIED : in    SIDE  := right;
     FIELD     : in    WIDTH := 0) is
   begin  -- Example 03.30
@@ -7568,10 +7570,10 @@ package body fixed_pkg is
            FIELD     => FIELD);
   end procedure hwrite;
 
-  -- purpose: writes fixed64 point into a line
+  -- purpose: writes fixed point into a line
   procedure hwrite (
     L         : inout LINE;               -- input line
-    VALUE     : in    UNRESOLVED_sfixed;  -- fixed64 point input
+    VALUE     : in    UNRESOLVED_sfixed;  -- fixed point input
     JUSTIFIED : in    SIDE  := right;
     FIELD     : in    WIDTH := 0) is
   begin  -- Example 03.30
@@ -8025,7 +8027,7 @@ package body fixed_pkg is
     end if;
   end function to_hstring;
 
-  -- From string functions allow you to convert a string into a fixed64
+  -- From string functions allow you to convert a string into a fixed
   -- point number.  Example:
   --  signal uf1 : ufixed (3 downto -3);
   --  uf1 <= from_string ("0110.100", uf1'high, uf1'low); -- 6.5
@@ -8349,7 +8351,7 @@ package body fixed_pkg is
       size_res => size_res);
   end function to_sfixed;
 
-  -- unsigned fixed64 point
+  -- unsigned fixed point
   function to_UFix (
     arg      : STD_LOGIC_VECTOR;
     width    : NATURAL;                 -- width of vector
@@ -8362,7 +8364,7 @@ package body fixed_pkg is
       fraction => fraction);
   end function to_UFix;
 
-  -- signed fixed64 point
+  -- signed fixed point
   function to_SFix (
     arg      : STD_LOGIC_VECTOR;
     width    : NATURAL;                 -- width of vector

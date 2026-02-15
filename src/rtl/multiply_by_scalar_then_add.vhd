@@ -1,30 +1,30 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
---use work.fixed64.ALL;
+--use work.sfixed36.ALL;
 use work.qTypes.ALL;
-use IEEE.fixed_pkg.ALL;
+use work.fixed_pkg.ALL;
 
-entity Multiply_By_Scalar_Then_Add is
+entity multiply_by_scalar_then_add is
     Port (
         A : in  cvector;   -- Input complex vector 1
         B : in  cvector;   -- Input complex vector 2
-        C : in  cfixed64;    -- Complex scalar multiplier
+        C : in  csfixed36;    -- Complex scalar multiplier
         Result : out cvector  -- Output complex vector (C*A + B)
     );
-end Multiply_By_Scalar_Then_Add;
+end multiply_by_scalar_then_add;
 
-architecture Concurrent of Multiply_By_Scalar_Then_Add is
+architecture Concurrent of multiply_by_scalar_then_add is
     -- Declare components
-    component Multiply_Column_By_Scalar is
+    component multiply_column_by_scalar is
         Port (
-            constComplex : in  cfixed64;
+            constComplex : in  csfixed36;
             rowVector    : in  cvector;
             outputVector : out cvector
         );
     end component;
 
-    component Add_Vectors_Element_Wise is
+    component add_vectors_element_wise is
         Port (
             a : in  cvector;
             b : in  cvector;
@@ -37,7 +37,7 @@ architecture Concurrent of Multiply_By_Scalar_Then_Add is
 
 begin
     -- Stage 1: Multiply C * A
-    Multiply_Stage_High: Multiply_Column_By_Scalar
+    Multiply_Stage_High: multiply_column_by_scalar
         port map (
             constComplex => C,
             rowVector    => A,
@@ -45,7 +45,7 @@ begin
         );
 
     -- Stage 2: Add (C*A) + B
-    Add_Stage_High: Add_Vectors_Element_Wise
+    Add_Stage_High: add_vectors_element_wise
         port map (
             a => c_times_A,
             b => B,
