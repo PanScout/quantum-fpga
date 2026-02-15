@@ -6,14 +6,14 @@ use IEEE.NUMERIC_STD.ALL;
 use work.fixed_pkg.ALL;
 use work.qTypes.ALL;
 
-entity QPU is
+entity qpu is
     Port (
         -- Global signals
         clk     : in  std_logic;
         reset   : in  std_logic;     -- Active High Reset
         enable  : in  std_logic;     -- Mode Control (1=Receive, 0=Transmit)
 		  
-		  --SCOCK
+		  -- SCLK
 		  SCLK: in std_logic;
 
         -- Matrix SPI Receiver Ports
@@ -35,34 +35,34 @@ entity QPU is
         tx_spi_valid: out std_logic;
 		  
 		  --Debug Ports
-		  assmember: out std_logic;
-		  victor   : out std_logic;
+		  assembler_done_led: out std_logic;
+		  vector_done_led   : out std_logic;
 		  qte_start: out std_logic;
 		  qte_valid: out std_logic;
 		  evo_complete: out std_logic;
 		  psi_done_led: out std_logic;
-		  SCOCK_led: out std_logic;
+		  sclk_led: out std_logic;
 		  
 
         -- Status Output
         psi_matrix_assemble_done : out std_logic
     );
-end QPU;
+end qpu;
 
-architecture Behavioral of QPU is
+architecture Behavioral of qpu is
 
     ----------------------------------------------------------------------
     -- Signal Declarations
     ----------------------------------------------------------------------
 	 
-	 signal SCOCK: std_logic;
+	 signal sclk_buf: std_logic;
     signal slow_clk            : std_logic;
     signal receive_mode_active : std_logic;
     signal transmit_mode_active: std_logic;
 
-    signal spi_matrix_data       : std_logic_vector((2*fixed64'length)-1 downto 0);
+    signal spi_matrix_data       : std_logic_vector((2*sfixed36'length)-1 downto 0);
     signal internal_matrix_valid : std_logic;
-    signal spi_vector_data       : std_logic_vector((2*fixed64'length)-1 downto 0);
+    signal spi_vector_data       : std_logic_vector((2*sfixed36'length)-1 downto 0);
     signal internal_vector_valid : std_logic;
 
     signal assembled_matrix      : cmatrix;
@@ -79,7 +79,7 @@ architecture Behavioral of QPU is
     signal assembled_psi_matrix  : psi_matrix;
     signal internal_psi_asm_done : std_logic;
     signal start_disassembly     : std_logic;
-    signal disassembled_data     : std_logic_vector((2*fixed64'length)-1 downto 0);
+    signal disassembled_data     : std_logic_vector((2*sfixed36'length)-1 downto 0);
     signal disassemble_valid_out : std_logic;
     signal disassemble_done      : std_logic;
     signal internal_tx_spi_valid : std_logic;
@@ -98,7 +98,7 @@ architecture Behavioral of QPU is
     end component;
 
     component spi_receive is
-        generic(NUM_BITS : integer :=  cfixed64.re'length + cfixed64.im'length);
+        generic(NUM_BITS : integer :=  2 * sfixed36'length);
         port(
             clk, reset, enable : in std_logic;
             SCLK, SS, MOSI     : in std_logic;
@@ -111,7 +111,7 @@ architecture Behavioral of QPU is
         port(
             clk       : in std_logic;
             reset     : in std_logic;
-            data_in   : in std_logic_vector((2*fixed64'length)-1 downto 0);
+            data_in   : in std_logic_vector((2*sfixed36'length)-1 downto 0);
             valid_in  : in std_logic;
             matrix_out: out cmatrix;
             done_out  : out std_logic
@@ -122,14 +122,14 @@ architecture Behavioral of QPU is
         port(
             clk       : in std_logic;
             reset     : in std_logic;
-            data_in   : in std_logic_vector((2*fixed64'length)-1 downto 0);
+            data_in   : in std_logic_vector((2*sfixed36'length)-1 downto 0);
             valid_in  : in std_logic;
             vector_out: out cvector;
             done_out  : out std_logic
         );
     end component;
 
-    component Quantum_Time_Evolution is
+    component quantum_time_evolution is
         port(
             clk, reset           : in std_logic;
             psiAssemblerDone     : in std_logic;
@@ -161,14 +161,14 @@ architecture Behavioral of QPU is
             start                : in std_logic;
             tx_done_pulse_in     : in std_logic;
             psi_matrix_in        : in psi_matrix;
-            data_out             : out std_logic_vector((2*fixed64'length)-1 downto 0);
+            data_out             : out std_logic_vector((2*sfixed36'length)-1 downto 0);
             valid_out            : out std_logic;
             done_out             : out std_logic
         );
     end component;
 
     component spi_transmit is
-        generic(NUM_BITS : integer :=  cfixed64.re'length + cfixed64.im'length);
+        generic(NUM_BITS : integer :=  2 * sfixed36'length);
         port(
             clk       : in std_logic;
             enable    : in std_logic;
@@ -184,14 +184,14 @@ begin
 
 	 --Debug drivers
 	 
-	 assmember <= matrix_done;
-	 victor    <= vector_done;
+	 assembler_done_led <= matrix_done;
+	 vector_done_led    <= vector_done;
 	 qte_start <= start_evolution;
 	 qte_valid <= qte_output_valid;
 	 evo_complete <= qte_evolution_complete;
 	 psi_done_led <= internal_psi_asm_done;
-	 SCOCK <= SCLK;
-	 SCOCK_led <= SCOCK;
+	 sclk_buf <= SCLK;
+	 sclk_led <= sclk_buf;
 	 
 	 
 	 
@@ -217,7 +217,7 @@ begin
     -- Connect Matrix SPI Receiver
     ----------------------------------------------------------------------
     rx_matrix_inst: spi_receive
-        generic map(NUM_BITS => cfixed64.re'length + cfixed64.im'length)
+        generic map(NUM_BITS => 2 * sfixed36'length)
         port map(
             clk       => clk,
             reset     => reset,
@@ -234,7 +234,7 @@ begin
     -- Connect Vector SPI Receiver
     ----------------------------------------------------------------------
     rx_vector_inst: spi_receive
-        generic map(NUM_BITS => cfixed64.re'length + cfixed64.im'length)
+        generic map(NUM_BITS => 2 * sfixed36'length)
         port map(
             clk       => clk,
             reset     => reset,
@@ -281,7 +281,7 @@ begin
     ----------------------------------------------------------------------
     -- Quantum Time Evolution Unit
     ----------------------------------------------------------------------
-    Quantum_Time_Evolution_inst: Quantum_Time_Evolution
+    quantum_time_evolution_inst: quantum_time_evolution
         port map(
             clk                 => clk,
             reset               => reset,
@@ -330,7 +330,7 @@ begin
     -- SPI Transmit Component
     ----------------------------------------------------------------------
     spi_transmit_inst: spi_transmit
-        generic map(NUM_BITS => cfixed64.re'length + cfixed64.im'length)
+        generic map(NUM_BITS => 2 * sfixed36'length)
         port map(
             clk       => clk,
             enable    => transmit_mode_active,
