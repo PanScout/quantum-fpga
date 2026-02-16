@@ -29,3 +29,6 @@ simulation/questa/*_run_msim_*.do
 
 # GHDL build artifacts
 build/
+
+# Compiled shared libraries
+*.so

@@ -144,6 +144,39 @@ Expands the `quantum_time_evolution` block from the architecture diagram above. 
                 psi_matrix (30 state vectors)
 ```
 
+## QSPICE -- Quantum Circuit Designer
+
+A Python-based graphical tool for creating and simulating quantum circuits through an intuitive drag-and-drop interface, with optional FPGA hardware acceleration via Raspberry Pi GPIO/SPI. This is the user-facing frontend that drives the QPU over SPI.
+
+### QSPICE Architecture
+
+```
+GUI.py  -->  QSPICE.py  -->  FPGA_INTERFACE_PY.py  -->  Hardware (GPIO/SPI)
+  |                              |
+  |                              +--> fpga_interface_wrapper.py (C alternative)
+  |
+  +--> COMMUNICATION.py (low-level GPIO/SPI protocol)
+```
+
+- **GUI.py** -- PyQt5 drag-and-drop circuit designer with real-time visualization
+- **QSPICE.py** -- Quantum simulation engine (gates, layers, circuits, state evolution)
+- **FPGA_INTERFACE_PY.py** -- Pure-Python SPI bit-banging interface to FPGA hardware via pigpio
+- **fpga_interface_wrapper.py** -- Alternative ctypes wrapper calling a compiled C implementation
+- **COMMUNICATION.py** -- Low-level GPIO/SPI communication protocol and signal generation
+
+### Circuit Designer Features
+
+- Standard gates: X, H, Y, Z, CNOT, Controlled-Z
+- Custom user-defined gates via matrix input
+- Layer-based circuit construction
+- Real-time state evolution visualization
+- Measurement simulation with configurable shot counts
+- Hardware execution mode (requires Raspberry Pi + FPGA)
+
+### QSPICE Dependencies
+
+- Python 3, PyQt5, NumPy, SciPy, matplotlib, pigpio, pandas
+
 ## Project Structure
 
 ```
@@ -210,6 +243,14 @@ src/
 python/
 ├── plot_results.py       # Parse QPU hex output and plot time evolution
 └── jupyter/              # Theory notebooks (Pade analysis, visualization)
+
+qspice/                   # Raspberry Pi GUI and FPGA interface
+├── GUI.py                # PyQt5 drag-and-drop circuit designer
+├── QSPICE.py             # Quantum simulation engine
+├── FPGA_INTERFACE_PY.py  # Pure-Python SPI interface via pigpio
+├── fpga_interface_wrapper.py  # C shared library wrapper
+├── COMMUNICATION.py      # Low-level GPIO/SPI protocol
+└── archive/              # Earlier test scripts
 
 build/                    # GHDL build artifacts (generated)
 Makefile                  # GHDL build, simulation, and plotting
