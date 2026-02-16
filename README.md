@@ -297,4 +297,4 @@ Changing this scales the matrix dimension, SPI word count, and computation time 
 
 ## Authors
 
-Kelan Zielinski, Michael Denis, Jasem Alkhashti -- University of Miami
+Kelan Zielinski, Michael Denis, Jasem Alkhashti, Kevin Marroquin -- University of Miami
