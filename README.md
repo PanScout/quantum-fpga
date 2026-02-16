@@ -1,6 +1,6 @@
 # Quantum FPGA
 
-FPGA-based quantum time evolution emulator. Takes a Hamiltonian matrix and an initial state vector over SPI, computes the unitary time evolution operator via Pade approximation of the matrix exponential, and outputs 30 time-stepped state vectors.
+FPGA-based quantum time evolution emulator. Takes a Hamiltonian matrix and an initial state vector over SPI, computes the unitary time evolution operator via Pade approximation of the matrix exponential, and outputs 30 time-stepped state vectors. Includes a drag-and-drop quantum circuit designer GUI (PyQt5) that runs on a Raspberry Pi and drives the FPGA over SPI.
 
 Senior design project built for the Intel Arria 10 GX FPGA at the University of Miami College of Engineering.
 
