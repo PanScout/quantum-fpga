@@ -58,18 +58,91 @@ Senior design project built for the Intel Arria 10 GX FPGA at the University of 
 - **Vector order**: Sequential: `psi(0), psi(1)`
 - **Output**: 30 time steps x dimension elements = 60 words for 1-qubit
 
-### Pade Approximation Pipeline
+### Quantum Time Evolution Pipeline
 
-Computes `exp(-iHt)` using a [3,3] Pade approximant with scaling and squaring:
+Expands the `quantum_time_evolution` block from the architecture diagram above. A state machine iterates 30 time steps (`t = 0` to `pi`), computing `U(t) = exp(-iHt)` via [3,3] Pade approximation with scaling and squaring, then applying it to the initial state.
 
-1. Form `B = -iHt`
-2. Compute infinity-norm of B and scaling factor `S = 2^ceil(log2(norm(B)))`
-3. Scale down: `B_s = B / S`
-4. Numerator: `P = -(((B_s + 12)B_s + 60)B_s + 120)` (Horner's method)
-5. Denominator: `Q = (((B_s - 12)B_s + 60)B_s - 120)` (Horner's method)
-6. Matrix inversion: `Q^-1` (Newton-Schulz iteration, 40 iterations)
-7. `U_s = P * Q^-1`
-8. Scale up: `U = U_s^(2^S)` (repeated squaring)
+```
+        H (cmatrix)     psi_0 (cvector)
+              |               |
+              +-------+-------+
+                      |
+          +-----------+-----------+
+          | quantum_time_evolution |   State machine: IDLE -> RUN -> CAPTURE -> RESET -> FINISHED
+          |                        |   Loops i = 0..29, t(i) linearly spaced [0, pi]
+          |   +--------------------+-------------------------------------------+
+          |   |  quantum_fpga (single time step)                               |
+          |   |                                                                |
+          |   |   H, t(i)                                                      |
+          |   |     |                                                          |
+          |   |     v                                                          |
+          |   |   +-------------------------+                                  |
+          |   |   | insert_imaginary_time   |   B = -iHt(i)                    |
+          |   |   +------------+------------+                                  |
+          |   |                |                                               |
+          |   |        +-------+-------+                                       |
+          |   |        |               |                                       |
+          |   |        v               v                                       |
+          |   |   +---------+   +------------------+                           |
+          |   |   | compute |   | generate_scaling |                           |
+          |   |   | inf norm|   |     _factor      |   S = ceil(log2(||B||))   |
+          |   |   +----+----+   +--------+---------+                           |
+          |   |        |                 |                                     |
+          |   |        +---------+-------+                                     |
+          |   |                  |                                             |
+          |   |                  v                                             |
+          |   |        +-------------------+                                   |
+          |   |        | scale_cmatrix_down|   B_s = B >> S                    |
+          |   |        +---------+---------+                                   |
+          |   |                  |                                             |
+          |   |          +-------+-------+                                     |
+          |   |          |               |                                     |
+          |   |          v               v                                     |
+          |   |   +--------------+ +--------------+                            |
+          |   |   | pade         | | pade         |   P = -(((B_s+12)B_s+60)  |
+          |   |   |  _numerator  | |  _denominator|       B_s + 120)          |
+          |   |   | (Horner's)   | | (Horner's)   |   Q = (((B_s-12)B_s+60)  |
+          |   |   +------+-------+ +------+-------+       B_s - 120)          |
+          |   |          |               |                                     |
+          |   |          |               v                                     |
+          |   |          |   +------------------------+                        |
+          |   |          |   | matrix_inversion       |   Newton-Schulz:       |
+          |   |          |   |  X_0 = c * Q^T         |   X_{n+1} =           |
+          |   |          |   |  40 iterations of      |     X_n(2I - Q*X_n)   |
+          |   |          |   |  X_{n+1}=X_n(2I-QX_n) |                        |
+          |   |          |   +-----------+------------+                        |
+          |   |          |               |  Q^-1                               |
+          |   |          +-------+-------+                                     |
+          |   |                  |                                             |
+          |   |                  v                                             |
+          |   |        +-------------------+                                   |
+          |   |        | matrix_multiply   |   U_s = P * Q^-1                  |
+          |   |        +---------+---------+                                   |
+          |   |                  |                                             |
+          |   |                  v                                             |
+          |   |   +-----------------------------+                              |
+          |   |   | repeated_matrix_squaring    |   U = U_s^(2^S)             |
+          |   |   | S iterations: M <- M * M    |   (scale back up)           |
+          |   |   +--------------+--------------+                              |
+          |   |                  |  U(t)                                       |
+          |   |                  v                                             |
+          |   |   +-----------------------------+                              |
+          |   |   | matrix_by_vector_multiply   |   psi(t) = U(t) * psi_0     |
+          |   |   +--------------+--------------+                              |
+          |   |                  |                                             |
+          |   +------------------+---------------------------------------------+
+          |                      |  psi(t_i)
+          |            +---------+---------+
+          |            |  store in column  |   psi_matrix(:, i) = psi(t_i)
+          |            |  i of psi_matrix  |
+          |            +---------+---------+
+          |                      |
+          |              [loop i = 0..29]
+          |                      |
+          +-----------+----------+
+                      |
+                psi_matrix (30 state vectors)
+```
 
 ## Project Structure
 
